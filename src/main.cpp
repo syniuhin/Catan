@@ -16,20 +16,22 @@ long long int superhash(char pass[20]){
 }
 
 int main(int, char const**){
-	char username[20];
-	char pass[20];
-	char email[20];
-	printf("Enter username: ");
-	scanf("%s", username);
-	printf("Enter email: ");
-	scanf("%s", email);
-	printf("Enter password: ");
-	scanf("%s", pass);
-
     sqlite3* db;
     db_connect(db);
     db_create(db);
-    db_insert(db, User(username, email, superhash(pass)));
+
+	char username[20];
+	char pass[20];
+	char email[20];
+	printf("Enter usrnm to delete: ");
+	scanf("%s", username);
+//	printf("Enter email: ");
+//	scanf("%s", email);
+//	printf("Enter password: ");
+//	scanf("%s", pass);
+//
+//    db_insert(db, User(username, email, superhash(pass)));
+    db_delete(db, User(username, "", 0));
     db_close(db);
     return 0;
 }

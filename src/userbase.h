@@ -14,6 +14,7 @@ public:
     User() {}
     User(std::string username, std::string email, 
         long long int password){
+        this -> id = -1;
         this -> username = username;
         this -> email = email;
         this -> password = password;

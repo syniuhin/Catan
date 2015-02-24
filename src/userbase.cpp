@@ -36,6 +36,8 @@ int db_create(sqlite3*& db){
 }
 
 int db_insert(sqlite3*& db, User user){
+  if (user.username.empty() || user.email.empty())
+    return 0;
   std::string insertString;
   insertString.append("insert into users(")
     .append(COLUMN_NAMES[1]).append(", ")
@@ -61,7 +63,38 @@ int db_insert(sqlite3*& db, User user){
   return res;
 }
 
+/**
+ * Takes (partially constructed) User
+ * instance and tries to delete it
+ */
 int db_delete(sqlite3*& db, User user){
+  if ((user.username.empty() &&
+      user.email.empty()) &&
+      user.id < 0)
+    return 0;
+
+  std::string deleteString;
+  deleteString.append("delete from users where ");
+  if (user.id >= 0){
+    deleteString.append("id = ")
+      .append(std::to_string(user.id));
+  } else if (!user.username.empty()){
+    deleteString.append("username = '")
+      .append(user.username)
+      .append("' ");
+  } else if (!user.email.empty()){
+    deleteString.append("email = '")
+      .append(user.email)
+      .append("' ");
+  }
+  deleteString.append(";");
+  sqlite3_stmt *stmt;
+  sqlite3_prepare(db, deleteString.c_str(), 
+      deleteString.size(), &stmt, NULL);
   int res;
+  if (SQLITE_DONE == (res = sqlite3_step(stmt)))
+    LOG(INFO) << "db_delete: success " << user.to_str();
+  else
+    LOG(ERROR) << "db_delete: " << sqlite3_errmsg(db);
   return res;
 }
