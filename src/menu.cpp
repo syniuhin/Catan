@@ -50,7 +50,7 @@ bool Main_menu::draw_text(){
     text.setOrigin(textRect.left + textRect.width/2.0f,
                    textRect.top  + textRect.height/2.0f);
     text.setPosition(sf::Vector2f(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - TEXT_VERTICAL_OFFSET));
-    
+
     window -> draw(text);
     return true;
 }
