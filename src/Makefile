@@ -9,7 +9,7 @@ SFML_FLAGS = -framework sfml-system -framework sfml-window -framework sfml-graph
 all: $(BIN)
 sqlite: sqlite3.c shell.c
 	$(cc) -o $@ $^
-game: main.cpp userbase.cpp sqlite3.o
+game: main.cpp userbase.cpp game.cpp sqlite3.o
 	$(CXX) -std=c++11 -o $@ $^
 sqlite3.o: sqlite3.c
 	$(cc) -o $@ -c $^

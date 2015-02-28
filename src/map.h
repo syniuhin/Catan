@@ -12,6 +12,10 @@
 #include <stdio.h>
 #include <SFML/Graphics.hpp>
 
+/**
+ * Types of the land.
+ */
+static const int TYPE_DESERT = 0;
 void draw_map(sf::RenderWindow*);
 
 #endif /* defined(__Catan__map__) */

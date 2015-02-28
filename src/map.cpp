@@ -28,7 +28,6 @@ void draw_map(sf::RenderWindow* window){
         int vertical_offset = (window -> getSize().y -
                                side * (HEX_SIZE * FACTOR_H + HEX_OUTLINE_SIZE * 2)) / 2;
         for (int j = 0; j < side; ++side){
-            
         }
     }
 }

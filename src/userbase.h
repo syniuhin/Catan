@@ -50,4 +50,6 @@ int db_create(sqlite3*& db);
 int db_insert(sqlite3*& db, User user);
 int db_delete(sqlite3*& db, User user);
 
+long long int superhash(std::string);
+
 #endif /* defined(__Catan__userbase__) */

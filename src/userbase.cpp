@@ -98,3 +98,10 @@ int db_delete(sqlite3*& db, User user){
     LOG(ERROR) << "db_delete: " << sqlite3_errmsg(db);
   return res;
 }
+
+long long int superhash(std::string passwd){
+    long long int res = 0;
+    for (int i = 0, p = 1; i < passwd.length(); ++i, p *= 31)
+      res += (passwd[i] - 'a') * p;
+    return res;
+}
