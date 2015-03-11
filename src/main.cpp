@@ -1,5 +1,6 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 #include "constants.h"
 #include "easylogging++.h"
@@ -7,13 +8,39 @@
 
 INITIALIZE_EASYLOGGINGPP
 
+using namespace std;
+
 int main(int, char const**){
-    sqlite3* db;
-    db_connect(db);
+  sqlite3* db;
+  db_connect(db);
 
-	char username[20];
-	char pass[20];
+  cout << "Sign in or sign up?[i/u]: ";
+  char iu;
+  cin >> iu;
+  string username;
+  string pass;
+  if (iu == 'i'){
+    cout << "Login: ";
+    cin >> username;
+    cout << "Passwd: ";
+    cin >> pass;
+    int user_id = find_user(db, 
+          User(username, "", superhash(pass)));
+    if (user_id == -1)
+      LOG(INFO) << "Login unsuccessful";
+    else
+      LOG(INFO) << "Login successful";
+  } else if (iu == 'u'){
+    std::string email;
+    cout << "Login: ";
+    cin >> username;
+    cout << "Email: ";
+    cin >> email;
+    cout << "Passwd: ";
+    cin >> pass;
+    db_insert(db, User(username, email, superhash(pass)));
+  }
 
-    db_close(db);
-    return 0;
+  db_close(db);
+  return 0;
 }

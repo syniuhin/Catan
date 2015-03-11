@@ -2,10 +2,13 @@
 #define Catan_game_h
 
 #include "constants.h"
-#include "vector"
+
+#include <vector>
+#include <map>
 
 class Hex {
   public:
+    Hex();
     Hex(Hex*, Hex*, Hex*, Hex*, Hex*, Hex*, int, int);
   private:
     int num;
@@ -24,7 +27,7 @@ struct Point {
   Hex* third;
   Point() {}
   Point(Hex*, Hex*, Hex*);
-  
+
   Hex** getHexes(Hex**);
 };
 
@@ -34,6 +37,15 @@ struct Line {
   Line() {}
   Line(Hex*, Hex*);
   Line(Point*, Point*);
+};
+
+class Map {
+  public:
+    Map();
+    Map(Hex*);
+  private:
+    std::map<int, Hex*> numMap;
+    Hex* root;
 };
 
 class Game {
@@ -46,7 +58,6 @@ class Game {
     int victory_p_left;
     int build_costs;
 
-    std::vector<std::vector<Point> > map;
 };
 
 class Player {

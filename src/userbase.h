@@ -36,7 +36,7 @@ static const std::string CREATE_TABLE = "CREATE TABLE IF NOT EXISTS USERS("  \
                            "EMAIL          TEXT    NOT NULL UNIQUE," \
                            "PASSWORD       TEXT    NOT NULL);";
 
-//static const char* TABLE = "USERS";
+static const char* TABLE = "USERS";
 const int ID_COL = 0;
 const int USERNAME_COL = 1;
 const int EMAIL_COL = 2;
@@ -49,6 +49,7 @@ int db_close(sqlite3*& db);
 int db_create(sqlite3*& db);
 int db_insert(sqlite3*& db, User user);
 int db_delete(sqlite3*& db, User user);
+int find_user(sqlite3*& db, User user);
 
 long long int superhash(std::string);
 

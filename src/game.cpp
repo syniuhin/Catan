@@ -59,3 +59,9 @@ Line::Line(Point* a, Point* b){
   }
   delete[] ah;
 }
+
+Map::Map() {}
+
+Map::Map(Hex* root) {
+  this -> root = root;
+}
