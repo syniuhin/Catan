@@ -5,13 +5,19 @@
 #include "constants.h"
 #include "easylogging++.h"
 #include "userbase.h"
+#include "game.h"
 
 INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
 
 int main(int, char const**){
+  srand(time(NULL));
   sqlite3* db;
+
+  Map* game_map = new Map();
+  game_map -> gen_map();
+
   db_connect(db);
 
   cout << "Sign in or sign up?[i/u]: ";
@@ -24,7 +30,7 @@ int main(int, char const**){
     cin >> username;
     cout << "Passwd: ";
     cin >> pass;
-    int user_id = find_user(db, 
+    int user_id = find_user(db,
           User(username, "", superhash(pass)));
     if (user_id == -1)
       LOG(INFO) << "Login unsuccessful";

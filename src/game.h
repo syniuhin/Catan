@@ -3,22 +3,33 @@
 
 #include "constants.h"
 
+#include <stdlib.h>
+#include <math.h>
+
 #include <vector>
 #include <map>
 
+const int TYPE_SEA = 0;
+
 class Hex {
   public:
-    Hex();
-    Hex(Hex*, Hex*, Hex*, Hex*, Hex*, Hex*, int, int);
-  private:
-    int num;
-    int type;
     Hex* up_left;
     Hex* up_right;
     Hex* left;
     Hex* right;
     Hex* down_left;
     Hex* down_right;
+
+    Hex();
+    Hex(Hex*, Hex*, Hex*, Hex*, Hex*, Hex*, int, int);
+
+    void set_num(int);
+    int get_num();
+
+    int get_type();
+  private:
+    int num;
+    int type;
 };
 
 struct Point {
@@ -43,6 +54,8 @@ class Map {
   public:
     Map();
     Map(Hex*);
+
+    void gen_map();
   private:
     std::map<int, Hex*> numMap;
     Hex* root;
@@ -57,7 +70,6 @@ class Game {
     int progress_left;
     int victory_p_left;
     int build_costs;
-
 };
 
 class Player {
@@ -68,6 +80,5 @@ class Player {
 };
 
 namespace GameFlow {
-  
 };
 #endif

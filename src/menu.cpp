@@ -23,7 +23,7 @@ Main_menu::~Main_menu(){
 
 void Main_menu::draw(){
     bool process = false;
-    
+
     process = draw_background();
     if (process)
         process = draw_text();
