@@ -27,6 +27,8 @@ class Hex {
     int get_num();
 
     int get_type();
+
+    std::string to_string();
   private:
     int num;
     int type;
@@ -36,6 +38,7 @@ struct Point {
   Hex* first;
   Hex* second;
   Hex* third;
+
   Point() {}
   Point(Hex*, Hex*, Hex*);
 
@@ -45,6 +48,7 @@ struct Point {
 struct Line {
   Hex* first;
   Hex* second;
+
   Line() {}
   Line(Hex*, Hex*);
   Line(Point*, Point*);

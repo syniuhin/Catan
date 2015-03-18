@@ -10,6 +10,12 @@ Game::Game() : knights_left(KNIGHT_CARDS_NUM),
 }
 
 Hex::Hex(){
+    up_left = NULL;
+    up_right = NULL;
+    left = NULL;
+    right = NULL;
+    down_left = NULL;
+    down_right = NULL;
     this -> num = -1;
     this -> type = -1;
 }
@@ -37,6 +43,41 @@ int Hex::get_num(){
 int Hex::get_type(){
     return 1;
     //return type;
+}
+
+std::string Hex::to_string(){
+    std::string res;
+    if (NULL != up_left)
+        res.append("up_left != NULL ,");
+    else
+        res.append("up_left == NULL ");
+
+    if (NULL != left)
+        res.append("left != NULL ");
+    else
+        res.append("left == NULL ");
+
+    if (NULL != down_left)
+        res.append("down_left != NULL ");
+    else
+        res.append("down_left == NULL ");
+
+    if (NULL != down_right)
+        res.append("down_right != NULL ");
+    else
+        res.append("down_right == NULL ");
+
+    if (NULL != right)
+        res.append("right != NULL ");
+    else
+        res.append("right == NULL ");
+
+    if (NULL != up_right)
+        res.append("up_right != NULL ");
+    else
+        res.append("up_right == NULL ");
+
+    return res;
 }
 
 Point::Point(Hex* f, Hex* s, Hex* t){
@@ -104,18 +145,35 @@ void Map::gen_map(){
 
     LOG(INFO) << "nums ok";
     Hex* curr = root;
+    LOG(INFO) << curr -> to_string();
 
     LOG(INFO) << "initial num is " << curr -> get_num();
     int desert_num = rand() % (m + 1);
 
     for (int i = 0; i < n; ++i){
         for (int j = 0; j < dims[i]; ++j){
+            if (NULL == curr){
+                LOG(ERROR) << "NULL == curr";
+            }
+
+            if (i > 0 && j > 0){
+                Hex* left = curr -> up_left -> down_left;
+                curr -> left = left;
+                left -> right = curr;
+                if (NULL != left -> down_right){
+                    curr -> down_left = left -> down_right;
+                    left -> down_right -> up_right = curr;
+                }
+            }
+
+
             if (!desert_num){
                 //curr -> set_type(TYPE_DESERT);
+                --desert_num;
                 curr -> set_num(0);
             } else {
                 --desert_num;
-                LOG(INFO) << desert_num;
+                //LOG(INFO) << "desert_num " << desert_num;
 
                 int neighbor_sum = 0;
                 int neighbor_count = 0;
@@ -131,7 +189,7 @@ void Map::gen_map(){
                     neighbor_count++;
                     neighbor_sum += curr -> down_left -> get_num();
                 }
-                LOG(INFO) << neighbor_count;
+                LOG(INFO) << "neighbor_count is " << neighbor_count;
 
                 int num_ind;
                 if (neighbor_count == 0){
@@ -153,6 +211,7 @@ void Map::gen_map(){
                 nums.erase(nums.begin() + num_ind);
                 --m;
             }
+            LOG(INFO) << "curr -> num is " << curr -> get_num();
             if (NULL == curr -> down_right){
                 curr -> down_right = new Hex();
                 curr -> down_right -> up_left = curr;
@@ -160,7 +219,6 @@ void Map::gen_map(){
             curr = curr -> down_right;
         }
         for (int j = 1; j < dims[i]; ++j){
-            LOG(INFO) << curr -> get_num();
             curr = curr -> up_left;
         }
         if (i < n / 2){
