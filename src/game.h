@@ -59,9 +59,11 @@ class Map {
     Map();
     Map(Hex*);
 
-    void gen_map();
+    void generate();
+
+    void draw(sf::RenderWindow*);
   private:
-    std::map<int, Hex*> numMap;
+    std::map<int, Hex*> num_map;
     Hex* root;
 };
 

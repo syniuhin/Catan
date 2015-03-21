@@ -6,15 +6,17 @@
 //  Copyright (c) 2015 Illia Syniuhin. All rights reserved.
 //
 
-#include "menu.h"
-#include "constants.h"
+#include <SFML/Graphics.hpp>
 
 #include "easylogging++.h"
 
-#include <SFML/Graphics.hpp>
+#include "menu.h"
+#include "constants.h"
 
 Main_menu::Main_menu(sf::RenderWindow* window){
     this -> window = window;
+    buttons_initialized = false;
+    selected_button = -1;
 }
 
 Main_menu::~Main_menu(){
@@ -29,6 +31,10 @@ void Main_menu::draw(){
         process = draw_text();
     if (process)
         process = draw_buttons();
+}
+
+int Main_menu::get_selected_button(){
+    return selected_button;
 }
 
 bool Main_menu::draw_background(){
@@ -77,15 +83,17 @@ bool Main_menu::draw_buttons(){
 }
 
 bool Main_menu::highlight_buttons(){
+    selected_button = -1;
     sf::Vector2i mouse_pos = sf::Mouse::getPosition(*window);
-    LOG(INFO) << "mouse_pos: " << mouse_pos.x << " " << mouse_pos.y;
+    //LOG(INFO) << "mouse_pos: " << mouse_pos.x << " " << mouse_pos.y;
     for (int i = 0; i < BUTTONS_NUM; ++i){
         sf::Vector2f pos = buttons[i].getPosition();
         sf::Rect<float> rect(pos.x - BUTTON_WIDTH / 2, pos.y - BUTTON_HEIGHT / 2,
                              BUTTON_WIDTH, BUTTON_HEIGHT);
         if (rect.contains((float)mouse_pos.x, (float)mouse_pos.y)){
-            LOG(INFO) << "OK button_pos: " << pos.x << " " << pos.y;
+            //LOG(INFO) << "OK button_pos: " << pos.x << " " << pos.y;
             buttons[i].setFillColor(sf::Color::Blue);
+            selected_button = i;
         }
     }
 	return true;

@@ -1,5 +1,11 @@
-#include "game.h"
+#include <SFML/Graphics.hpp>
+
 #include "easylogging++.h"
+
+#include "game.h"
+
+const int HEX_SIZE = 40;
+const int HEX_OUTLINE_SIZE = 2;
 
 Game::Game() : knights_left(KNIGHT_CARDS_NUM),
                progress_left(PROGRESS_CARDS_NUM),
@@ -128,8 +134,8 @@ Map::Map(Hex* root) {
   this -> root = root;
 }
 
-void Map::gen_map(){
-    int n = 5;
+void Map::generate(){
+    int n = GRID_SIZE;
     int dims[] = {3, 4, 5, 4, 3};
 
     int m = 18;
@@ -149,6 +155,7 @@ void Map::gen_map(){
 
     LOG(INFO) << "initial num is " << curr -> get_num();
     int desert_num = rand() % (m + 1);
+    LOG(INFO) << "desert num is " << desert_num;
 
     for (int i = 0; i < n; ++i){
         for (int j = 0; j < dims[i]; ++j){
@@ -165,7 +172,6 @@ void Map::gen_map(){
                     left -> down_right -> up_right = curr;
                 }
             }
-
 
             if (!desert_num){
                 //curr -> set_type(TYPE_DESERT);
@@ -208,6 +214,7 @@ void Map::gen_map(){
                     }
                 }
                 curr -> set_num(nums[num_ind]);
+                num_map[nums[num_ind]] = curr;
                 nums.erase(nums.begin() + num_ind);
                 --m;
             }
@@ -233,6 +240,33 @@ void Map::gen_map(){
                 curr -> right -> left = curr;
             }
             curr = curr -> right;
+            curr -> down_left = curr -> left -> down_right;
+            curr -> down_left -> up_right = curr;
+        }
+    }
+}
+
+void Map::draw(sf::RenderWindow* window){
+    sf::CircleShape hexagon(HEX_SIZE, 6);
+    hexagon.rotate(90);
+    hexagon.setOutlineThickness(HEX_OUTLINE_SIZE);
+    hexagon.setOutlineColor(sf::Color::Black);
+
+    int dims[] = {GRID_SIZE - 2, GRID_SIZE - 1, GRID_SIZE,
+        GRID_SIZE - 1, GRID_SIZE - 2};
+
+    int wx = window -> getSize().x;
+    int wy = window -> getSize().y;
+
+    int horizontal_offset = (wx - 8 * (HEX_SIZE +
+                HEX_OUTLINE_SIZE)) / 2;
+    for (int i = 0; i < GRID_SIZE; ++i){
+        int vertical_offset = (wy - dims[i] *
+                (HEX_SIZE + HEX_OUTLINE_SIZE)) / 2;
+        horizontal_offset += i * 2 * (HEX_OUTLINE_SIZE + HEX_SIZE);
+        for (int j = 0; j < dims[i]; ++j){
+            hexagon.setPosition(horizontal_offset, vertical_offset);
+            window -> draw(hexagon);
         }
     }
 }

@@ -12,6 +12,8 @@ const std::string APP_NAME = "Catan";
 /**
  * Game rules constants.
  */
+static const int GRID_SIZE = 5;
+
 static const int RES_CARDS_NUM_FOREACH = 19;
 static const int KNIGHT_CARDS_NUM = 14;
 static const int PROGRESS_CARDS_NUM = 6;

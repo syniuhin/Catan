@@ -28,11 +28,14 @@ public:
 
     void draw();
 
+    int get_selected_button();
 private:
     sf::RenderWindow* window;
+
     sf::RectangleShape buttons[BUTTONS_NUM];
-    bool buttons_initialized = false;
-    
+    bool buttons_initialized;
+    int selected_button;
+
     bool draw_background();
     bool draw_text();
     bool draw_buttons();
