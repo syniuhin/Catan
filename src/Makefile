@@ -5,7 +5,7 @@ cc = gcc
 BIN = sqlite game
 SRC = main.cpp userbase.cpp game.cpp menu.cpp map.cpp
 EXEC = bin
-SFML_FLAGS = -framework sfml-system -framework sfml-window -framework sfml-graphics
+SFML_FLAGS = -g -framework sfml-system -framework sfml-window -framework sfml-graphics
 
 all: $(BIN)
 sqlite: sqlite3.c shell.c

@@ -9,7 +9,18 @@
 #include <vector>
 #include <map>
 
-const int TYPE_SEA = 0;
+static const int TYPE_SEA = 0;
+static const int TYPE_DESERT = 1;
+
+const int HEXES_NUM = 19;
+const int nums_arr[] = {
+    2, 3, 3,
+    4, 4, 5,
+    5, 6, 6,
+    8, 8, 9,
+    9, 10, 10,
+    11, 11, 12
+};
 
 class Hex {
   public:
@@ -64,6 +75,7 @@ class Map {
     void draw(sf::RenderWindow*);
   private:
     std::map<int, Hex*> num_map;
+    std::vector<Hex*> id_map;
     Hex* root;
 };
 
