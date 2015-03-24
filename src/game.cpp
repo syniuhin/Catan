@@ -28,14 +28,14 @@ Hex::Hex(){
 
 Hex::Hex(Hex* ul, Hex* ur, Hex* l, Hex* r,
     Hex* dl, Hex* dr, int num, int type){
-  up_left = ul;
-  up_right = ur;
-  left = l;
-  right = r;
-  down_left = dl;
-  down_right = dr;
-  this -> num = num;
-  this -> type = type;
+    up_left = ul;
+    up_right = ur;
+    left = l;
+    right = r;
+    down_left = dl;
+    down_right = dr;
+    this -> num = num;
+    this -> type = type;
 }
 
 void Hex::set_num(int num){
@@ -46,9 +46,12 @@ int Hex::get_num(){
     return this -> num;
 }
 
+void Hex::set_type(int type){
+    this -> type = type;
+}
+
 int Hex::get_type(){
-    return 1;
-    //return type;
+    return type;
 }
 
 std::string Hex::to_string(){
@@ -141,13 +144,18 @@ void Map::generate(){
     int n = GRID_SIZE;
     int dims[] = {3, 4, 5, 4, 3};
 
+    std::vector<int> types;
+    for (int i = TYPE_SEA; i <= TYPE_FOREST; ++i)
+        for (int j = 0; j < TYPE_COUNT[i]; ++j)
+            types.push_back(i);
+
     std::vector<int> nums(&nums_arr[0], &nums_arr[0]
             + (HEXES_NUM - 1));
 
-    Hex* curr = root;
-
-    int desert_num = rand() % HEXES_NUM;
     int m = HEXES_NUM - 1;
+    int k = types.size();
+
+    Hex* curr = root;
 
     for (int i = 0; i < n; ++i){
         for (int j = 0; j < dims[i]; ++j){
@@ -166,14 +174,15 @@ void Map::generate(){
                 }
             }
 
-            if (!desert_num){
-                --desert_num;
-                //curr -> set_type(TYPE_DESERT);
+            int type_ind = rand() % k;
+            int type = types[type_ind];
+            types.erase(types.begin() + type_ind);
+            --k;
+
+            curr -> set_type(type);
+            if (TYPE_DESERT == type){
                 curr -> set_num(0);
             } else {
-                --desert_num;
-                //LOG(INFO) << "desert_num " << desert_num;
-
                 int neighbor_sum = 0;
                 int neighbor_count = 0;
                 if (NULL != curr -> up_left){
@@ -188,8 +197,6 @@ void Map::generate(){
                     neighbor_count++;
                     neighbor_sum += curr -> down_left -> get_num();
                 }
-//                LOG(INFO) << id_map.size() <<
-//                    " neighbor_count is " << neighbor_count;
 
                 int num_ind;
                 if (neighbor_count == 0){
@@ -208,11 +215,9 @@ void Map::generate(){
                     }
                 }
                 curr -> set_num(nums[num_ind]);
-                //num_map[nums[num_ind]] = curr;
                 nums.erase(nums.begin() + num_ind);
                 --m;
             }
-//            LOG(INFO) << "curr -> num is " << curr -> get_num();
             id_map.push_back(curr);
             if (j < dims[i] - 1 && NULL == curr -> down_right){
                 curr -> down_right = new Hex();
@@ -309,15 +314,14 @@ void Map::draw(sf::RenderWindow* window){
                 hexagon.setFillColor(sf::Color::Red);
                 //LOG(INFO) << "highlight " << k - 1;
             } else {
-                hexagon.setFillColor(sf::Color::White);
+                hexagon.setFillColor(TYPE_COLOR[curr -> get_type()]);
             }
             window -> draw(hexagon);
 
             on_mouse(window, &mouse_circle);
             text.setPosition(horizontal_offset + HEX_SIZE / 2, vertical_offset +
                     HEX_SIZE / 2);
-            text.setString(std::to_string(curr -> get_num()) + ", " +
-                    std::to_string(k - 1));
+            text.setString(std::to_string(curr -> get_num()));
             window -> draw(text);
 
             vertical_offset += deltay;
