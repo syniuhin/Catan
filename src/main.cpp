@@ -26,7 +26,7 @@ int main(int, char const**){
 
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH,
                 SCREEN_HEIGHT), APP_NAME);
-    window.setFramerateLimit(10);
+    window.setFramerateLimit(30);
 //    Main_menu menu(&window);
 //    int clicked_button = process_menu(&window, &menu);
     Game game = Game();

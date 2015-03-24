@@ -107,25 +107,25 @@ Line::Line(Hex* f, Hex* s){
 }
 
 Line::Line(Point* a, Point* b){
-  if (a == b)
-    return;
-  Hex** ah = new Hex*[3];
-  ah = a -> getHexes(ah);
+    if (a == b)
+        return;
+    Hex** ah = new Hex*[3];
+    ah = a -> getHexes(ah);
 
-  Hex** bh = new Hex*[3];
-  bh = b -> getHexes(bh);
+    Hex** bh = new Hex*[3];
+    bh = b -> getHexes(bh);
 
-  for (int i = 0; i < 3; ++i){
-    for (int j = 0; j < 3; ++j){
-      if (ah[i] == bh[j]){
-        if (NULL == first)
-          first = ah[i];
-        else
-          second = ah[i];
-      }
+    for (int i = 0; i < 3; ++i){
+        for (int j = 0; j < 3; ++j){
+            if (ah[i] == bh[j]){
+                if (NULL == first)
+                    first = ah[i];
+                else
+                    second = ah[i];
+            }
+        }
     }
-  }
-  delete[] ah;
+    delete[] ah;
 }
 
 Map::Map() {
@@ -247,7 +247,13 @@ bool mouse_points_circle(sf::RenderWindow* window, sf::CircleShape* circle){
 
     double radius = (double) HEX_SIZE;
     return sqrt((center.x - point.x) * (center.x - point.x) +
-            (center.y - point.y) * (center.y - point.y)) - radius < EPS + 10;
+            (center.y - point.y) * (center.y - point.y)) - radius < EPS + 20;
+}
+
+void on_mouse(sf::RenderWindow* window, sf::CircleShape* circle){
+    sf::Vector2i point = sf::Mouse::getPosition(*window);
+    circle -> setPosition((float) point.x, (float) point.y);
+    window -> draw(*circle);
 }
 
 void Map::draw(sf::RenderWindow* window){
@@ -265,6 +271,9 @@ void Map::draw(sf::RenderWindow* window){
         return;
     }
     text.setFont(font);
+
+    sf::CircleShape mouse_circle(10, 17);
+    mouse_circle.setFillColor(sf::Color::Blue);
 
     int dims[] = {GRID_SIZE - 2, GRID_SIZE - 1, GRID_SIZE,
         GRID_SIZE - 1, GRID_SIZE - 2};
@@ -298,12 +307,13 @@ void Map::draw(sf::RenderWindow* window){
             hexagon.setPosition(horizontal_offset, vertical_offset);
             if (mouse_points_circle(window, &hexagon)){
                 hexagon.setFillColor(sf::Color::Red);
-                LOG(INFO) << "highlight " << k - 1;
+                //LOG(INFO) << "highlight " << k - 1;
             } else {
                 hexagon.setFillColor(sf::Color::White);
             }
             window -> draw(hexagon);
 
+            on_mouse(window, &mouse_circle);
             text.setPosition(horizontal_offset + HEX_SIZE / 2, vertical_offset +
                     HEX_SIZE / 2);
             text.setString(std::to_string(curr -> get_num()) + ", " +
