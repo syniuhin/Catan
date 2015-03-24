@@ -38,4 +38,9 @@ static const int STTL_COST[] = {1, 0, 1, 1, 1};
 static const int CITY_COST[] = {0, 0, 3, 2, 0};
 static const int CARD_COST[] = {0, 1, 1, 1, 0};
 
+/**
+ * Common constants
+ */
+static const double EPS = 0.0000005;
+
 #endif

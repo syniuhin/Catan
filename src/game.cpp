@@ -188,8 +188,8 @@ void Map::generate(){
                     neighbor_count++;
                     neighbor_sum += curr -> down_left -> get_num();
                 }
-                LOG(INFO) << id_map.size() <<
-                    " neighbor_count is " << neighbor_count;
+//                LOG(INFO) << id_map.size() <<
+//                    " neighbor_count is " << neighbor_count;
 
                 int num_ind;
                 if (neighbor_count == 0){
@@ -212,7 +212,7 @@ void Map::generate(){
                 nums.erase(nums.begin() + num_ind);
                 --m;
             }
-            LOG(INFO) << "curr -> num is " << curr -> get_num();
+//            LOG(INFO) << "curr -> num is " << curr -> get_num();
             id_map.push_back(curr);
             if (j < dims[i] - 1 && NULL == curr -> down_right){
                 curr -> down_right = new Hex();
@@ -237,6 +237,17 @@ void Map::generate(){
             curr -> down_left -> up_right = curr;
         }
     }
+}
+
+bool mouse_points_circle(sf::RenderWindow* window, sf::CircleShape* circle){
+    sf::Vector2i point = sf::Mouse::getPosition(*window);
+    double sqrt2 = sqrt(2.0);
+    sf::Vector2f center = circle -> getPosition() +
+        sf::Vector2f(HEX_SIZE * sqrt2 * .5, HEX_SIZE * sqrt2 * .5);
+
+    double radius = (double) HEX_SIZE;
+    return sqrt((center.x - point.x) * (center.x - point.x) +
+            (center.y - point.y) * (center.y - point.y)) - radius < EPS + 10;
 }
 
 void Map::draw(sf::RenderWindow* window){
@@ -285,10 +296,18 @@ void Map::draw(sf::RenderWindow* window){
                 hexagon.setFillColor(sf::Color::White);
 
             hexagon.setPosition(horizontal_offset, vertical_offset);
+            if (mouse_points_circle(window, &hexagon)){
+                hexagon.setFillColor(sf::Color::Red);
+                LOG(INFO) << "highlight " << k - 1;
+            } else {
+                hexagon.setFillColor(sf::Color::White);
+            }
             window -> draw(hexagon);
 
-            text.setPosition(horizontal_offset + HEX_SIZE / 2, vertical_offset + HEX_SIZE / 2);
-            text.setString(std::to_string(curr -> get_num()) + ", " + std::to_string(k - 1));
+            text.setPosition(horizontal_offset + HEX_SIZE / 2, vertical_offset +
+                    HEX_SIZE / 2);
+            text.setString(std::to_string(curr -> get_num()) + ", " +
+                    std::to_string(k - 1));
             window -> draw(text);
 
             vertical_offset += deltay;

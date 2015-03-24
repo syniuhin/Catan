@@ -118,15 +118,14 @@ void start_game(sf::RenderWindow* window){
 
     game_map.generate();
 
-    window -> clear();
-    game_map.draw(window);
-    window -> display();
     while (window -> isOpen()) {
         sf::Event event;
         while (window -> pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window -> close();
         }
+        window -> clear();
+        game_map.draw(window);
+        window -> display();
     }
-
 }
