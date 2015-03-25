@@ -10,22 +10,15 @@
 #include <vector>
 #include <map>
 
-class Game {
-  public:
-    Game();
-  private:
-    int res_left[5];
-    int knights_left;
-    int progress_left;
-    int victory_p_left;
-    int build_costs;
-};
-
 class Player {
-  private:
-    int cities;
-    int sttls;
-    int roads;
+    public:
+        Player(int);
+    private:
+        int player_id;
+
+        int cities;
+        int sttls;
+        int roads;
 };
 
 class Village {
@@ -42,6 +35,28 @@ class City : public Village {
     public:
         City();
         City(Point*, Player*);
+};
+
+class Game {
+    public:
+        Game(Map*, std::vector<Player*>, sf::RenderWindow*);
+
+        void gen_map();
+
+        void update();
+
+        void click();
+    private:
+        int res_left[5];
+        int knights_left;
+        int progress_left;
+        int victory_p_left;
+        int build_costs;
+
+        Map* game_map;
+        std::vector<Player*> players;
+
+        sf::RenderWindow* window;
 };
 
 namespace GameFlow {

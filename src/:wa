@@ -29,6 +29,8 @@ int main(int, char const**){
     window.setFramerateLimit(30);
 //    Main_menu menu(&window);
 //    int clicked_button = process_menu(&window, &menu);
+    Game game = Game();
+    Map game_map = Map();
 //    switch (clicked_button){
 //        case 0:
 //            //start game
@@ -111,10 +113,7 @@ int process_menu(sf::RenderWindow* window, Main_menu* menu){
 }
 
 void start_game(sf::RenderWindow* window){
-    std::vector<Player*> players;
-    for (int i = 0; i < 4; ++i)
-        players.push_back(new Player(i));
-    Game game = Game(new Map(), players, window);
+    Game game = Game(new Map());
     game.gen_map();
 
     while (window -> isOpen()) {
