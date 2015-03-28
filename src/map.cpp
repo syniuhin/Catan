@@ -66,35 +66,35 @@ int Hex::get_type(){
 
 std::string Hex::to_string(){
     std::string res;
-    if (NULL != up_left)
-        res.append("up_left NON_NULL,");
-    else
-        res.append("up_left NULL, ");
+  //  if (NULL != up_left)
+  //      res.append("up_left NON_NULL,");
+  //  else
+  //      res.append("up_left NULL, ");
 
-    if (NULL != left)
-        res.append("left NON_NULL, ");
-    else
-        res.append("left NULL, ");
+  //  if (NULL != left)
+  //      res.append("left NON_NULL, ");
+  //  else
+  //      res.append("left NULL, ");
 
-    if (NULL != down_left)
-        res.append("down_left NON_NULL, ");
-    else
-        res.append("down_left NULL, ");
+  //  if (NULL != down_left)
+  //      res.append("down_left NON_NULL, ");
+  //  else
+  //      res.append("down_left NULL, ");
 
-    if (NULL != down_right)
-        res.append("down_right NON_NULL, ");
-    else
-        res.append("down_right NULL, ");
+  //  if (NULL != down_right)
+  //      res.append("down_right NON_NULL, ");
+  //  else
+  //      res.append("down_right NULL, ");
 
-    if (NULL != right)
-        res.append("right NON_NULL, ");
-    else
-        res.append("right NULL, ");
+  //  if (NULL != right)
+  //      res.append("right NON_NULL, ");
+  //  else
+  //      res.append("right NULL, ");
 
-    if (NULL != up_right)
-        res.append("up_right NON_NULL; ");
-    else
-        res.append("up_right NULL; ");
+  //  if (NULL != up_right)
+  //      res.append("up_right NON_NULL; ");
+  //  else
+  //      res.append("up_right NULL; ");
 
     res.append("num ")
         .append(std::to_string(num));
@@ -115,6 +115,12 @@ bool Hex::on_mouse(sf::Vector2i point){
             (center.y - point.y) * (center.y - point.y)) - radius < EPS + 20;
 }
 
+Point::Point(){
+    first = NULL;
+    second = NULL;
+    third = NULL;
+}
+
 Point::Point(Hex* f, Hex* s, Hex* t){
     first = f;
     second = s;
@@ -126,6 +132,23 @@ Hex** Point::getHexes(Hex** res){
     res[1] = second;
     res[2] = third;
     return res;
+}
+
+void Point::click(){
+    std::string log;
+    log.append(std::to_string(first -> get_num()))
+        .append(" ")
+        .append(std::to_string(second -> get_num()))
+        .append(" ")
+        .append(std::to_string(third -> get_num()))
+        .append(" clicked");
+    LOG(INFO) << log;
+}
+
+bool Point::on_mouse(sf::Vector2i point){
+    return first -> on_mouse(point) &&
+        second -> on_mouse(point) &&
+        third -> on_mouse(point);
 }
 
 Line::Line(Hex* f, Hex* s){
@@ -155,12 +178,30 @@ Line::Line(Point* a, Point* b){
     delete[] ah;
 }
 
-Map::Map() {
-    this -> root = new Hex();
+void Line::click(){
+    std::string log;
+    log.append(std::to_string(first -> get_num()))
+        .append(" ")
+        .append(std::to_string(second -> get_num()))
+        .append(" clicked");
+    LOG(INFO) << log;
 }
 
-Map::Map(Hex* root) {
-  this -> root = root;
+bool Line::on_mouse(sf::Vector2i point){
+    return first -> on_mouse(point) &&
+        second -> on_mouse(point);
+}
+
+Map::Map(){
+    this -> root = new Hex();
+    mouse_circle = sf::CircleShape(10, 17);
+    mouse_circle.setFillColor(sf::Color::Blue);
+}
+
+Map::Map(Hex* root){
+    this -> root = root;
+    mouse_circle = sf::CircleShape(10, 17);
+    mouse_circle.setFillColor(sf::Color::Blue);
 }
 
 void Map::generate(sf::RenderWindow* window){
@@ -291,13 +332,13 @@ void Map::generate(sf::RenderWindow* window){
     LOG(INFO) << "Map generated successfully";
 }
 
-void draw_mouse_pointer(sf::RenderWindow* window, sf::CircleShape* circle){
+void Map::draw_mouse_pointer(sf::RenderWindow* window){
     sf::Vector2i point = sf::Mouse::getPosition(*window);
-    circle -> setPosition((float) point.x, (float) point.y);
-    window -> draw(*circle);
+    mouse_circle.setPosition((float) point.x, (float) point.y);
+    window -> draw(mouse_circle);
 }
 
-void Map::draw(sf::RenderWindow* window){
+void Map::draw_map(sf::RenderWindow* window){
     sf::CircleShape hexagon(HEX_SIZE - HEX_OUTLINE_SIZE, 6);
     sf::Vector2i point = sf::Mouse::getPosition(*window);
 
@@ -313,9 +354,6 @@ void Map::draw(sf::RenderWindow* window){
         return;
     }
     text.setFont(font);
-
-    sf::CircleShape mouse_circle(10, 17);
-    mouse_circle.setFillColor(sf::Color::Blue);
 
     int dims[] = {GRID_SIZE - 2, GRID_SIZE - 1, GRID_SIZE,
         GRID_SIZE - 1, GRID_SIZE - 2};
@@ -338,7 +376,6 @@ void Map::draw(sf::RenderWindow* window){
             }
             window -> draw(hexagon);
 
-            draw_mouse_pointer(window, &mouse_circle);
             text.setPosition(curr_pos + sf::Vector2f(.7f * HEX_SIZE, .7f * HEX_SIZE));
             text.setString(std::to_string(curr -> get_num()));
             window -> draw(text);
@@ -348,9 +385,26 @@ void Map::draw(sf::RenderWindow* window){
     }
 }
 
+void Map::draw(sf::RenderWindow* window){
+    draw_map(window);
+    draw_mouse_pointer(window);
+}
+
 void Map::click(sf::RenderWindow* window){
     sf::Vector2i point = sf::Mouse::getPosition(*window);
     for (size_t i = 0; i < map_objects.size(); ++i)
         if (map_objects[i] -> on_mouse(point))
             map_objects[i] -> click();
+}
+
+Point* Map::add_point(Hex* up_left, Hex* up_right, Hex* down){
+    Point* point = new Point(up_left, up_right, down);
+    map_objects.push_back(point);
+    return point;
+}
+
+Line* Map::add_line(Hex* first, Hex* second){
+    Line* line = new Line(first, second);
+    map_objects.push_back(line);
+    return line;
 }

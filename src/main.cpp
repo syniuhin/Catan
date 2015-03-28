@@ -117,7 +117,7 @@ void start_game(sf::RenderWindow* window){
     Game game = Game(new Map(), players, window);
     game.gen_map();
 
-    while (window -> isOpen()) {
+    while (window -> isOpen()){
         game.update();
     }
 }

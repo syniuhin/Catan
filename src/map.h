@@ -92,24 +92,33 @@ class Hex : public MapObject {
         int type;
 };
 
-struct Point {
-    Hex* first;
-    Hex* second;
-    Hex* third;
+class Point : public MapObject {
+    public:
+        Point();
+        Point(Hex*, Hex*, Hex*);
 
-    Point() {}
-    Point(Hex*, Hex*, Hex*);
+        Hex** getHexes(Hex**);
 
-    Hex** getHexes(Hex**);
+        void click();
+        bool on_mouse(sf::Vector2i);
+    private:
+        Hex* first;
+        Hex* second;
+        Hex* third;
+
 };
 
-struct Line {
-    Hex* first;
-    Hex* second;
+class Line : public MapObject {
+    public:
+        Line();
+        Line(Hex*, Hex*);
+        Line(Point*, Point*);
 
-    Line() {}
-    Line(Hex*, Hex*);
-    Line(Point*, Point*);
+        void click();
+        bool on_mouse(sf::Vector2i);
+    private:
+        Hex* first;
+        Hex* second;
 };
 
 class Map {
@@ -127,7 +136,19 @@ class Map {
         std::vector<Hex*> id_map;
 
         std::vector<MapObject*> map_objects;
+        std::vector<Point*> points;
+        std::vector<Line*> lines;
         Hex* root;
+
+        sf::CircleShape mouse_circle;
+
+        void draw_map(sf::RenderWindow*);
+        void draw_mouse_pointer(sf::RenderWindow*);
+
+        Point* add_point(Hex* up_left, Hex* up_right, Hex* down);
+        Line* add_line(Hex* first, Hex* second);
 };
 
+namespace MapUtils{
+};
 #endif /* defined(__Catan__map__) */
