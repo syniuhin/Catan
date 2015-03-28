@@ -3,8 +3,7 @@ CXX = g++
 cc = gcc
 
 BIN = sqlite game
-SRC = main.cpp userbase.cpp game.cpp menu.cpp map.cpp
-EXEC = bin
+SRC = *.cpp
 SFML_FLAGS = -g -framework sfml-system -framework sfml-window -framework sfml-graphics
 
 all: $(BIN)
@@ -15,4 +14,4 @@ game: $(SRC) sqlite3.o
 sqlite3.o: sqlite3.c
 	$(cc) -o $@ -c $^
 clean:
-	rm -f $(BIN)
+	rm *.o $(BIN)

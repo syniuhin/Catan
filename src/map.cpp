@@ -1,11 +1,3 @@
-//
-//  map.cpp
-//  Catan
-//
-//  Created by Illia Syniuhin on 2/18/15.
-//  Copyright (c) 2015 Illia Syniuhin. All rights reserved.
-//
-
 #include "map.h"
 
 #include "easylogging++.h"
@@ -66,37 +58,39 @@ int Hex::get_type(){
 
 std::string Hex::to_string(){
     std::string res;
-  //  if (NULL != up_left)
-  //      res.append("up_left NON_NULL,");
-  //  else
-  //      res.append("up_left NULL, ");
+//    if (NULL != up_left)
+//        res.append("up_left NON_NULL,");
+//    else
+//        res.append("up_left NULL, ");
 
-  //  if (NULL != left)
-  //      res.append("left NON_NULL, ");
-  //  else
-  //      res.append("left NULL, ");
+//    if (NULL != left)
+//        res.append("left NON_NULL, ");
+//    else
+//        res.append("left NULL, ");
 
-  //  if (NULL != down_left)
-  //      res.append("down_left NON_NULL, ");
-  //  else
-  //      res.append("down_left NULL, ");
+//    if (NULL != down_left)
+//        res.append("down_left NON_NULL, ");
+//    else
+//        res.append("down_left NULL, ");
 
-  //  if (NULL != down_right)
-  //      res.append("down_right NON_NULL, ");
-  //  else
-  //      res.append("down_right NULL, ");
+//    if (NULL != down_right)
+//        res.append("down_right NON_NULL, ");
+//    else
+//        res.append("down_right NULL, ");
 
-  //  if (NULL != right)
-  //      res.append("right NON_NULL, ");
-  //  else
-  //      res.append("right NULL, ");
+//    if (NULL != right)
+//        res.append("right NON_NULL, ");
+//    else
+//        res.append("right NULL, ");
 
-  //  if (NULL != up_right)
-  //      res.append("up_right NON_NULL; ");
-  //  else
-  //      res.append("up_right NULL; ");
+//    if (NULL != up_right)
+//        res.append("up_right NON_NULL; ");
+//    else
+//        res.append("up_right NULL; ");
 
-    res.append("num ")
+    res.append("type ")
+        .append(std::to_string(type))
+        .append(", num ")
         .append(std::to_string(num));
     return res;
 }
