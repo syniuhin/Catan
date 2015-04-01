@@ -1,8 +1,8 @@
+#include "game.h"
+
 #include <SFML/Graphics.hpp>
 
 #include "easylogging++.h"
-
-#include "game.h"
 
 Game::Game(Map* gm, std::vector<Player*> plyrs,
         sf::RenderWindow* win)

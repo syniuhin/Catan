@@ -1,13 +1,13 @@
+#include <iostream>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include <iostream>
 
 #include "easylogging++.h"
 
 #include "constants.h"
-#include "userbase.h"
 #include "game.h"
 #include "menu.h"
+#include "userbase.h"
 
 INITIALIZE_EASYLOGGINGPP
 

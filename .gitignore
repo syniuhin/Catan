@@ -38,3 +38,5 @@ src/game
 src/logs
 *.plist
 *.swp
+
+src/game.dSYM

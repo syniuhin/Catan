@@ -4,6 +4,14 @@
 
 const int HEX_SIZE = 70;
 const int HEX_OUTLINE_SIZE = 2;
+const int HEX_PRECISION = 6;
+
+const int MOUSE_POINTER_SIZE = 10;
+const int MOUSE_POINTER_PRECISION = 17;
+
+const int POINT_SIZE = 15;
+const int POINT_OUTLINE_SIZE = 1;
+const int POINT_PRECISION = 13;
 
 MapObject::MapObject(){
     pos = NULL;
@@ -190,12 +198,28 @@ Map::Map(){
     this -> root = new Hex();
     mouse_circle = sf::CircleShape(10, 17);
     mouse_circle.setFillColor(sf::Color::Blue);
+
+    hexagon = sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE, 6);
 }
 
 Map::Map(Hex* root){
     this -> root = root;
-    mouse_circle = sf::CircleShape(10, 17);
+    hexagon = sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
+            HEX_PRECISION);
+    hexagon.setOutlineThickness(HEX_OUTLINE_SIZE);
+    hexagon.setOutlineColor(sf::Color::Black);
+
+    mouse_circle = sf::CircleShape(MOUSE_POINTER_SIZE,
+            MOUSE_POINTER_PRECISION);
     mouse_circle.setFillColor(sf::Color::Blue);
+
+    point_circle = sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
+            POINT_PRECISION);
+    point_circle.setFillColor(sf::Color::Red);
+    point_circle.setOutlineColor(sf::Color::Black);
+    point_circle.setOutlineThickness(POINT_OUTLINE_SIZE);
+    double sqrt2 = sqrt(2.0);
+    point_circle.setOrigin(.5 * sqrt2 * POINT_SIZE, .5 * sqrt2 * POINT_SIZE);
 }
 
 void Map::generate(sf::RenderWindow* window){
@@ -332,12 +356,15 @@ void Map::draw_mouse_pointer(sf::RenderWindow* window){
     window -> draw(mouse_circle);
 }
 
-void Map::draw_map(sf::RenderWindow* window){
-    sf::CircleShape hexagon(HEX_SIZE - HEX_OUTLINE_SIZE, 6);
-    sf::Vector2i point = sf::Mouse::getPosition(*window);
+void Map::draw_points(sf::RenderWindow* window){
+    
+    for (size_t i = 0; i < points.size(); ++i){
+        
+    }
+}
 
-    hexagon.setOutlineThickness(HEX_OUTLINE_SIZE);
-    hexagon.setOutlineColor(sf::Color::Black);
+void Map::draw_map(sf::RenderWindow* window){
+    sf::Vector2i point = sf::Mouse::getPosition(*window);
 
     sf::Text text;
     text.setCharacterSize(HEX_SIZE / 2);

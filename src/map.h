@@ -131,9 +131,13 @@ class Map {
         std::vector<Line*> lines;
         Hex* root;
 
+        sf::CircleShape hexagon;
         sf::CircleShape mouse_circle;
+        sf::CircleShape point_circle;
 
         void draw_map(sf::RenderWindow*);
+        void draw_points(sf::RenderWindow*);
+        void draw_lines(sf::RenderWindow*);
         void draw_mouse_pointer(sf::RenderWindow*);
 
         Point* add_point(Hex* up_left, Hex* up_right, Hex* down);

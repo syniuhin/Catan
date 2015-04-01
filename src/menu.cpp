@@ -1,16 +1,9 @@
-//
-//  menu.cpp
-//  Catan
-//
-//  Created by Illia Syniuhin on 2/20/15.
-//  Copyright (c) 2015 Illia Syniuhin. All rights reserved.
-//
+#include "menu.h"
 
 #include <SFML/Graphics.hpp>
 
 #include "easylogging++.h"
 
-#include "menu.h"
 #include "constants.h"
 
 Main_menu::Main_menu(sf::RenderWindow* window){

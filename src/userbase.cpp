@@ -1,4 +1,5 @@
 #include "userbase.h"
+
 #include "easylogging++.h"
 
 int db_connect(sqlite3*& db){
