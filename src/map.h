@@ -1,5 +1,5 @@
-#ifndef __Catan__map__
-#define __Catan__map__
+#ifndef __MAP_H__
+#define __MAP_H__
 
 #include "constants.h"
 
@@ -45,7 +45,7 @@ const int nums_arr[] = {
 
 class MapObject {
     public:
-        MapObject();
+        MapObject() {};
 
         sf::Vector2f* get_pos();
         void set_pos(sf::Vector2f*);
@@ -53,7 +53,7 @@ class MapObject {
         virtual void click() = 0;
         virtual bool on_mouse(sf::Vector2i) = 0;
     protected:
-        sf::Vector2f* pos;
+        sf::Vector2f* pos = NULL;
 };
 
 class Hex : public MapObject {
@@ -65,8 +65,14 @@ class Hex : public MapObject {
         Hex* down_left;
         Hex* down_right;
 
-        Hex();
-        Hex(Hex*, Hex*, Hex*, Hex*, Hex*, Hex*, int, int);
+        Hex(Hex* up_left = NULL,
+                Hex* up_right = NULL,
+                Hex* left = NULL,
+                Hex* right = NULL,
+                Hex* down_left = NULL,
+                Hex* down_right = NULL,
+                int num = -1,
+                int type = -1);
 
         void set_num(int);
         int get_num();
@@ -85,8 +91,10 @@ class Hex : public MapObject {
 
 class Point : public MapObject {
     public:
-        Point();
-        Point(Hex*, Hex*, Hex*);
+        Point() {}
+        Point(Hex* first = NULL,
+                Hex* second = NULL,
+                Hex* third = NULL);
 
         Hex** getHexes(Hex**);
 
@@ -96,14 +104,16 @@ class Point : public MapObject {
         Hex* first;
         Hex* second;
         Hex* third;
-
 };
 
 class Line : public MapObject {
     public:
-        Line();
-        Line(Hex*, Hex*);
-        Line(Point*, Point*);
+        Line(Hex* first = NULL, Hex* second = NULL);
+
+        /**
+         * Factory method
+         */
+        static Line* fromPoints(Point*, Point*);
 
         void click();
         bool on_mouse(sf::Vector2i);
@@ -114,13 +124,12 @@ class Line : public MapObject {
 
 class Map {
     public:
-        Map();
-        Map(Hex*);
+        explicit Map(Hex* root = NULL);
+
+        ~Map() {};
 
         void generate(sf::RenderWindow*);
-
         void draw(sf::RenderWindow*);
-
         void click(sf::RenderWindow*);
     private:
         std::map<int, Hex*> num_map;
@@ -144,6 +153,4 @@ class Map {
         Line* add_line(Hex* first, Hex* second);
 };
 
-namespace MapUtils{
-};
-#endif /* defined(__Catan__map__) */
+#endif /* defined(__MAP_H__) */

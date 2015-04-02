@@ -23,8 +23,7 @@ class Player {
 
 class Village {
     public:
-        Village();
-        Village(Point*, Player*);
+        Village(Point* loc = NULL, Player* ownr = NULL);
     protected:
         Point* location;
         Player* owner;
@@ -33,8 +32,7 @@ class Village {
 
 class City : public Village {
     public:
-        City();
-        City(Point*, Player*);
+        City(Point* loc = NULL, Player* ownr = NULL);
 };
 
 class Game {
@@ -47,11 +45,11 @@ class Game {
 
         void click();
     private:
-        int res_left[5];
-        int knights_left;
-        int progress_left;
-        int victory_p_left;
-        int build_costs;
+        int res_left[5] = {RES_CARDS_NUM_FOREACH};
+        int knights_left = KNIGHT_CARDS_NUM;
+        int progress_left = PROGRESS_CARDS_NUM;
+        int victory_p_left = VICTORY_P_CARDS_NUM;
+        int build_costs = BUILD_COSTS_CARDS_NUM;
 
         Map* game_map;
         std::vector<Player*> players;
@@ -59,6 +57,4 @@ class Game {
         sf::RenderWindow* window;
 };
 
-namespace GameFlow {
-};
 #endif

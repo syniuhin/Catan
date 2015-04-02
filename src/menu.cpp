@@ -8,8 +8,6 @@
 
 Main_menu::Main_menu(sf::RenderWindow* window){
     this -> window = window;
-    buttons_initialized = false;
-    selected_button = -1;
 }
 
 Main_menu::~Main_menu(){

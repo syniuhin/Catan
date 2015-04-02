@@ -33,8 +33,8 @@ private:
     sf::RenderWindow* window;
 
     sf::RectangleShape buttons[BUTTONS_NUM];
-    bool buttons_initialized;
-    int selected_button;
+    bool buttons_initialized = false;
+    int selected_button = -1;
 
     bool draw_background();
     bool draw_text();

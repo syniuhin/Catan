@@ -6,16 +6,9 @@
 
 Game::Game(Map* gm, std::vector<Player*> plyrs,
         sf::RenderWindow* win)
-    : knights_left(KNIGHT_CARDS_NUM),
-      progress_left(PROGRESS_CARDS_NUM),
-      victory_p_left(VICTORY_P_CARDS_NUM),
-      build_costs(BUILD_COSTS_CARDS_NUM),
-      window(win),
+    : window(win),
       game_map(gm),
-      players(plyrs.begin(), plyrs.end()){
-    for (int i = 0; i < 5; ++i)
-        res_left[i] = RES_CARDS_NUM_FOREACH;
-}
+      players(plyrs.begin(), plyrs.end()) {}
 
 void Game::gen_map(){
     game_map -> generate(window);
@@ -44,22 +37,10 @@ void Game::click(){
     game_map -> click(window);
 }
 
-Village::Village(){
-    resource_delta = 1;
-    location = NULL;
-    owner = NULL;
-}
-
 Village::Village(Point* loc, Player* ownr){
     resource_delta = 1;
     location = loc;
     owner = ownr;
-}
-
-City::City(){
-    resource_delta = 2;
-    location = NULL;
-    owner = NULL;
 }
 
 City::City(Point* loc, Player* ownr){

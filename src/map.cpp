@@ -13,27 +13,12 @@ const int POINT_SIZE = 15;
 const int POINT_OUTLINE_SIZE = 1;
 const int POINT_PRECISION = 13;
 
-MapObject::MapObject(){
-    pos = NULL;
-}
-
 sf::Vector2f* MapObject::get_pos(){
     return pos;
 }
 
 void MapObject::set_pos(sf::Vector2f *new_pos){
     pos = new_pos;
-}
-
-Hex::Hex(){
-    up_left = NULL;
-    up_right = NULL;
-    left = NULL;
-    right = NULL;
-    down_left = NULL;
-    down_right = NULL;
-    this -> num = -1;
-    this -> type = -1;
 }
 
 Hex::Hex(Hex* ul, Hex* ur, Hex* l, Hex* r,
@@ -117,12 +102,6 @@ bool Hex::on_mouse(sf::Vector2i point){
             (center.y - point.y) * (center.y - point.y)) - radius < EPS + 20;
 }
 
-Point::Point(){
-    first = NULL;
-    second = NULL;
-    third = NULL;
-}
-
 Point::Point(Hex* f, Hex* s, Hex* t){
     first = f;
     second = s;
@@ -158,9 +137,10 @@ Line::Line(Hex* f, Hex* s){
     second = s;
 }
 
-Line::Line(Point* a, Point* b){
+Line* Line::fromPoints(Point* a, Point* b){
     if (a == b)
-        return;
+        return NULL;
+    Line* line = new Line;
     Hex** ah = new Hex*[3];
     ah = a -> getHexes(ah);
 
@@ -170,14 +150,17 @@ Line::Line(Point* a, Point* b){
     for (int i = 0; i < 3; ++i){
         for (int j = 0; j < 3; ++j){
             if (ah[i] == bh[j]){
-                if (NULL == first)
-                    first = ah[i];
+                if (NULL == line -> first)
+                    line -> first = ah[i];
                 else
-                    second = ah[i];
+                    line -> second = ah[i];
             }
         }
     }
     delete[] ah;
+    delete[] bh;
+
+    return line;
 }
 
 void Line::click(){
@@ -194,16 +177,10 @@ bool Line::on_mouse(sf::Vector2i point){
         second -> on_mouse(point);
 }
 
-Map::Map(){
-    this -> root = new Hex();
-    mouse_circle = sf::CircleShape(10, 17);
-    mouse_circle.setFillColor(sf::Color::Blue);
-
-    hexagon = sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE, 6);
-}
-
-Map::Map(Hex* root){
-    this -> root = root;
+Map::Map(Hex* root) {
+    this -> root = (root)
+        ? root
+        : new Hex;
     hexagon = sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
             HEX_PRECISION);
     hexagon.setOutlineThickness(HEX_OUTLINE_SIZE);
@@ -219,7 +196,8 @@ Map::Map(Hex* root){
     point_circle.setOutlineColor(sf::Color::Black);
     point_circle.setOutlineThickness(POINT_OUTLINE_SIZE);
     double sqrt2 = sqrt(2.0);
-    point_circle.setOrigin(.5 * sqrt2 * POINT_SIZE, .5 * sqrt2 * POINT_SIZE);
+    point_circle.setOrigin(.5 * sqrt2 * POINT_SIZE,
+            .5 * sqrt2 * POINT_SIZE);
 }
 
 void Map::generate(sf::RenderWindow* window){
@@ -323,7 +301,7 @@ void Map::generate(sf::RenderWindow* window){
             id_map.push_back(curr);
             map_objects.push_back(curr);
             if (j < dims[i] - 1 && NULL == curr -> down_right){
-                curr -> down_right = new Hex();
+                curr -> down_right = new Hex;
                 curr -> down_right -> up_left = curr;
                 curr = curr -> down_right;
             }
@@ -334,12 +312,12 @@ void Map::generate(sf::RenderWindow* window){
             curr = curr -> up_left;
         }
         if (i < GRID_SIZE / 2){
-            curr -> up_right = new Hex();
+            curr -> up_right = new Hex;
             curr -> up_right -> down_left = curr;
 
             curr = curr -> up_right;
         } else {
-            curr -> right = new Hex();
+            curr -> right = new Hex;
             curr -> right -> left = curr;
 
             curr = curr -> right;
