@@ -115,9 +115,9 @@ void start_game(sf::RenderWindow* window){
     for (int i = 0; i < 4; ++i)
         players.push_back(new Player(i));
     Game game = Game(new Map(), players, window);
-    game.gen_map();
+    game.GenMap();
 
     while (window -> isOpen()){
-        game.update();
+        game.Update();
     }
 }

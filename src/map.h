@@ -34,7 +34,7 @@ static const sf::Color TYPE_COLOR[] = {
 };
 
 const int HEXES_NUM = 19;
-const int nums_arr[] = {
+const int NUMS_ARR[] = {
     2, 3, 3,
     4, 4, 5,
     5, 6, 6,
@@ -50,10 +50,10 @@ class MapObject {
         sf::Vector2f* get_pos();
         void set_pos(sf::Vector2f*);
 
-        virtual void click() = 0;
-        virtual bool on_mouse(sf::Vector2i) = 0;
+        virtual void Click() = 0;
+        virtual bool OnMouse(sf::Vector2i) = 0;
     protected:
-        sf::Vector2f* pos = NULL;
+        sf::Vector2f* pos_ = NULL;
 };
 
 class Hex : public MapObject {
@@ -82,44 +82,44 @@ class Hex : public MapObject {
 
         std::string to_string();
 
-        void click();
-        bool on_mouse(sf::Vector2i);
+        void Click();
+        bool OnMouse(sf::Vector2i);
     private:
-        int num;
-        int type;
+        int num_;
+        int type_;
 };
 
 class Point : public MapObject {
     public:
         Point() {}
-        Point(Hex* first = NULL,
-                Hex* second = NULL,
-                Hex* third = NULL);
+        Point(Hex* first_ = NULL,
+                Hex* second_ = NULL,
+                Hex* third_ = NULL);
 
-        Hex** getHexes(Hex**);
+        Hex** GetHexes(Hex**);
 
-        void click();
-        bool on_mouse(sf::Vector2i);
+        void Click();
+        bool OnMouse(sf::Vector2i);
     private:
-        Hex* first;
-        Hex* second;
-        Hex* third;
+        Hex* first_;
+        Hex* second_;
+        Hex* third_;
 };
 
 class Line : public MapObject {
     public:
-        Line(Hex* first = NULL, Hex* second = NULL);
+        Line(Hex* first_ = NULL, Hex* second_ = NULL);
 
         /**
          * Factory method
          */
-        static Line* fromPoints(Point*, Point*);
+        static Line* FromPoints(Point*, Point*);
 
-        void click();
-        bool on_mouse(sf::Vector2i);
+        void Click();
+        bool OnMouse(sf::Vector2i);
     private:
-        Hex* first;
-        Hex* second;
+        Hex* first_;
+        Hex* second_;
 };
 
 class Map {
@@ -128,29 +128,28 @@ class Map {
 
         ~Map() {};
 
-        void generate(sf::RenderWindow*);
-        void draw(sf::RenderWindow*);
-        void click(sf::RenderWindow*);
+        void Generate(sf::RenderWindow*);
+        void Draw(sf::RenderWindow*);
+        void Click(sf::RenderWindow*);
     private:
-        std::map<int, Hex*> num_map;
-        std::vector<Hex*> id_map;
+        std::vector<Hex*> hexes_;
 
-        std::vector<MapObject*> map_objects;
-        std::vector<Point*> points;
-        std::vector<Line*> lines;
-        Hex* root;
+        std::vector<MapObject*> map_objects_;
+        std::vector<Point*> points_;
+        std::vector<Line*> lines_;
+        Hex* root_;
 
-        sf::CircleShape hexagon;
-        sf::CircleShape mouse_circle;
-        sf::CircleShape point_circle;
+        sf::CircleShape hexagon_;
+        sf::CircleShape mouse_circle_;
+        sf::CircleShape point_circle_;
 
-        void draw_map(sf::RenderWindow*);
-        void draw_points(sf::RenderWindow*);
-        void draw_lines(sf::RenderWindow*);
-        void draw_mouse_pointer(sf::RenderWindow*);
+        void DrawMap(sf::RenderWindow*);
+        void DrawPoints(sf::RenderWindow*);
+        void DrawLines(sf::RenderWindow*);
+        void DrawMousePointer(sf::RenderWindow*);
 
         Point* add_point(Hex* up_left, Hex* up_right, Hex* down);
-        Line* add_line(Hex* first, Hex* second);
+        Line* add_line(Hex* first_, Hex* second_);
 };
 
 #endif /* defined(__MAP_H__) */

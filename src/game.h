@@ -14,20 +14,20 @@ class Player {
     public:
         Player(int);
     private:
-        int player_id;
+        int player_id_;
 
-        int cities;
-        int sttls;
-        int roads;
+        int cities_;
+        int sttls_;
+        int roads_;
 };
 
 class Village {
     public:
         Village(Point* loc = NULL, Player* ownr = NULL);
     protected:
-        Point* location;
-        Player* owner;
-        int resource_delta;
+        Point* location_;
+        Player* owner_;
+        int resource_delta_;
 };
 
 class City : public Village {
@@ -39,22 +39,22 @@ class Game {
     public:
         Game(Map*, std::vector<Player*>, sf::RenderWindow*);
 
-        void gen_map();
+        void GenMap();
 
-        void update();
+        void Update();
 
-        void click();
+        void Click();
     private:
-        int res_left[5] = {RES_CARDS_NUM_FOREACH};
-        int knights_left = KNIGHT_CARDS_NUM;
-        int progress_left = PROGRESS_CARDS_NUM;
-        int victory_p_left = VICTORY_P_CARDS_NUM;
-        int build_costs = BUILD_COSTS_CARDS_NUM;
+        int res_left_[5] = {RES_CARDS_NUM_FOREACH};
+        int knights_left_ = KNIGHT_CARDS_NUM;
+        int progress_left_ = PROGRESS_CARDS_NUM;
+        int victory_p_left_ = VICTORY_P_CARDS_NUM;
+        int build_costs_ = BUILD_COSTS_CARDS_NUM;
 
-        Map* game_map;
-        std::vector<Player*> players;
+        Map* game_map_;
+        std::vector<Player*> players_;
 
-        sf::RenderWindow* window;
+        sf::RenderWindow* window_;
 };
 
 #endif
