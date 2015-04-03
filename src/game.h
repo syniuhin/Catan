@@ -1,5 +1,5 @@
-#ifndef Catan_game_h
-#define Catan_game_h
+#ifndef __GAME_H__
+#define __GAME_H__
 
 #include "constants.h"
 #include "map.h"
@@ -13,6 +13,8 @@
 class Player {
     public:
         Player(int);
+
+        int get_id();
     private:
         int player_id_;
 
@@ -25,6 +27,8 @@ class Village {
     public:
         Village(Point* loc = NULL, Player* ownr = NULL);
     protected:
+//        friend class Point;
+
         Point* location_;
         Player* owner_;
         int resource_delta_;
@@ -41,9 +45,9 @@ class Game {
 
         void GenMap();
 
+        void SetUp();
         void Update();
 
-        void Click();
     private:
         int res_left_[5] = {RES_CARDS_NUM_FOREACH};
         int knights_left_ = KNIGHT_CARDS_NUM;
@@ -53,8 +57,11 @@ class Game {
 
         Map* game_map_;
         std::vector<Player*> players_;
+        std::vector<Village*> villages_;
 
         sf::RenderWindow* window_;
+
+        void Click();
 };
 
 #endif

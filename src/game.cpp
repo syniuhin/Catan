@@ -11,7 +11,35 @@ Game::Game(Map* gm, std::vector<Player*> plyrs,
       players_(plyrs.begin(), plyrs.end()) {}
 
 void Game::GenMap(){
-    game_map_ -> Generate(window_);
+    game_map_ -> Generate();
+}
+
+void Game::SetUp() {
+    for (size_t i = 0; i < players_.size(); ++i){
+        Player* curr = players_[i];
+        Point* added = NULL;
+        while (window_ -> isOpen() && !added){
+            sf::Event event;
+            while (window_ -> pollEvent(event)) {
+                switch (event.type){
+                    case sf::Event::Closed:
+                        window_ -> close();
+                        break;
+                    case sf::Event::MouseButtonReleased:
+                        added = game_map_ -> AddVillage(curr);
+                        if (added)
+                            villages_.push_back(new Village(
+                                        added, curr));
+                        break;
+                    default:
+                        break;
+                }
+            }
+            window_ -> clear();
+            game_map_ -> Draw();
+            window_ -> display();
+        }
+    }
 }
 
 void Game::Update(){
@@ -29,12 +57,12 @@ void Game::Update(){
         }
     }
     window_ -> clear();
-    game_map_ -> Draw(window_);
+    game_map_ -> Draw();
     window_ -> display();
 }
 
 void Game::Click(){
-    game_map_ -> Click(window_);
+    game_map_ -> Click();
 }
 
 Village::Village(Point* loc, Player* ownr){
@@ -49,4 +77,10 @@ City::City(Point* loc, Player* ownr){
     owner_ = ownr;
 }
 
-Player::Player(int p_id) : player_id_(p_id) {}
+Player::Player(int p_id) {
+    this -> player_id_ = p_id;
+}
+
+int Player::get_id() {
+    return player_id_;
+}

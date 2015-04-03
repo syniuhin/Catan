@@ -43,17 +43,22 @@ const int NUMS_ARR[] = {
     11, 11, 12
 };
 
+/**
+ * Forward declarations of game.h classes
+ */
+class Player;
+
 class MapObject {
     public:
         MapObject() {};
 
-        sf::Vector2f* get_pos();
-        void set_pos(sf::Vector2f*);
+        sf::Vector2f get_pos();
+        void set_pos(sf::Vector2f);
 
         virtual void Click() = 0;
         virtual bool OnMouse(sf::Vector2i) = 0;
     protected:
-        sf::Vector2f* pos_ = NULL;
+        sf::Vector2f pos_;
 };
 
 class Hex : public MapObject {
@@ -100,10 +105,14 @@ class Point : public MapObject {
 
         void Click();
         bool OnMouse(sf::Vector2i);
+
+        void set_owner_id(int);
     private:
         Hex* first_;
         Hex* second_;
         Hex* third_;
+
+        int owner_id_ = -1;
 };
 
 class Line : public MapObject {
@@ -117,39 +126,55 @@ class Line : public MapObject {
 
         void Click();
         bool OnMouse(sf::Vector2i);
+
+        void set_owner_id(int);
     private:
         Hex* first_;
         Hex* second_;
+
+        int owner_id_ = -1;
 };
 
 class Map {
     public:
-        explicit Map(Hex* root = NULL);
+        explicit Map(sf::RenderWindow*);
+        Map(Hex* root, sf::RenderWindow*);
 
         ~Map() {};
 
-        void Generate(sf::RenderWindow*);
-        void Draw(sf::RenderWindow*);
-        void Click(sf::RenderWindow*);
-    private:
-        std::vector<Hex*> hexes_;
+        void Generate();
+        void Draw();
+        void Click();
 
+        /**
+         * Adds new Village to a Map.
+         * NOTE: This method called only
+         * after * mouse button released!
+         */
+        Point* AddVillage(Player*);
+    private:
         std::vector<MapObject*> map_objects_;
+
+        std::vector<Hex*> hexes_;
         std::vector<Point*> points_;
         std::vector<Line*> lines_;
-        Hex* root_;
+
+        Hex* root_ = NULL;
+        sf::RenderWindow* window_;
 
         sf::CircleShape hexagon_;
         sf::CircleShape mouse_circle_;
         sf::CircleShape point_circle_;
 
-        void DrawMap(sf::RenderWindow*);
-        void DrawPoints(sf::RenderWindow*);
-        void DrawLines(sf::RenderWindow*);
-        void DrawMousePointer(sf::RenderWindow*);
+        void Init();
 
-        Point* add_point(Hex* up_left, Hex* up_right, Hex* down);
-        Line* add_line(Hex* first_, Hex* second_);
+        void DrawMap();
+        void DrawPoints();
+        void DrawLines();
+        void DrawMousePointer();
+
+        Point* AddPoint(Hex* up_left, Hex* up_right, Hex* down);
+        Line* AddLine(Hex* first_, Hex* second_);
 };
 
 #endif /* defined(__MAP_H__) */

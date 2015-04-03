@@ -114,9 +114,10 @@ void start_game(sf::RenderWindow* window){
     std::vector<Player*> players;
     for (int i = 0; i < 4; ++i)
         players.push_back(new Player(i));
-    Game game = Game(new Map(), players, window);
-    game.GenMap();
+    Game game = Game(new Map(window), players, window);
 
+    game.GenMap();
+    game.SetUp();
     while (window -> isOpen()){
         game.Update();
     }
