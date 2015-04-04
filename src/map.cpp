@@ -103,34 +103,82 @@ bool Hex::OnMouse(sf::Vector2i point){
             (center.y - point.y) * (center.y - point.y)) - radius < EPS + 20;
 }
 
-Point::Point(Hex* f, Hex* s, Hex* t){
-    first_ = f;
-    second_ = s;
-    third_ = t;
+bool Hex::CanBeAdded(Point* point) {
+    int index = GetIndexForPoint(point);
+    return !points_[(index + 5) % 6] &&
+        !points_[(index + 7) % 6];
 }
 
-Hex** Point::GetHexes(Hex** res){
-    res[0] = first_;
-    res[1] = second_;
-    res[2] = third_;
+void Hex::AddPoint(Point* point) {
+    AddPoint(point, GetIndexForPoint(point));
+}
+
+void Hex::AddPoint(Point* point, int index) {
+    points_[index] = point;
+}
+
+int Hex::GetIndexForPoint(Point* point) {
+    Hex* point_hexes[3];
+    point -> get_hexes(point_hexes);
+    bool matches[6] = {false};
+    for (int i = 0; i < 3; ++i) {
+        Hex* curr = point_hexes[i];
+        if (this == curr)
+            continue;
+        if (curr == up_left)
+            matches[0] = true;
+        if (curr == up_right)
+            matches[1] = true;
+        if (curr == right)
+            matches[2] = true;
+        if (curr == down_right)
+            matches[3] = true;
+        if (curr == down_left)
+            matches[4] = true;
+        if (curr == left)
+            matches[5] = true;
+    }
+    int index = -1;
+    for (int i = 0; index == -1 && i < 6; ++i) {
+        if (matches[i] && matches[(i + 1) % 6])
+            index = i;
+    }
+    return index;
+}
+
+Point::Point(Hex* f, Hex* s, Hex* t){
+    hexes_.insert(f);
+    hexes_.insert(s);
+    hexes_.insert(t);
+}
+
+Hex** Point::get_hexes(Hex** res){
+    for (int i = 0; i < 3; ++i)
+        res[i] = NULL;
+    int k = 0;
+    for (std::set<Hex*>::iterator it = hexes_.begin();
+            it != hexes_.end(); ++it)
+        res[k++] = *it;
     return res;
 }
 
 void Point::Click(){
-    std::string log;
-    log.append(std::to_string(first_ -> get_num()))
-        .append(" ")
-        .append(std::to_string(second_ -> get_num()))
-        .append(" ")
-        .append(std::to_string(third_ -> get_num()))
-        .append(" clicked");
-    LOG(INFO) << log;
+//    std::string log;
+//    log.append(std::to_string(first_ -> get_num()))
+//        .append(" ")
+//        .append(std::to_string(second_ -> get_num()))
+//        .append(" ")
+//        .append(std::to_string(third_ -> get_num()))
+//        .append(" clicked");
+//    LOG(INFO) << log;
 }
 
-bool Point::OnMouse(sf::Vector2i point) {
-    return first_ -> OnMouse(point) &&
-        second_ -> OnMouse(point) &&
-        third_ -> OnMouse(point);
+bool Point::OnMouse(sf::Vector2i cursor) {
+    bool res = true;
+    for (std::set<Hex*>::iterator it = hexes_.begin();
+            it != hexes_.end() && res; ++it)
+        res = (*it) -> OnMouse(cursor);
+    return res;
 }
 
 int Point::get_owner_id() {
@@ -151,10 +199,10 @@ Line* Line::FromPoints(Point* a, Point* b){
         return NULL;
     Line* line = new Line;
     Hex** ah = new Hex*[3];
-    ah = a -> GetHexes(ah);
+    ah = a -> get_hexes(ah);
 
     Hex** bh = new Hex*[3];
-    bh = b -> GetHexes(bh);
+    bh = b -> get_hexes(bh);
 
     for (int i = 0; i < 3; ++i){
         for (int j = 0; j < 3; ++j){
@@ -327,6 +375,7 @@ void Map::Generate(){
                 --m;
             }
             hexes_.push_back(curr);
+            hexes_by_num_[curr -> get_num()].push_back(curr);
             map_objects_.push_back(curr);
             if (j < dims_[i] - 1 && NULL == curr -> down_right){
                 curr -> down_right = new Hex;
@@ -502,7 +551,7 @@ Point* Map::AddVillage(Player* player) {
         Point* point = points_[i];
         if (point -> OnMouse(cursor) &&
                 -1 == point -> get_owner_id() &&
-                CheckNeighbors(point)){
+                TryAddPoint(point)){
             point -> set_owner_id(player -> get_id());
             return point;
         }
@@ -523,7 +572,15 @@ Line* Map::AddLine(Hex* first_, Hex* second_) {
     return line;
 }
 
-bool Map::CheckNeighbors(Point* point) {
-    //TODO: remove stub
-    return true;
+bool Map::TryAddPoint(Point* point) {
+    Hex* point_hexes[3];
+    point -> get_hexes(point_hexes);
+    bool res = true;
+    for (int i = 0; i < 3 && res; ++i)
+        res = point_hexes[i] -> CanBeAdded(point);
+    if (res) {
+        for (int i = 0; i < 3; ++i)
+            point_hexes[i] -> AddPoint(point);
+    }
+    return res;
 }

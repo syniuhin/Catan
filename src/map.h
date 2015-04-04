@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
 #include <SFML/Graphics.hpp>
 
@@ -47,6 +48,7 @@ const int NUMS_ARR[] = {
  * Forward declarations of game.h classes
  */
 class Player;
+class Point;
 
 class MapObject {
     public:
@@ -87,9 +89,18 @@ class Hex : public MapObject {
 
         void Click();
         bool OnMouse(sf::Vector2i);
+
+        bool CanBeAdded(Point*);
+        void AddPoint(Point*);
     private:
         int num_;
         int type_;
+
+        Point* points_[6] = {NULL};
+
+        void AddPoint(Point*, int index);
+
+        int GetIndexForPoint(Point*);
 };
 
 class Point : public MapObject {
@@ -98,18 +109,15 @@ class Point : public MapObject {
                 Hex* second_,
                 Hex* third_);
 
-        Hex** GetHexes(Hex**);
-
         void Click();
         bool OnMouse(sf::Vector2i);
 
         int get_owner_id();
         void set_owner_id(int);
-    private:
-        Hex* first_ = NULL;
-        Hex* second_ = NULL;
-        Hex* third_ = NULL;
 
+        Hex** get_hexes(Hex**);
+    private:
+        std::set<Hex*> hexes_;
         int owner_id_ = -1;
 };
 
@@ -147,7 +155,7 @@ class Map {
         /**
          * Adds new Village to a Map.
          * NOTE: This method called only
-         * after * mouse button released!
+         * after mouse button released!
          */
         Point* AddVillage(Player*);
     private:
@@ -157,7 +165,9 @@ class Map {
         std::vector<Point*> points_;
         std::vector<Line*> lines_;
 
-        static const int dims_[GRID_SIZE + 2] = {GRID_SIZE - 1,
+        std::vector<Hex*> hexes_by_num_[13];
+
+        const int dims_[GRID_SIZE + 2] = {GRID_SIZE - 1,
                 GRID_SIZE, GRID_SIZE + 1, GRID_SIZE + 2,
                 GRID_SIZE + 1, GRID_SIZE, GRID_SIZE - 1};
 
@@ -180,7 +190,7 @@ class Map {
         Point* AddPoint(Hex* up_left, Hex* up_right, Hex* down);
         Line* AddLine(Hex* first_, Hex* second_);
 
-        bool CheckNeighbors(Point*);
+        bool TryAddPoint(Point*);
 };
 
 #endif /* defined(__MAP_H__) */

@@ -8,16 +8,16 @@ SFML_FLAGS = -framework sfml-system -framework \
 bin: main.o game.o map.o menu.o sqlite3.o userbase.o
 	$(CXX) $(SFML_FLAGS) $(FLAGS) -o $@ $^
 main.o: main.cpp
-	$(CXX) $(SFML_FLAGS) $(FLAGS) -c $^
+	$(CXX) $(FLAGS) -c $^
 game.o: game.cpp
-	$(CXX) $(SFML_FLAGS) $(FLAGS) -c $^
+	$(CXX) $(FLAGS) -c $^
 map.o: map.cpp
 	$(CXX) $(FLAGS) -c $^
 menu.o: menu.cpp
-	$(CXX) $(SFML_FLAGS) $(FLAGS) -c $^
+	$(CXX) $(FLAGS) -c $^
 sqlite3.o: sqlite3.c shell.c
 	$(cc) -c $^
-userbase.o: userbase.cpp sqlite3.o
+userbase.o: userbase.cpp
 	$(CXX) $(FLAGS) -c $^
 clean:
 	rm *.o bin
