@@ -10,9 +10,9 @@ const int HEX_PRECISION = 6;
 const int MOUSE_POINTER_SIZE = 10;
 const int MOUSE_POINTER_PRECISION = 17;
 
-const int POINT_SIZE = 15;
+const int POINT_SIZE = 10;
 const int POINT_OUTLINE_SIZE = 1;
-const int POINT_PRECISION = 13;
+const int POINT_PRECISION = 66;
 
 sf::Vector2f MapObject::get_pos(){
     return pos_;
@@ -52,35 +52,35 @@ int Hex::get_type(){
 
 std::string Hex::to_string(){
     std::string res;
-//    if (NULL != up_left)
-//        res.append("up_left NON_NULL,");
-//    else
-//        res.append("up_left NULL, ");
+    if (NULL != up_left)
+        res.append("up_left NON_NULL,");
+    else
+        res.append("up_left NULL, ");
 
-//    if (NULL != left)
-//        res.append("left NON_NULL, ");
-//    else
-//        res.append("left NULL, ");
+    if (NULL != left)
+        res.append("left NON_NULL, ");
+    else
+        res.append("left NULL, ");
 
-//    if (NULL != down_left)
-//        res.append("down_left NON_NULL, ");
-//    else
-//        res.append("down_left NULL, ");
+    if (NULL != down_left)
+        res.append("down_left NON_NULL, ");
+    else
+        res.append("down_left NULL, ");
 
-//    if (NULL != down_right)
-//        res.append("down_right NON_NULL, ");
-//    else
-//        res.append("down_right NULL, ");
+    if (NULL != down_right)
+        res.append("down_right NON_NULL, ");
+    else
+        res.append("down_right NULL, ");
 
-//    if (NULL != right)
-//        res.append("right NON_NULL, ");
-//    else
-//        res.append("right NULL, ");
+    if (NULL != right)
+        res.append("right NON_NULL, ");
+    else
+        res.append("right NULL, ");
 
-//    if (NULL != up_right)
-//        res.append("up_right NON_NULL; ");
-//    else
-//        res.append("up_right NULL; ");
+    if (NULL != up_right)
+        res.append("up_right NON_NULL; ");
+    else
+        res.append("up_right NULL; ");
 
     res.append("type ")
         .append(std::to_string(type_))
@@ -213,10 +213,6 @@ void Map::Init() {
     point_circle_.setFillColor(sf::Color::Red);
     point_circle_.setOutlineColor(sf::Color::Black);
     point_circle_.setOutlineThickness(POINT_OUTLINE_SIZE);
-    double sqrt2 = sqrt(2.0);
-    point_circle_.setOrigin(.5 * sqrt2 * POINT_SIZE,
-            .5 * sqrt2 * POINT_SIZE);
-
 }
 
 void Map::Generate(){
@@ -262,7 +258,8 @@ void Map::Generate(){
                 return;
             }
 
-            curr -> set_pos(sf::Vector2f(horizontal_offset, vertical_offset));
+            curr -> set_pos(sf::Vector2f(horizontal_offset,
+                        vertical_offset));
             if (i > 0 && j > 0){
                 Hex* left = curr -> up_left -> down_left;
                 curr -> left = left;
@@ -335,7 +332,7 @@ void Map::Generate(){
             curr -> up_right -> down_left = curr;
 
             curr = curr -> up_right;
-        } else {
+        } else if (i < GRID_SIZE - 1) {
             curr -> right = new Hex;
             curr -> right -> left = curr;
 
@@ -344,7 +341,48 @@ void Map::Generate(){
             curr -> down_left -> up_right = curr;
         }
     }
+
+    GeneratePoints();
     LOG(INFO) << "Map generated successfully";
+}
+
+void Map::GeneratePoints() {
+    int deltax = HEX_SIZE * cos(30.0 * M_PI / 180.0);
+    int deltay = HEX_SIZE * (1 + sin(30.0 * M_PI / 180.0));
+    double sqrt2 = sqrt(2.0);
+    sf::Vector2f to_center = sf::Vector2f(HEX_SIZE * sqrt2 * .5,
+                         HEX_SIZE * sqrt2 * .5);
+    for (size_t i = 0; i < hexes_.size(); ++i) {
+        Hex* curr = hexes_[i];
+        Hex* ul = curr -> up_left;
+        Hex* ur = curr -> up_right;
+        Hex* r = curr -> right;
+
+        sf::Vector2f curr_pos = curr -> get_pos();
+        if (ul && ur) {
+            Point* new_point = new Point(ul, ur, curr);
+//            new_point -> set_pos(
+//                    (ul -> get_pos() + ur -> get_pos() +
+//                     curr_pos) / 3.0f + to_center);
+            new_point -> set_pos(
+                    curr_pos + sf::Vector2f((float) deltax -
+                        .5f * HEX_OUTLINE_SIZE,
+                        -POINT_SIZE));
+            points_.push_back(new_point);
+        }
+        if (ur && r) {
+            Point* new_point = new Point(ur, r, curr);
+//            new_point -> set_pos(
+//                    (ur -> get_pos() + r -> get_pos() +
+//                     curr_pos) / 3.0f + to_center);
+            new_point -> set_pos(
+                    curr_pos + sf::Vector2f((float) 2 * deltax -
+                        .5f * HEX_OUTLINE_SIZE,
+                        cos(60.0 * M_PI / 180.0) * HEX_SIZE -
+                        POINT_SIZE - HEX_OUTLINE_SIZE));
+            points_.push_back(new_point);
+        }
+    }
 }
 
 void Map::DrawMousePointer(){
@@ -355,23 +393,12 @@ void Map::DrawMousePointer(){
 
 void Map::DrawPoints(){
 //    TODO : remove stub
-
-    int sqrt2 = sqrt(2.0);
-    Hex** hexes = new Hex*[3];
     for (size_t i = 0; i < points_.size(); ++i){
         Point* curr = points_[i];
-        hexes = curr -> GetHexes(hexes);
-        sf::Vector2f pos = hexes[0] -> get_pos() +
-                hexes[1] -> get_pos() +
-                hexes[2] -> get_pos();
-        pos /= 3.0f;
-        pos += sf::Vector2f(HEX_SIZE * sqrt2 * .5,
-                HEX_SIZE * sqrt2 * .5);
-        point_circle_.setPosition(pos);
+        point_circle_.setPosition(curr -> get_pos());
         point_circle_.setFillColor(sf::Color::White);
         window_ -> draw(point_circle_);
     }
-    delete[] hexes;
 }
 
 void Map::DrawMap(){
@@ -381,7 +408,7 @@ void Map::DrawMap(){
     text.setCharacterSize(HEX_SIZE / 2);
     text.setColor(sf::Color::Black);
     sf::Font font;
-    if (!font.loadFromFile("black_jack.ttf")) {
+    if (!font.loadFromFile("mplus-1m-regular.ttf")) {
         LOG(ERROR) << "Error loading font";
         return;
     }
@@ -391,6 +418,10 @@ void Map::DrawMap(){
         GRID_SIZE - 1, GRID_SIZE - 2};
     int k = 0;
     Hex* curr = hexes_[k++];
+//    sf::CircleShape pos_circle(10, 20);
+//    pos_circle.setFillColor(sf::Color::Magenta);
+//    sf::CircleShape center_circle(10, 20);
+//    center_circle.setFillColor(sf::Color::Cyan);
     for (int i = 0; i < GRID_SIZE; ++i){
         for (int j = 0; j < dims[i]; ++j){
             if (0 == curr -> get_num())
@@ -408,11 +439,16 @@ void Map::DrawMap(){
             }
             window_ -> draw(hexagon_);
 
+//            pos_circle.setPosition(curr_pos);
+//            window_ -> draw(pos_circle);
+//            center_circle.setPosition(curr_pos + sf::Vector2f(HEX_SIZE * sqrt(2.0) * .5,
+//                         HEX_SIZE * sqrt(2.0) * .5));
+//            window_ -> draw(center_circle);
+
             text.setPosition(curr_pos + sf::Vector2f(.7f * HEX_SIZE, .7f * HEX_SIZE));
             text.setString(std::to_string(curr -> get_num()));
             window_ -> draw(text);
-
-                curr = hexes_[k++];
+            curr = hexes_[k++];
         }
     }
 }

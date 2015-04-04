@@ -50,8 +50,6 @@ class Player;
 
 class MapObject {
     public:
-        MapObject() {};
-
         sf::Vector2f get_pos();
         void set_pos(sf::Vector2f);
 
@@ -96,10 +94,9 @@ class Hex : public MapObject {
 
 class Point : public MapObject {
     public:
-        Point() {}
-        Point(Hex* first_ = NULL,
-                Hex* second_ = NULL,
-                Hex* third_ = NULL);
+        Point(Hex* first_,
+                Hex* second_,
+                Hex* third_);
 
         Hex** GetHexes(Hex**);
 
@@ -108,9 +105,9 @@ class Point : public MapObject {
 
         void set_owner_id(int);
     private:
-        Hex* first_;
-        Hex* second_;
-        Hex* third_;
+        Hex* first_ = NULL;
+        Hex* second_ = NULL;
+        Hex* third_ = NULL;
 
         int owner_id_ = -1;
 };
@@ -167,6 +164,8 @@ class Map {
         sf::CircleShape point_circle_;
 
         void Init();
+
+        void GeneratePoints();
 
         void DrawMap();
         void DrawPoints();

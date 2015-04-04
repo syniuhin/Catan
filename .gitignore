@@ -34,7 +34,7 @@
 src/sqlite*
 src/shell.c
 src/easylogging++.h
-src/game
+src/bin
 src/logs
 *.plist
 *.swp
