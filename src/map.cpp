@@ -3,7 +3,7 @@
 
 #include "easylogging++.h"
 
-const int HEX_SIZE = 70;
+const int HEX_SIZE = 60;
 const int HEX_OUTLINE_SIZE = 2;
 const int HEX_PRECISION = 6;
 
@@ -217,12 +217,16 @@ void Map::Init() {
 
 void Map::Generate(){
     LOG(INFO) << "Generating map...";
-    int dims[] = {GRID_SIZE - 2, GRID_SIZE - 1, GRID_SIZE,
-        GRID_SIZE - 1, GRID_SIZE - 2};
-    int v_dims[] = {2, 5, 8, 8, 8};
+    int dims[] = {GRID_SIZE - 1, GRID_SIZE, GRID_SIZE + 1,
+        GRID_SIZE + 2, GRID_SIZE + 1, GRID_SIZE, GRID_SIZE - 1};
+    int v_dims[] = {2, 5, 8, 11, 11, 11, 11};
     double h_dims[] = {
-        cos(30.0 * M_PI / 180.0), cos(30.0 * M_PI / 180.0),
-        2 * cos(30.0 * M_PI / 180.0), 2 * cos(30.0 * M_PI / 180.0)
+        cos(30.0 * M_PI / 180.0),
+        cos(30.0 * M_PI / 180.0),
+        cos(30.0 * M_PI / 180.0),
+        2 * cos(30.0 * M_PI / 180.0),
+        2 * cos(30.0 * M_PI / 180.0),
+        2 * cos(30.0 * M_PI / 180.0)
     };
 
     int wx = window_ -> getSize().x;
@@ -243,11 +247,11 @@ void Map::Generate(){
 
     Hex* curr = root_;
 
-    const int horizontal_start = (wx - HEX_SIZE * 10 *
-            cos(30.0 * M_PI / 180.0)) / 2;
+    const int horizontal_start = (wx - HEX_SIZE * 2 *
+            (2 + GRID_SIZE) * cos(30.0 * M_PI / 180.0)) / 2;
     int horizontal_offset = horizontal_start;
 
-    for (int i = 0; i < GRID_SIZE; ++i){
+    for (int i = 0; i < GRID_SIZE + 2; ++i){
         int vertical_offset = (wy - v_dims[i] * HEX_SIZE) / 2;
         horizontal_offset = horizontal_start;
         for (int j = 0; j < i; ++j)
@@ -270,13 +274,19 @@ void Map::Generate(){
                 }
             }
 
-            int type_ind = rand() % k;
-            int type = types[type_ind];
-            types.erase(types.begin() + type_ind);
-            --k;
+            int type;
+            if ((i > 0 && i < GRID_SIZE + 1) &&
+                    (j > 0 && j < dims[i] - 1)){
+                int type_ind = rand() % k;
+                type = types[type_ind];
+                types.erase(types.begin() + type_ind);
+                --k;
+            } else {
+                type = TYPE_SEA;
+            }
 
             curr -> set_type(type);
-            if (TYPE_DESERT == type){
+            if (TYPE_DESERT == type || TYPE_SEA == type){
                 curr -> set_num(0);
             } else {
                 int neighbor_sum = 0;
@@ -327,12 +337,12 @@ void Map::Generate(){
         for (int j = 1; j < dims[i]; ++j){
             curr = curr -> up_left;
         }
-        if (i < GRID_SIZE / 2){
+        if (i < (GRID_SIZE + 2) / 2){
             curr -> up_right = new Hex;
             curr -> up_right -> down_left = curr;
 
             curr = curr -> up_right;
-        } else if (i < GRID_SIZE - 1) {
+        } else if (i < (GRID_SIZE + 2) - 1) {
             curr -> right = new Hex;
             curr -> right -> left = curr;
 
@@ -414,15 +424,15 @@ void Map::DrawMap(){
     }
     text.setFont(font);
 
-    int dims[] = {GRID_SIZE - 2, GRID_SIZE - 1, GRID_SIZE,
-        GRID_SIZE - 1, GRID_SIZE - 2};
+    int dims[] = {GRID_SIZE - 1, GRID_SIZE, GRID_SIZE + 1,
+        GRID_SIZE + 2, GRID_SIZE + 1, GRID_SIZE, GRID_SIZE - 1};
     int k = 0;
     Hex* curr = hexes_[k++];
 //    sf::CircleShape pos_circle(10, 20);
 //    pos_circle.setFillColor(sf::Color::Magenta);
 //    sf::CircleShape center_circle(10, 20);
 //    center_circle.setFillColor(sf::Color::Cyan);
-    for (int i = 0; i < GRID_SIZE; ++i){
+    for (int i = 0; i < GRID_SIZE + 2; ++i){
         for (int j = 0; j < dims[i]; ++j){
             if (0 == curr -> get_num())
                 hexagon_.setFillColor(sf::Color::Yellow);
