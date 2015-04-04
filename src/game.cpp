@@ -15,7 +15,7 @@ void Game::GenMap(){
 }
 
 void Game::SetUp() {
-    for (size_t i = 0; i < players_.size(); ++i){
+    for (size_t i = 0, k = 0; k < 2 * players_.size(); ++k){
         Player* curr = players_[i];
         Point* added = NULL;
         while (window_ -> isOpen() && !added){
@@ -39,6 +39,10 @@ void Game::SetUp() {
             game_map_ -> Draw();
             window_ -> display();
         }
+        if (k < players_.size() - 1)
+            i++;
+        else if (k >= players_.size())
+            i--;
     }
 }
 

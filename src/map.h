@@ -103,6 +103,7 @@ class Point : public MapObject {
         void Click();
         bool OnMouse(sf::Vector2i);
 
+        int get_owner_id();
         void set_owner_id(int);
     private:
         Hex* first_ = NULL;
@@ -156,6 +157,10 @@ class Map {
         std::vector<Point*> points_;
         std::vector<Line*> lines_;
 
+        static const int dims_[GRID_SIZE + 2] = {GRID_SIZE - 1,
+                GRID_SIZE, GRID_SIZE + 1, GRID_SIZE + 2,
+                GRID_SIZE + 1, GRID_SIZE, GRID_SIZE - 1};
+
         Hex* root_ = NULL;
         sf::RenderWindow* window_;
 
@@ -174,6 +179,8 @@ class Map {
 
         Point* AddPoint(Hex* up_left, Hex* up_right, Hex* down);
         Line* AddLine(Hex* first_, Hex* second_);
+
+        bool CheckNeighbors(Point*);
 };
 
 #endif /* defined(__MAP_H__) */

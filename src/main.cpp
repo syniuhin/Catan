@@ -117,7 +117,7 @@ void start_game(sf::RenderWindow* window){
     Game game = Game(new Map(window), players, window);
 
     game.GenMap();
-//    game.SetUp();
+    game.SetUp();
     while (window -> isOpen()){
         game.Update();
     }

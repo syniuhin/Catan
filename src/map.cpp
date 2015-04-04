@@ -52,35 +52,35 @@ int Hex::get_type(){
 
 std::string Hex::to_string(){
     std::string res;
-    if (NULL != up_left)
-        res.append("up_left NON_NULL,");
-    else
-        res.append("up_left NULL, ");
-
-    if (NULL != left)
-        res.append("left NON_NULL, ");
-    else
-        res.append("left NULL, ");
-
-    if (NULL != down_left)
-        res.append("down_left NON_NULL, ");
-    else
-        res.append("down_left NULL, ");
-
-    if (NULL != down_right)
-        res.append("down_right NON_NULL, ");
-    else
-        res.append("down_right NULL, ");
-
-    if (NULL != right)
-        res.append("right NON_NULL, ");
-    else
-        res.append("right NULL, ");
-
-    if (NULL != up_right)
-        res.append("up_right NON_NULL; ");
-    else
-        res.append("up_right NULL; ");
+//    if (NULL != up_left)
+//        res.append("up_left NON_NULL,");
+//    else
+//        res.append("up_left NULL, ");
+//
+//    if (NULL != left)
+//        res.append("left NON_NULL, ");
+//    else
+//        res.append("left NULL, ");
+//
+//    if (NULL != down_left)
+//        res.append("down_left NON_NULL, ");
+//    else
+//        res.append("down_left NULL, ");
+//
+//    if (NULL != down_right)
+//        res.append("down_right NON_NULL, ");
+//    else
+//        res.append("down_right NULL, ");
+//
+//    if (NULL != right)
+//        res.append("right NON_NULL, ");
+//    else
+//        res.append("right NULL, ");
+//
+//    if (NULL != up_right)
+//        res.append("up_right NON_NULL; ");
+//    else
+//        res.append("up_right NULL; ");
 
     res.append("type ")
         .append(std::to_string(type_))
@@ -131,6 +131,10 @@ bool Point::OnMouse(sf::Vector2i point) {
     return first_ -> OnMouse(point) &&
         second_ -> OnMouse(point) &&
         third_ -> OnMouse(point);
+}
+
+int Point::get_owner_id() {
+    return this -> owner_id_;
 }
 
 void Point::set_owner_id(int owner_id) {
@@ -217,8 +221,6 @@ void Map::Init() {
 
 void Map::Generate(){
     LOG(INFO) << "Generating map...";
-    int dims[] = {GRID_SIZE - 1, GRID_SIZE, GRID_SIZE + 1,
-        GRID_SIZE + 2, GRID_SIZE + 1, GRID_SIZE, GRID_SIZE - 1};
     int v_dims[] = {2, 5, 8, 11, 11, 11, 11};
     double h_dims[] = {
         cos(30.0 * M_PI / 180.0),
@@ -256,7 +258,7 @@ void Map::Generate(){
         horizontal_offset = horizontal_start;
         for (int j = 0; j < i; ++j)
             horizontal_offset += HEX_SIZE * h_dims[j];
-        for (int j = 0; j < dims[i]; ++j){
+        for (int j = 0; j < dims_[i]; ++j){
             if (NULL == curr){
                 LOG(ERROR) << "NULL == curr";
                 return;
@@ -276,7 +278,7 @@ void Map::Generate(){
 
             int type;
             if ((i > 0 && i < GRID_SIZE + 1) &&
-                    (j > 0 && j < dims[i] - 1)){
+                    (j > 0 && j < dims_[i] - 1)){
                 int type_ind = rand() % k;
                 type = types[type_ind];
                 types.erase(types.begin() + type_ind);
@@ -326,7 +328,7 @@ void Map::Generate(){
             }
             hexes_.push_back(curr);
             map_objects_.push_back(curr);
-            if (j < dims[i] - 1 && NULL == curr -> down_right){
+            if (j < dims_[i] - 1 && NULL == curr -> down_right){
                 curr -> down_right = new Hex;
                 curr -> down_right -> up_left = curr;
                 curr = curr -> down_right;
@@ -334,7 +336,7 @@ void Map::Generate(){
             vertical_offset += deltay;
             horizontal_offset += deltax;
         }
-        for (int j = 1; j < dims[i]; ++j){
+        for (int j = 1; j < dims_[i]; ++j){
             curr = curr -> up_left;
         }
         if (i < (GRID_SIZE + 2) / 2){
@@ -406,7 +408,25 @@ void Map::DrawPoints(){
     for (size_t i = 0; i < points_.size(); ++i){
         Point* curr = points_[i];
         point_circle_.setPosition(curr -> get_pos());
-        point_circle_.setFillColor(sf::Color::White);
+        sf::Color fill_color;
+        switch (curr -> get_owner_id()) {
+            case 0:
+                fill_color = sf::Color::Red;
+                break;
+            case 1:
+                fill_color = sf::Color::Cyan;
+                break;
+            case 2:
+                fill_color = sf::Color::Magenta;
+                break;
+            case 3:
+                fill_color = sf::Color::White;
+                break;
+            default:
+                fill_color = sf::Color(255, 255, 255, 20);
+                break;
+        }
+        point_circle_.setFillColor(fill_color);
         window_ -> draw(point_circle_);
     }
 }
@@ -424,7 +444,7 @@ void Map::DrawMap(){
     }
     text.setFont(font);
 
-    int dims[] = {GRID_SIZE - 1, GRID_SIZE, GRID_SIZE + 1,
+    int dims_[] = {GRID_SIZE - 1, GRID_SIZE, GRID_SIZE + 1,
         GRID_SIZE + 2, GRID_SIZE + 1, GRID_SIZE, GRID_SIZE - 1};
     int k = 0;
     Hex* curr = hexes_[k++];
@@ -433,7 +453,7 @@ void Map::DrawMap(){
 //    sf::CircleShape center_circle(10, 20);
 //    center_circle.setFillColor(sf::Color::Cyan);
     for (int i = 0; i < GRID_SIZE + 2; ++i){
-        for (int j = 0; j < dims[i]; ++j){
+        for (int j = 0; j < dims_[i]; ++j){
             if (0 == curr -> get_num())
                 hexagon_.setFillColor(sf::Color::Yellow);
             else
@@ -477,12 +497,14 @@ void Map::Click() {
 }
 
 Point* Map::AddVillage(Player* player) {
-    sf::Vector2i point = sf::Mouse::getPosition(*window_);
+    sf::Vector2i cursor = sf::Mouse::getPosition(*window_);
     for (size_t i = 0; i < points_.size(); ++i) {
-        Point* curr = points_[i];
-        if (curr -> OnMouse(point)){
-            curr -> set_owner_id(player -> get_id());
-            return curr;
+        Point* point = points_[i];
+        if (point -> OnMouse(cursor) &&
+                -1 == point -> get_owner_id() &&
+                CheckNeighbors(point)){
+            point -> set_owner_id(player -> get_id());
+            return point;
         }
     }
     return NULL;
@@ -499,4 +521,9 @@ Line* Map::AddLine(Hex* first_, Hex* second_) {
     Line* line = new Line(first_, second_);
     map_objects_.push_back(line);
     return line;
+}
+
+bool Map::CheckNeighbors(Point* point) {
+    //TODO: remove stub
+    return true;
 }
