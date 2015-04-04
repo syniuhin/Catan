@@ -17,8 +17,10 @@ void Game::GenMap(){
 void Game::SetUp() {
     for (size_t i = 0, k = 0; k < 2 * players_.size(); ++k){
         Player* curr = players_[i];
-        Point* added = NULL;
-        while (window_ -> isOpen() && !added){
+        Point* village_added = NULL;
+        Line* road_added = NULL;
+        while (window_ -> isOpen() && (!village_added ||
+                    !road_added)){
             sf::Event event;
             while (window_ -> pollEvent(event)) {
                 switch (event.type){
@@ -26,10 +28,14 @@ void Game::SetUp() {
                         window_ -> close();
                         break;
                     case sf::Event::MouseButtonReleased:
-                        added = game_map_ -> AddVillage(curr);
-                        if (added)
-                            villages_.push_back(new Village(
-                                        added, curr));
+                        if (!village_added) {
+                            village_added = game_map_ -> AddVillage(curr);
+                            if (village_added)
+                                villages_.push_back(new Village(
+                                            village_added, curr));
+                        } else {
+                            road_added = game_map_ -> AddRoad(curr);
+                        }
                         break;
                     default:
                         break;
@@ -44,6 +50,7 @@ void Game::SetUp() {
         else if (k >= players_.size())
             i--;
     }
+    LOG(INFO) << "Game was set up successfully";
 }
 
 void Game::Update(){

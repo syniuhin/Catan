@@ -109,6 +109,8 @@ class Point : public MapObject {
                 Hex* second_,
                 Hex* third_);
 
+        static bool AreAdjacent(Point, Point);
+
         void Click();
         bool OnMouse(sf::Vector2i);
 
@@ -116,6 +118,7 @@ class Point : public MapObject {
         void set_owner_id(int);
 
         Hex** get_hexes(Hex**);
+        std::set<Hex*> get_hexes();
     private:
         std::set<Hex*> hexes_;
         int owner_id_ = -1;
@@ -123,22 +126,48 @@ class Point : public MapObject {
 
 class Line : public MapObject {
     public:
-        Line(Hex* first_ = NULL, Hex* second_ = NULL);
-
         /**
-         * Factory method
+         * Factory method. Why? Because
+         * we need to perform set_intersection
+         * because of (probably poorely designed)
+         * Point interface. TODO: think about
+         * Point carefully and decide between
+         * consistency and performance
          */
         static Line* FromPoints(Point*, Point*);
 
         void Click();
         bool OnMouse(sf::Vector2i);
 
+        bool CheckOwnership(int owner_id);
+
         void set_owner_id(int);
+        int get_owner_id();
+
+        Point** get_points(Point**);
+
+        void set_rotation(double);
+        float get_rotation();
     private:
-        Hex* first_;
-        Hex* second_;
+        /**
+         * This constructor logic sucks.
+         * TODO: search how to initialize
+         * private members when using
+         * factory method
+         */
+        Line(Point*, Point*, std::set<Hex*>);
+
+        Point* first_;
+        Point* second_;
 
         int owner_id_ = -1;
+
+        std::set<Hex*> hexes_;
+
+        /**
+         * Rotation angle in degrees
+         */
+        double rotation_;
 };
 
 class Map {
@@ -158,6 +187,11 @@ class Map {
          * after mouse button released!
          */
         Point* AddVillage(Player*);
+
+        /**
+         * Same note here
+         */
+        Line* AddRoad(Player*);
     private:
         std::vector<MapObject*> map_objects_;
 
@@ -177,18 +211,25 @@ class Map {
         sf::CircleShape hexagon_;
         sf::CircleShape mouse_circle_;
         sf::CircleShape point_circle_;
+        sf::RectangleShape line_rectangle_;
+        sf::VertexArray line_array_;
 
         void Init();
 
         void GeneratePoints();
+        /**
+         * NOTE: Called STRICTLY
+         * after GeneratePoints()
+         */
+        void GenerateLines();
 
         void DrawMap();
         void DrawPoints();
         void DrawLines();
         void DrawMousePointer();
 
-        Point* AddPoint(Hex* up_left, Hex* up_right, Hex* down);
-        Line* AddLine(Hex* first_, Hex* second_);
+        Point* AddPoint(Point*);
+        Line* AddLine(Line*);
 
         bool TryAddPoint(Point*);
 };

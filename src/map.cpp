@@ -1,10 +1,12 @@
 #include "map.h"
 #include "game.h"
 
+#include <algorithm>
+
 #include "easylogging++.h"
 
 const int HEX_SIZE = 60;
-const int HEX_OUTLINE_SIZE = 2;
+const int HEX_OUTLINE_SIZE = 4;
 const int HEX_PRECISION = 6;
 
 const int MOUSE_POINTER_SIZE = 10;
@@ -189,53 +191,78 @@ void Point::set_owner_id(int owner_id) {
     this -> owner_id_ = owner_id;
 }
 
-Line::Line(Hex* f, Hex* s) {
-    first_ = s;
-    second_ = s;
+std::set<Hex*> Point::get_hexes() {
+    return hexes_;
 }
 
-Line* Line::FromPoints(Point* a, Point* b){
-    if (a == b)
-        return NULL;
-    Line* line = new Line;
-    Hex** ah = new Hex*[3];
-    ah = a -> get_hexes(ah);
+Line::Line(Point* f, Point* s, std::set<Hex*> h) {
+    first_ = f;
+    second_ = s;
+    hexes_ = h;
+}
 
-    Hex** bh = new Hex*[3];
-    bh = b -> get_hexes(bh);
+Line* Line::FromPoints(Point* first, Point* second) {
+    std::set<Hex*> first_hexes_ = first -> get_hexes();
+    std::set<Hex*> second_hexes_ = second -> get_hexes();
+    std::set<Hex*> hexes_;
 
-    for (int i = 0; i < 3; ++i){
-        for (int j = 0; j < 3; ++j){
-            if (ah[i] == bh[j]){
-                if (NULL == line -> first_)
-                    line -> first_ = ah[i];
-                else
-                    line -> second_ = ah[i];
-            }
-        }
-    }
-    delete[] ah;
-    delete[] bh;
-
+    std::set_intersection(first_hexes_.begin(), first_hexes_.end(),
+            second_hexes_.begin(), second_hexes_.end(),
+            std::inserter(hexes_, hexes_.begin()));
+    Line* line = NULL;
+    if (hexes_.size() == 2)
+        line = new Line(first, second, hexes_);
     return line;
 }
 
 void Line::Click(){
-    std::string log;
-    log.append(std::to_string(first_ -> get_num()))
-        .append(" ")
-        .append(std::to_string(second_ -> get_num()))
-        .append(" clicked");
-    LOG(INFO) << log;
+//    std::string log;
+//    log.append(std::to_string(first_ -> get_num()))
+//        .append(" ")
+//        .append(std::to_string(second_ -> get_num()))
+//        .append(" clicked");
+//    LOG(INFO) << log;
 }
 
-bool Line::OnMouse(sf::Vector2i point){
-    return first_ -> OnMouse(point) &&
-        second_ -> OnMouse(point);
+bool Line::OnMouse(sf::Vector2i cursor){
+    bool res = true;
+    for (std::set<Hex*>::iterator it = hexes_.begin();
+            it != hexes_.end() && res; ++it)
+        res = (*it) -> OnMouse(cursor);
+    return res;
+}
+
+/**
+ * TODO: check in rules if this is correct
+ */
+bool Line::CheckOwnership(int owner_id) {
+    int fid = first_ -> get_owner_id();
+    int sid = second_ -> get_owner_id();
+    return (fid == -1 && sid == owner_id) ||
+        (fid == owner_id && sid == -1) ||
+        (fid == owner_id && sid == owner_id);
 }
 
 void Line::set_owner_id(int owner_id) {
     this -> owner_id_ = owner_id;
+}
+
+int Line::get_owner_id() {
+    return this -> owner_id_;
+}
+
+Point** Line::get_points(Point** container) {
+    container[0] = first_;
+    container[1] = second_;
+    return container;
+}
+
+void Line::set_rotation(double rotation) {
+    this -> rotation_ = rotation;
+}
+
+float Line::get_rotation() {
+    return (float) this -> rotation_;
 }
 
 Map::Map(sf::RenderWindow* window) {
@@ -265,6 +292,12 @@ void Map::Init() {
     point_circle_.setFillColor(sf::Color::Red);
     point_circle_.setOutlineColor(sf::Color::Black);
     point_circle_.setOutlineThickness(POINT_OUTLINE_SIZE);
+
+   // line_rectangle_ = sf::RectangleShape(sf::Vector2f(HEX_SIZE,
+   //             10));
+   // line_rectangle_.setFillColor(sf::Color::White);
+
+    line_array_ = sf::VertexArray(sf::Lines, 2);
 }
 
 void Map::Generate(){
@@ -404,6 +437,7 @@ void Map::Generate(){
     }
 
     GeneratePoints();
+    GenerateLines();
     LOG(INFO) << "Map generated successfully";
 }
 
@@ -422,39 +456,56 @@ void Map::GeneratePoints() {
         sf::Vector2f curr_pos = curr -> get_pos();
         if (ul && ur) {
             Point* new_point = new Point(ul, ur, curr);
-//            new_point -> set_pos(
-//                    (ul -> get_pos() + ur -> get_pos() +
-//                     curr_pos) / 3.0f + to_center);
             new_point -> set_pos(
                     curr_pos + sf::Vector2f((float) deltax -
                         .5f * HEX_OUTLINE_SIZE,
                         -POINT_SIZE));
-            points_.push_back(new_point);
+            AddPoint(new_point);
         }
         if (ur && r) {
             Point* new_point = new Point(ur, r, curr);
-//            new_point -> set_pos(
-//                    (ur -> get_pos() + r -> get_pos() +
-//                     curr_pos) / 3.0f + to_center);
             new_point -> set_pos(
                     curr_pos + sf::Vector2f((float) 2 * deltax -
                         .5f * HEX_OUTLINE_SIZE,
                         cos(60.0 * M_PI / 180.0) * HEX_SIZE -
                         POINT_SIZE - HEX_OUTLINE_SIZE));
-            points_.push_back(new_point);
+            AddPoint(new_point);
         }
     }
 }
 
-void Map::DrawMousePointer(){
+void Map::GenerateLines() {
+    for (size_t i = 0; i < points_.size() - 1; ++i) {
+        for (size_t j = i + 1; j < points_.size(); ++j) {
+            Line* line = Line::FromPoints(points_[i], points_[j]);
+            if (line) {
+                line -> set_pos(points_[i] -> get_pos());
+
+//                sf::Vector2f deltas = points_[i] -> get_pos() -
+//                        points_[j] -> get_pos();
+//                double dist = sqrt(deltas.x * deltas.x +
+//                        deltas.y * deltas.y);
+//                if (deltas.y < 0 || deltas.x < 0)
+//                    dist *= -1;
+//                double angle_rad = acos(deltas.x / dist);
+//                double angle_deg = angle_rad * 180.f / M_PI;
+//                line -> set_rotation(angle_deg);
+
+                AddLine(line);
+            }
+        }
+    }
+}
+
+void Map::DrawMousePointer() {
     sf::Vector2i point = sf::Mouse::getPosition(*window_);
     mouse_circle_.setPosition((float) point.x, (float) point.y);
     window_ -> draw(mouse_circle_);
 }
 
-void Map::DrawPoints(){
+void Map::DrawPoints() {
 //    TODO : remove stub
-    for (size_t i = 0; i < points_.size(); ++i){
+    for (size_t i = 0; i < points_.size(); ++i) {
         Point* curr = points_[i];
         point_circle_.setPosition(curr -> get_pos());
         sf::Color fill_color;
@@ -480,7 +531,45 @@ void Map::DrawPoints(){
     }
 }
 
-void Map::DrawMap(){
+void Map::DrawLines() {
+    Point* points[2];
+    sf::Vector2f positions[2];
+    for (size_t i = 0; i < lines_.size(); ++i) {
+        Line* curr = lines_[i];
+//        line_rectangle_.setPosition(curr -> get_pos());
+//        line_rectangle_.setRotation(curr -> get_rotation());
+//        window_ -> draw(line_rectangle_);
+        curr -> get_points(points);
+        double sqrt2 = sqrt(2.0);
+        sf::Vector2f to_center = sf::Vector2f(POINT_SIZE * sqrt2 * .5,
+                         POINT_SIZE * sqrt2 * .5);
+        sf::Color fill_color;
+        switch (curr -> get_owner_id()) {
+            case 0:
+                fill_color = sf::Color::Red;
+                break;
+            case 1:
+                fill_color = sf::Color::Cyan;
+                break;
+            case 2:
+                fill_color = sf::Color::Magenta;
+                break;
+            case 3:
+                fill_color = sf::Color::White;
+                break;
+            default:
+                fill_color = sf::Color(255, 255, 255, 20);
+                break;
+        }
+        line_array_[0].position = points[0] -> get_pos() + to_center;
+        line_array_[0].color = fill_color;
+        line_array_[1].position = points[1] -> get_pos() + to_center;
+        line_array_[1].color = fill_color;
+        window_ -> draw(line_array_);
+    }
+}
+
+void Map::DrawMap() {
     sf::Vector2i point = sf::Mouse::getPosition(*window_);
 
     sf::Text text;
@@ -535,6 +624,7 @@ void Map::DrawMap(){
 void Map::Draw() {
     DrawMap();
     DrawPoints();
+    DrawLines();
     DrawMousePointer();
 }
 
@@ -547,12 +637,13 @@ void Map::Click() {
 
 Point* Map::AddVillage(Player* player) {
     sf::Vector2i cursor = sf::Mouse::getPosition(*window_);
+    int player_id = player -> get_id();
     for (size_t i = 0; i < points_.size(); ++i) {
         Point* point = points_[i];
         if (point -> OnMouse(cursor) &&
                 -1 == point -> get_owner_id() &&
                 TryAddPoint(point)){
-            point -> set_owner_id(player -> get_id());
+            point -> set_owner_id(player_id);
             return point;
         }
     }
@@ -560,14 +651,28 @@ Point* Map::AddVillage(Player* player) {
 }
 
 
-Point* Map::AddPoint(Hex* up_left, Hex* up_right, Hex* down) {
-    Point* point = new Point(up_left, up_right, down);
+Line* Map::AddRoad(Player* player) {
+    sf::Vector2i cursor = sf::Mouse::getPosition(*window_);
+    int player_id = player -> get_id();
+    for (size_t i = 0; i < lines_.size(); ++i) {
+        Line* line = lines_[i];
+        if (line -> OnMouse(cursor) &&
+                line -> CheckOwnership(player_id)){
+            line -> set_owner_id(player_id);
+            return line;
+        }
+    }
+    return NULL;
+}
+
+Point* Map::AddPoint(Point* point) {
+    points_.push_back(point);
     map_objects_.push_back(point);
     return point;
 }
 
-Line* Map::AddLine(Hex* first_, Hex* second_) {
-    Line* line = new Line(first_, second_);
+Line* Map::AddLine(Line* line) {
+    lines_.push_back(line);
     map_objects_.push_back(line);
     return line;
 }
