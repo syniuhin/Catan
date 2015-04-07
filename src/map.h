@@ -2,6 +2,7 @@
 #define __MAP_H__
 
 #include "constants.h"
+#include "util.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -192,6 +193,13 @@ class Map {
          * Same note here
          */
         Line* AddRoad(Player*);
+
+        /**
+         * Generates triples by dice sum:
+         * <player_id, resource_id, quantity>
+         */
+        std::vector<Triple<int, int, int> >
+                GenerateResources(int num);
     private:
         std::vector<MapObject*> map_objects_;
 

@@ -48,6 +48,7 @@ class Game {
         void SetUp();
         void Update();
 
+        void PerformTurn(Player*);
     private:
         int res_left_[5] = {RES_CARDS_NUM_FOREACH};
         int knights_left_ = KNIGHT_CARDS_NUM;
@@ -61,7 +62,7 @@ class Game {
 
         sf::RenderWindow* window_;
 
-        void Click();
+        int ThrowDice();
 };
 
 #endif

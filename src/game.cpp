@@ -1,5 +1,7 @@
 #include "game.h"
 
+#include "util.h"
+
 #include <SFML/Graphics.hpp>
 
 #include "easylogging++.h"
@@ -61,7 +63,7 @@ void Game::Update(){
                 window_ -> close();
                 break;
             case sf::Event::MouseButtonReleased:
-                Click();
+                game_map_ -> Click();
                 break;
             default:
                 break;
@@ -72,8 +74,16 @@ void Game::Update(){
     window_ -> display();
 }
 
-void Game::Click(){
-    game_map_ -> Click();
+void Game::PerformTurn(Player* player) {
+    //TODO: Complete when added all logic
+    int num = ThrowDice();
+    std::vector<Triple<int, int, int> > generated_resources =
+            game_map_ -> GenerateResources(num);
+}
+
+int Game::ThrowDice() {
+    return (rand() % 6 + 1) +
+        (rand() % 6 + 1);
 }
 
 Village::Village(Point* loc, Player* ownr){

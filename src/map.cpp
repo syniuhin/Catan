@@ -1,4 +1,5 @@
 #include "map.h"
+
 #include "game.h"
 
 #include <algorithm>
@@ -664,6 +665,17 @@ Line* Map::AddRoad(Player* player) {
     }
     return NULL;
 }
+
+std::vector<Triple<int, int, int> >
+        Map::GenerateResources(int num) {
+    //DO STH
+    LOG(INFO) << "GenerateResources of " + std::to_string(num) +
+        " is called";
+    std::vector<Triple<int, int, int> > generated;
+
+    return generated;
+}
+
 
 Point* Map::AddPoint(Point* point) {
     points_.push_back(point);

@@ -120,5 +120,7 @@ void start_game(sf::RenderWindow* window){
     game.SetUp();
     while (window -> isOpen()){
         game.Update();
+//        for (int i = 0; i < 4; ++i)
+//            game.PerformTurn(players[i]);
     }
 }
