@@ -17,43 +17,46 @@ const int POINT_SIZE = 10;
 const int POINT_OUTLINE_SIZE = 1;
 const int POINT_PRECISION = 66;
 
-sf::Vector2f MapObject::get_pos(){
+sf::Vector2f MapObject::get_pos() const {
     return pos_;
 }
 
-void MapObject::set_pos(sf::Vector2f new_pos){
+void MapObject::set_pos(sf::Vector2f new_pos) {
     pos_ = new_pos;
 }
 
 Hex::Hex(Hex* ul, Hex* ur, Hex* l, Hex* r,
-    Hex* dl, Hex* dr, int num, int type){
-    up_left = ul;
-    up_right = ur;
-    left = l;
-    right = r;
-    down_left = dl;
-    down_right = dr;
-    this -> num_ = num;
-    this -> type_ = type;
+    Hex* dl, Hex* dr, int num, int type)
+    : up_left(ul),
+      up_right(ur),
+      left(l),
+      right(r),
+      down_left(dl),
+      down_right(dr),
+      num_(num),
+      type_(type) {}
+
+//TODO : carefully review it
+Hex::~Hex() {
 }
 
-void Hex::set_num(int num){
+void Hex::set_num(int num) {
     this -> num_ = num;
 }
 
-int Hex::get_num(){
+int Hex::get_num() const {
     return this -> num_;
 }
 
-void Hex::set_type(int type){
+void Hex::set_type(int type) {
     this -> type_ = type;
 }
 
-int Hex::get_type(){
+int Hex::get_type() const {
     return type_;
 }
 
-std::string Hex::to_string(){
+std::string Hex::to_string() const {
     std::string res;
 //    if (NULL != up_left)
 //        res.append("up_left NON_NULL,");
@@ -92,11 +95,11 @@ std::string Hex::to_string(){
     return res;
 }
 
-void Hex::Click(){
+void Hex::Click() {
     LOG(INFO) << to_string() << " clicked";
 }
 
-bool Hex::OnMouse(sf::Vector2i point){
+bool Hex::OnMouse(sf::Vector2i point) const {
     double sqrt2 = sqrt(2.0);
     sf::Vector2f center = pos_ +
         sf::Vector2f(HEX_SIZE * sqrt2 * .5, HEX_SIZE * sqrt2 * .5);
@@ -149,13 +152,17 @@ int Hex::GetIndexForPoint(Point* point) {
     return index;
 }
 
-Point::Point(Hex* f, Hex* s, Hex* t){
+Point::Point(Hex* f, Hex* s, Hex* t) {
     hexes_.insert(f);
     hexes_.insert(s);
     hexes_.insert(t);
 }
 
-Hex** Point::get_hexes(Hex** res){
+Point::~Point() {
+    hexes_.clear();
+}
+
+Hex** Point::get_hexes(Hex** res) const {
     for (int i = 0; i < 3; ++i)
         res[i] = NULL;
     int k = 0;
@@ -165,7 +172,7 @@ Hex** Point::get_hexes(Hex** res){
     return res;
 }
 
-void Point::Click(){
+void Point::Click() {
 //    std::string log;
 //    log.append(std::to_string(first_ -> get_num()))
 //        .append(" ")
@@ -176,7 +183,7 @@ void Point::Click(){
 //    LOG(INFO) << log;
 }
 
-bool Point::OnMouse(sf::Vector2i cursor) {
+bool Point::OnMouse(sf::Vector2i cursor) const {
     bool res = true;
     for (std::set<Hex*>::iterator it = hexes_.begin();
             it != hexes_.end() && res; ++it)
@@ -184,7 +191,7 @@ bool Point::OnMouse(sf::Vector2i cursor) {
     return res;
 }
 
-int Point::get_owner_id() {
+int Point::get_owner_id() const {
     return this -> owner_id_;
 }
 
@@ -196,10 +203,15 @@ std::set<Hex*> Point::get_hexes() {
     return hexes_;
 }
 
-Line::Line(Point* f, Point* s, std::set<Hex*> h) {
-    first_ = f;
-    second_ = s;
-    hexes_ = h;
+Line::Line(Point* f, Point* s, std::set<Hex*> h)
+    : first_(f),
+      second_(s),
+      hexes_(h) {}
+
+Line::~Line() {
+    delete first_;
+    delete second_;
+    hexes_.clear();
 }
 
 Line* Line::FromPoints(Point* first, Point* second) {
@@ -216,7 +228,7 @@ Line* Line::FromPoints(Point* first, Point* second) {
     return line;
 }
 
-void Line::Click(){
+void Line::Click() {
 //    std::string log;
 //    log.append(std::to_string(first_ -> get_num()))
 //        .append(" ")
@@ -225,7 +237,7 @@ void Line::Click(){
 //    LOG(INFO) << log;
 }
 
-bool Line::OnMouse(sf::Vector2i cursor){
+bool Line::OnMouse(sf::Vector2i cursor) const {
     bool res = true;
     for (std::set<Hex*>::iterator it = hexes_.begin();
             it != hexes_.end() && res; ++it)
@@ -236,7 +248,7 @@ bool Line::OnMouse(sf::Vector2i cursor){
 /**
  * TODO: check in rules if this is correct
  */
-bool Line::CheckOwnership(int owner_id) {
+bool Line::CheckOwnership(int owner_id) const {
     int fid = first_ -> get_owner_id();
     int sid = second_ -> get_owner_id();
     return (fid == -1 && sid == owner_id) ||
@@ -248,34 +260,34 @@ void Line::set_owner_id(int owner_id) {
     this -> owner_id_ = owner_id;
 }
 
-int Line::get_owner_id() {
+int Line::get_owner_id() const {
     return this -> owner_id_;
 }
 
-Point** Line::get_points(Point** container) {
+Point** Line::get_points(Point** container) const {
     container[0] = first_;
     container[1] = second_;
     return container;
 }
 
-void Line::set_rotation(double rotation) {
-    this -> rotation_ = rotation;
-}
-
-float Line::get_rotation() {
-    return (float) this -> rotation_;
-}
-
-Map::Map(sf::RenderWindow* window) {
-    this -> root_ = new Hex;
-    this -> window_ = window;
+Map::Map(sf::RenderWindow* window)
+    : root_(new Hex),
+      window_(window) {
     Init();
 }
 
-Map::Map(Hex* root, sf::RenderWindow* window) {
-    this -> root_ = root;
-    this -> window_ = window;
+Map::Map(Hex* root, sf::RenderWindow* window)
+    : root_(root),
+      window_(window) {
     Init();
+}
+
+Map::~Map() {
+    map_objects_.clear();
+    points_.clear();
+    lines_.clear();
+
+    delete root_;
 }
 
 void Map::Init() {
@@ -294,14 +306,10 @@ void Map::Init() {
     point_circle_.setOutlineColor(sf::Color::Black);
     point_circle_.setOutlineThickness(POINT_OUTLINE_SIZE);
 
-   // line_rectangle_ = sf::RectangleShape(sf::Vector2f(HEX_SIZE,
-   //             10));
-   // line_rectangle_.setFillColor(sf::Color::White);
-
     line_array_ = sf::VertexArray(sf::Lines, 2);
 }
 
-void Map::Generate(){
+void Map::Generate() {
     LOG(INFO) << "Generating map...";
     int v_dims[] = {2, 5, 8, 11, 11, 11, 11};
     double h_dims[] = {
@@ -335,24 +343,24 @@ void Map::Generate(){
             (2 + GRID_SIZE) * cos(30.0 * M_PI / 180.0)) / 2;
     int horizontal_offset = horizontal_start;
 
-    for (int i = 0; i < GRID_SIZE + 2; ++i){
+    for (int i = 0; i < GRID_SIZE + 2; ++i) {
         int vertical_offset = (wy - v_dims[i] * HEX_SIZE) / 2;
         horizontal_offset = horizontal_start;
         for (int j = 0; j < i; ++j)
             horizontal_offset += HEX_SIZE * h_dims[j];
-        for (int j = 0; j < dims_[i]; ++j){
-            if (NULL == curr){
+        for (int j = 0; j < dims_[i]; ++j) {
+            if (NULL == curr) {
                 LOG(ERROR) << "NULL == curr";
                 return;
             }
 
             curr -> set_pos(sf::Vector2f(horizontal_offset,
                         vertical_offset));
-            if (i > 0 && j > 0){
+            if (i > 0 && j > 0) {
                 Hex* left = curr -> up_left -> down_left;
                 curr -> left = left;
                 left -> right = curr;
-                if (NULL != left -> down_right){
+                if (NULL != left -> down_right) {
                     curr -> down_left = left -> down_right;
                     left -> down_right -> up_right = curr;
                 }
@@ -360,7 +368,7 @@ void Map::Generate(){
 
             int type;
             if ((i > 0 && i < GRID_SIZE + 1) &&
-                    (j > 0 && j < dims_[i] - 1)){
+                    (j > 0 && j < dims_[i] - 1)) {
                 int type_ind = rand() % k;
                 type = types[type_ind];
                 types.erase(types.begin() + type_ind);
@@ -370,35 +378,35 @@ void Map::Generate(){
             }
 
             curr -> set_type(type);
-            if (TYPE_DESERT == type || TYPE_SEA == type){
+            if (TYPE_DESERT == type || TYPE_SEA == type) {
                 curr -> set_num(0);
             } else {
                 int neighbor_sum = 0;
                 int neighbor_count = 0;
-                if (NULL != curr -> up_left){
+                if (NULL != curr -> up_left) {
                     neighbor_count++;
                     neighbor_sum += curr -> up_left -> get_num();
                 }
-                if (NULL != curr -> left){
+                if (NULL != curr -> left) {
                     neighbor_count++;
                     neighbor_sum += curr -> left -> get_num();
                 }
-                if (NULL != curr -> down_left){
+                if (NULL != curr -> down_left) {
                     neighbor_count++;
                     neighbor_sum += curr -> down_left -> get_num();
                 }
 
                 int num_ind;
-                if (neighbor_count == 0){
+                if (neighbor_count == 0) {
                     num_ind = rand() % m;
                 } else {
                     num_ind = 0;
                     int desired = 6 + neighbor_count * 6 -
                         neighbor_sum;
                     int minabs = 6;
-                    for (int ind = 0; ind < m; ++ind){
+                    for (int ind = 0; ind < m; ++ind) {
                         int currabs = abs(desired - nums[ind]);
-                        if (minabs > currabs){
+                        if (minabs > currabs) {
                             minabs = currabs;
                             num_ind = ind;
                         }
@@ -411,7 +419,7 @@ void Map::Generate(){
             hexes_.push_back(curr);
             hexes_by_num_[curr -> get_num()].push_back(curr);
             map_objects_.push_back(curr);
-            if (j < dims_[i] - 1 && NULL == curr -> down_right){
+            if (j < dims_[i] - 1 && NULL == curr -> down_right) {
                 curr -> down_right = new Hex;
                 curr -> down_right -> up_left = curr;
                 curr = curr -> down_right;
@@ -419,10 +427,10 @@ void Map::Generate(){
             vertical_offset += deltay;
             horizontal_offset += deltax;
         }
-        for (int j = 1; j < dims_[i]; ++j){
+        for (int j = 1; j < dims_[i]; ++j) {
             curr = curr -> up_left;
         }
-        if (i < (GRID_SIZE + 2) / 2){
+        if (i < (GRID_SIZE + 2) / 2) {
             curr -> up_right = new Hex;
             curr -> up_right -> down_left = curr;
 
@@ -591,8 +599,8 @@ void Map::DrawMap() {
 //    pos_circle.setFillColor(sf::Color::Magenta);
 //    sf::CircleShape center_circle(10, 20);
 //    center_circle.setFillColor(sf::Color::Cyan);
-    for (int i = 0; i < GRID_SIZE + 2; ++i){
-        for (int j = 0; j < dims_[i]; ++j){
+    for (int i = 0; i < GRID_SIZE + 2; ++i) {
+        for (int j = 0; j < dims_[i]; ++j) {
             if (0 == curr -> get_num())
                 hexagon_.setFillColor(sf::Color::Yellow);
             else
@@ -600,7 +608,7 @@ void Map::DrawMap() {
 
             sf::Vector2f curr_pos = curr -> get_pos();
             hexagon_.setPosition(curr_pos);
-            if (curr -> OnMouse(point)){
+            if (curr -> OnMouse(point)) {
                 hexagon_.setFillColor(TYPE_COLOR[curr -> get_type()] +
                         sf::Color(0, 0, 0, 75));
             } else {
@@ -643,7 +651,7 @@ Point* Map::AddVillage(Player* player) {
         Point* point = points_[i];
         if (point -> OnMouse(cursor) &&
                 -1 == point -> get_owner_id() &&
-                TryAddPoint(point)){
+                TryAddPoint(point)) {
             point -> set_owner_id(player_id);
             return point;
         }
@@ -658,7 +666,7 @@ Line* Map::AddRoad(Player* player) {
     for (size_t i = 0; i < lines_.size(); ++i) {
         Line* line = lines_[i];
         if (line -> OnMouse(cursor) &&
-                line -> CheckOwnership(player_id)){
+                line -> CheckOwnership(player_id)) {
             line -> set_owner_id(player_id);
             return line;
         }

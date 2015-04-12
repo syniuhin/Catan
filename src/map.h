@@ -53,11 +53,13 @@ class Point;
 
 class MapObject {
     public:
-        sf::Vector2f get_pos();
+        virtual ~MapObject() {}
+
+        sf::Vector2f get_pos() const;
         void set_pos(sf::Vector2f);
 
         virtual void Click() = 0;
-        virtual bool OnMouse(sf::Vector2i) = 0;
+        virtual bool OnMouse(sf::Vector2i) const = 0;
     protected:
         sf::Vector2f pos_;
 };
@@ -79,17 +81,18 @@ class Hex : public MapObject {
                 Hex* down_right = NULL,
                 int num = -1,
                 int type = -1);
+        ~Hex();
 
         void set_num(int);
-        int get_num();
+        int get_num() const;
 
         void set_type(int);
-        int get_type();
+        int get_type() const;
 
-        std::string to_string();
+        std::string to_string() const;
 
         void Click();
-        bool OnMouse(sf::Vector2i);
+        bool OnMouse(sf::Vector2i) const;
 
         bool CanBeAdded(Point*);
         void AddPoint(Point*);
@@ -109,16 +112,17 @@ class Point : public MapObject {
         Point(Hex* first_,
                 Hex* second_,
                 Hex* third_);
+        ~Point();
 
-        static bool AreAdjacent(Point, Point);
+        static bool AreAdjacent(const Point, const Point);
 
         void Click();
-        bool OnMouse(sf::Vector2i);
+        bool OnMouse(sf::Vector2i) const;
 
-        int get_owner_id();
+        int get_owner_id() const;
         void set_owner_id(int);
 
-        Hex** get_hexes(Hex**);
+        Hex** get_hexes(Hex**) const;
         std::set<Hex*> get_hexes();
     private:
         std::set<Hex*> hexes_;
@@ -127,6 +131,7 @@ class Point : public MapObject {
 
 class Line : public MapObject {
     public:
+        ~Line();
         /**
          * Factory method. Why? Because
          * we need to perform set_intersection
@@ -138,17 +143,14 @@ class Line : public MapObject {
         static Line* FromPoints(Point*, Point*);
 
         void Click();
-        bool OnMouse(sf::Vector2i);
+        bool OnMouse(sf::Vector2i) const;
 
-        bool CheckOwnership(int owner_id);
+        bool CheckOwnership(int owner_id) const;
 
         void set_owner_id(int);
-        int get_owner_id();
+        int get_owner_id() const;
 
-        Point** get_points(Point**);
-
-        void set_rotation(double);
-        float get_rotation();
+        Point** get_points(Point**) const;
     private:
         /**
          * This constructor logic sucks.
@@ -164,11 +166,6 @@ class Line : public MapObject {
         int owner_id_ = -1;
 
         std::set<Hex*> hexes_;
-
-        /**
-         * Rotation angle in degrees
-         */
-        double rotation_;
 };
 
 class Map {
@@ -176,7 +173,7 @@ class Map {
         explicit Map(sf::RenderWindow*);
         Map(Hex* root, sf::RenderWindow*);
 
-        ~Map() {};
+        ~Map();
 
         void Generate();
         void Draw();
@@ -219,7 +216,6 @@ class Map {
         sf::CircleShape hexagon_;
         sf::CircleShape mouse_circle_;
         sf::CircleShape point_circle_;
-        sf::RectangleShape line_rectangle_;
         sf::VertexArray line_array_;
 
         void Init();

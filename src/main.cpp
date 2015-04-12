@@ -123,4 +123,5 @@ void start_game(sf::RenderWindow* window){
 //        for (int i = 0; i < 4; ++i)
 //            game.PerformTurn(players[i]);
     }
+    players.clear();
 }
