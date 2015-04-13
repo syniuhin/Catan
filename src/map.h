@@ -178,16 +178,23 @@ class NotificationArea : public MapObject {
         bool OnMouse(sf::Vector2i) const;
 
         void MakeVisible();
+        void MakeVisible(int duration);
         void MakeInvisible();
         void Draw(sf::RenderWindow*);
 
         void SetContent(std::string text);
+
+        void Update();
     private:
         NotificationArea();
 
         sf::Text notification_text_;
         sf::Font notification_text_font_;
-        bool visible = false;
+
+        bool visible_ = false;
+        int duration_ = 0;
+
+        const int INF_DURATION = -1;
 };
 
 class Map {
@@ -201,6 +208,7 @@ class Map {
         void Draw() const;
         void Click();
         void ShowNotification(std::string);
+        void ShowNotification(std::string, int duration);
 
         /**
          * Adds new Village to a Map.

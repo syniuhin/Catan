@@ -1,8 +1,7 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-template<class T1, class T2, class T3>
-class Triple {
+template<class T1, class T2, class T3> class Triple {
 public:
     T1 first;
     T2 second;

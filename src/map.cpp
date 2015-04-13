@@ -304,20 +304,33 @@ bool NotificationArea::OnMouse(sf::Vector2i cursor) const {
 }
 
 void NotificationArea::MakeVisible() {
-    visible = true;
+    MakeVisible(INF_DURATION);
+}
+
+void NotificationArea::MakeVisible(int duration) {
+    visible_ = true;
+    duration_ = duration;
 }
 
 void NotificationArea::MakeInvisible() {
-    visible = false;
+    visible_ = false;
+    duration_ = 0;
 }
 
 void NotificationArea::Draw(sf::RenderWindow* const window) {
-    notification_text_.setPosition(pos_);
-    window -> draw(notification_text_);
+    if (visible_) {
+        notification_text_.setPosition(pos_);
+        window -> draw(notification_text_);
+    }
 }
 
 void NotificationArea::SetContent(std::string text) {
     notification_text_.setString(text);
+}
+
+void NotificationArea::Update() {
+    if (visible_ && duration_ != INF_DURATION)
+        visible_ = --duration_ != 0;
 }
 
 Map::Map(sf::RenderWindow* window)
@@ -685,6 +698,7 @@ void Map::Draw() const {
     DrawLines();
     DrawMousePointer();
     notifications_ -> Draw(window_);
+    notifications_ -> Update();
 }
 
 void Map::Click() {
@@ -696,6 +710,11 @@ void Map::Click() {
 
 void Map::ShowNotification(std::string text) {
     notifications_ -> MakeVisible();
+    notifications_ -> SetContent(text);
+}
+
+void Map::ShowNotification(std::string text, int duration) {
+    notifications_ -> MakeVisible(duration);
     notifications_ -> SetContent(text);
 }
 

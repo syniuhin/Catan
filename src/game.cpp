@@ -24,7 +24,11 @@ void Game::SetUp() {
         while (window_ -> isOpen() && (!village_added ||
                     !road_added)){
             sf::Event event;
-            game_map_ -> ShowNotification(std::to_string(i));
+            game_map_ -> ShowNotification((village_added)
+                    ? std::to_string(curr -> get_id() + 1)
+                            .append(" player, add a road")
+                    : std::to_string(curr -> get_id() + 1)
+                            .append(" player, add a village"));
             while (window_ -> pollEvent(event)) {
                 switch (event.type){
                     case sf::Event::Closed:
@@ -32,7 +36,8 @@ void Game::SetUp() {
                         break;
                     case sf::Event::MouseButtonReleased:
                         if (!village_added) {
-                            village_added = game_map_ -> AddVillage(curr);
+                            village_added = game_map_ ->
+                                AddVillage(curr);
                             if (village_added)
                                 villages_.push_back(new Village(
                                             village_added, curr));
@@ -54,6 +59,8 @@ void Game::SetUp() {
             i--;
     }
     LOG(INFO) << "Game was set up successfully";
+    game_map_ -> ShowNotification("Game was set up successfully",
+            30);
 }
 
 void Game::Update(){
