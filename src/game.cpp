@@ -24,6 +24,7 @@ void Game::SetUp() {
         while (window_ -> isOpen() && (!village_added ||
                     !road_added)){
             sf::Event event;
+            game_map_ -> ShowNotification(std::to_string(i));
             while (window_ -> pollEvent(event)) {
                 switch (event.type){
                     case sf::Event::Closed:

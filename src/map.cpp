@@ -17,6 +17,11 @@ const int POINT_SIZE = 10;
 const int POINT_OUTLINE_SIZE = 1;
 const int POINT_PRECISION = 66;
 
+MapObject::MapObject()
+    : pos_() {}
+
+MapObject::~MapObject() {}
+
 sf::Vector2f MapObject::get_pos() const {
     return pos_;
 }
@@ -270,15 +275,59 @@ Point** Line::get_points(Point** container) const {
     return container;
 }
 
-Map::Map(sf::RenderWindow* window)
-    : root_(new Hex),
-      window_(window) {
-    Init();
+NotificationArea*
+        NotificationArea::CreateInstance(std::string font_path) {
+    NotificationArea *instance = new NotificationArea;
+    if (!instance -> notification_text_font_.loadFromFile(
+                font_path)) {
+        LOG(ERROR) << "Error loading font";
+        return NULL;
+    }
+    instance -> notification_text_
+        .setFont(instance -> notification_text_font_);
+    instance -> notification_text_.setCharacterSize(20);
+    instance -> notification_text_.setColor(sf::Color::White);
+    return instance;
 }
+
+NotificationArea::NotificationArea()
+    : MapObject(),
+      notification_text_(),
+      notification_text_font_() {
+    pos_ = sf::Vector2f(10.0f, 10.0f);
+}
+
+void NotificationArea::Click() {}
+
+bool NotificationArea::OnMouse(sf::Vector2i cursor) const {
+    return true;
+}
+
+void NotificationArea::MakeVisible() {
+    visible = true;
+}
+
+void NotificationArea::MakeInvisible() {
+    visible = false;
+}
+
+void NotificationArea::Draw(sf::RenderWindow* const window) {
+    notification_text_.setPosition(pos_);
+    window -> draw(notification_text_);
+}
+
+void NotificationArea::SetContent(std::string text) {
+    notification_text_.setString(text);
+}
+
+Map::Map(sf::RenderWindow* window)
+    : Map(new Hex, window) {}
 
 Map::Map(Hex* root, sf::RenderWindow* window)
     : root_(root),
-      window_(window) {
+      window_(window),
+      notifications_(NotificationArea::
+              CreateInstance("black_jack.ttf")) {
     Init();
 }
 
@@ -506,13 +555,13 @@ void Map::GenerateLines() {
     }
 }
 
-void Map::DrawMousePointer() {
+void Map::DrawMousePointer() const {
     sf::Vector2i point = sf::Mouse::getPosition(*window_);
     mouse_circle_.setPosition((float) point.x, (float) point.y);
     window_ -> draw(mouse_circle_);
 }
 
-void Map::DrawPoints() {
+void Map::DrawPoints() const {
 //    TODO : remove stub
     for (size_t i = 0; i < points_.size(); ++i) {
         Point* curr = points_[i];
@@ -540,7 +589,7 @@ void Map::DrawPoints() {
     }
 }
 
-void Map::DrawLines() {
+void Map::DrawLines() const {
     Point* points[2];
     sf::Vector2f positions[2];
     for (size_t i = 0; i < lines_.size(); ++i) {
@@ -578,7 +627,7 @@ void Map::DrawLines() {
     }
 }
 
-void Map::DrawMap() {
+void Map::DrawMap() const {
     sf::Vector2i point = sf::Mouse::getPosition(*window_);
 
     sf::Text text;
@@ -630,11 +679,12 @@ void Map::DrawMap() {
     }
 }
 
-void Map::Draw() {
+void Map::Draw() const {
     DrawMap();
     DrawPoints();
     DrawLines();
     DrawMousePointer();
+    notifications_ -> Draw(window_);
 }
 
 void Map::Click() {
@@ -642,6 +692,11 @@ void Map::Click() {
     for (size_t i = 0; i < map_objects_.size(); ++i)
         if (map_objects_[i] -> OnMouse(point))
             map_objects_[i] -> Click();
+}
+
+void Map::ShowNotification(std::string text) {
+    notifications_ -> MakeVisible();
+    notifications_ -> SetContent(text);
 }
 
 Point* Map::AddVillage(Player* player) {

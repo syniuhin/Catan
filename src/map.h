@@ -53,7 +53,7 @@ class Point;
 
 class MapObject {
     public:
-        virtual ~MapObject() {}
+        virtual ~MapObject();
 
         sf::Vector2f get_pos() const;
         void set_pos(sf::Vector2f);
@@ -61,6 +61,7 @@ class MapObject {
         virtual void Click() = 0;
         virtual bool OnMouse(sf::Vector2i) const = 0;
     protected:
+        MapObject();
         sf::Vector2f pos_;
 };
 
@@ -168,6 +169,27 @@ class Line : public MapObject {
         std::set<Hex*> hexes_;
 };
 
+class NotificationArea : public MapObject {
+    public:
+        static NotificationArea*
+            CreateInstance(std::string font_path);
+
+        void Click();
+        bool OnMouse(sf::Vector2i) const;
+
+        void MakeVisible();
+        void MakeInvisible();
+        void Draw(sf::RenderWindow*);
+
+        void SetContent(std::string text);
+    private:
+        NotificationArea();
+
+        sf::Text notification_text_;
+        sf::Font notification_text_font_;
+        bool visible = false;
+};
+
 class Map {
     public:
         explicit Map(sf::RenderWindow*);
@@ -176,8 +198,9 @@ class Map {
         ~Map();
 
         void Generate();
-        void Draw();
+        void Draw() const;
         void Click();
+        void ShowNotification(std::string);
 
         /**
          * Adds new Village to a Map.
@@ -203,6 +226,7 @@ class Map {
         std::vector<Hex*> hexes_;
         std::vector<Point*> points_;
         std::vector<Line*> lines_;
+        NotificationArea* notifications_;
 
         std::vector<Hex*> hexes_by_num_[13];
 
@@ -213,10 +237,10 @@ class Map {
         Hex* root_ = NULL;
         sf::RenderWindow* window_;
 
-        sf::CircleShape hexagon_;
-        sf::CircleShape mouse_circle_;
-        sf::CircleShape point_circle_;
-        sf::VertexArray line_array_;
+        mutable sf::CircleShape hexagon_;
+        mutable sf::CircleShape mouse_circle_;
+        mutable sf::CircleShape point_circle_;
+        mutable sf::VertexArray line_array_;
 
         void Init();
 
@@ -227,10 +251,10 @@ class Map {
          */
         void GenerateLines();
 
-        void DrawMap();
-        void DrawPoints();
-        void DrawLines();
-        void DrawMousePointer();
+        void DrawMap() const;
+        void DrawPoints() const;
+        void DrawLines() const;
+        void DrawMousePointer() const;
 
         Point* AddPoint(Point*);
         Line* AddLine(Line*);
