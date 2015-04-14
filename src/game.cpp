@@ -71,18 +71,22 @@ void Game::Update(){
 
 void Game::PerformTurn(Player* curr) {
     //TODO: Complete when added all logic
-    int num = ThrowDice();
+    const int num = ThrowDice();
     game_map_ -> ShowNotification(std::string("Dice showed ")
             .append(std::to_string(num)));
-    std::vector<Triple<int, int, int> > generated_resources =
-            game_map_ -> GenerateResources(num);
-    for (size_t i = 0; i < generated_resources.size(); ++i) {
-        Triple<int, int, int> triple = generated_resources[i];
-        LOG(INFO) << "PlayerID: " << std::to_string(triple.first) <<
-                " TerrainID: " << std::to_string(triple.second) <<
-                " Count: " << std::to_string(triple.third);
-        players_[triple.first] ->
-            AddResource(TERRAIN_RES[triple.second], triple.third);
+    if (num != 7) {
+        std::vector<Triple<int, int, int> > generated_resources =
+                game_map_ -> GenerateResources(num);
+        for (size_t i = 0; i < generated_resources.size(); ++i) {
+            Triple<int, int, int> triple = generated_resources[i];
+            LOG(INFO) << "PlayerID: " << std::to_string(triple.first) <<
+                    " TerrainID: " << std::to_string(triple.second) <<
+                    " Count: " << std::to_string(triple.third);
+            players_[triple.first] ->
+                AddResource(TERRAIN_RES[triple.second], triple.third);
+        }
+    } else {
+        //TODO: activate robber
     }
     for (size_t i = 0; i < players_.size(); ++i) {
         LOG(INFO) << players_[i] -> to_string();
@@ -97,7 +101,6 @@ void Game::PerformTurn(Player* curr) {
                    window_ -> close();
                    break;
                case sf::Event::MouseButtonReleased:
-                   //game_map_ -> Click();
                    continued = game_map_ -> NextTurn();
                    break;
                default:
