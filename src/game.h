@@ -10,17 +10,24 @@
 #include <vector>
 #include <map>
 
+const int TERRAIN_RES[7] = {-1, -1, 0, 1, 2, 3, 4};
 class Player {
     public:
         Player(int);
 
         int get_id();
+
+        void AddResource(int res_id, int count);
+
+        std::string to_string();
     private:
         int player_id_;
 
         int cities_;
         int sttls_;
         int roads_;
+
+        int resources_[5] = {0};
 };
 
 class Village {

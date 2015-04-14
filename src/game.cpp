@@ -64,29 +64,50 @@ void Game::SetUp() {
 }
 
 void Game::Update(){
-    sf::Event event;
-    while (window_ -> pollEvent(event)) {
-        switch (event.type){
-            case sf::Event::Closed:
-                window_ -> close();
-                break;
-            case sf::Event::MouseButtonReleased:
-                game_map_ -> Click();
-                break;
-            default:
-                break;
-        }
+    for (size_t i = 0; i < players_.size(); ++i) {
+        PerformTurn(players_[i]);
     }
-    window_ -> clear();
-    game_map_ -> Draw();
-    window_ -> display();
 }
 
-void Game::PerformTurn(Player* player) {
+void Game::PerformTurn(Player* curr) {
     //TODO: Complete when added all logic
     int num = ThrowDice();
+    game_map_ -> ShowNotification(std::string("Dice showed ")
+            .append(std::to_string(num)));
     std::vector<Triple<int, int, int> > generated_resources =
             game_map_ -> GenerateResources(num);
+    for (size_t i = 0; i < generated_resources.size(); ++i) {
+        Triple<int, int, int> triple = generated_resources[i];
+        LOG(INFO) << "PlayerID: " << std::to_string(triple.first) <<
+                " TerrainID: " << std::to_string(triple.second) <<
+                " Count: " << std::to_string(triple.third);
+        players_[triple.first] ->
+            AddResource(TERRAIN_RES[triple.second], triple.third);
+    }
+    for (size_t i = 0; i < players_.size(); ++i) {
+        LOG(INFO) << players_[i] -> to_string();
+    }
+
+    bool continued = false;
+    sf::Event event;
+    while (window_ -> isOpen() && !continued) {
+       while (window_ -> pollEvent(event)) {
+           switch (event.type) {
+               case sf::Event::Closed:
+                   window_ -> close();
+                   break;
+               case sf::Event::MouseButtonReleased:
+                   game_map_ -> Click();
+                   continued = true;
+                   break;
+               default:
+                   break;
+           }
+       }
+       window_ -> clear();
+       game_map_ -> Draw();
+       window_ -> display();
+    }
 }
 
 int Game::ThrowDice() {
@@ -112,4 +133,19 @@ Player::Player(int p_id) {
 
 int Player::get_id() {
     return player_id_;
+}
+
+void Player::AddResource(int res_id, int count) {
+    resources_[res_id] += count;
+}
+
+std::string Player::to_string() {
+    std::string res;
+    res.append("{");
+    for (int i = 0; i < 5; ++i)
+        res.append(std::to_string(resources_[i])).append((i < 4)
+                ? ", "
+                : "} ");
+    res.append("id = ").append(std::to_string(player_id_));
+    return res;
 }

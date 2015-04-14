@@ -97,6 +97,8 @@ class Hex : public MapObject {
 
         bool CanBeAdded(Point*);
         void AddPoint(Point*);
+
+        std::vector<int> GetBoundPlayersIds() const;
     private:
         int num_;
         int type_;
@@ -224,7 +226,7 @@ class Map {
 
         /**
          * Generates triples by dice sum:
-         * <player_id, resource_id, quantity>
+         * <player_id, terrain_type, quantity>
          */
         std::vector<Triple<int, int, int> >
                 GenerateResources(int num);

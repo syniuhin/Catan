@@ -1,6 +1,7 @@
 #include "map.h"
 
 #include "game.h"
+#include "util.h"
 
 #include <algorithm>
 
@@ -155,6 +156,16 @@ int Hex::GetIndexForPoint(Point* point) {
             index = i;
     }
     return index;
+}
+
+std::vector<int> Hex::GetBoundPlayersIds() const {
+    std::vector<int> result;
+    for (int i = 0; i < 6; ++i) {
+        if (points_[i]) {
+            result.push_back(points_[i] -> get_owner_id());
+        }
+    }
+    return result;
 }
 
 Point::Point(Hex* f, Hex* s, Hex* t) {
@@ -753,9 +764,20 @@ std::vector<Triple<int, int, int> >
     //DO STH
     LOG(INFO) << "GenerateResources of " + std::to_string(num) +
         " is called";
-    std::vector<Triple<int, int, int> > generated;
+    std::vector<Triple<int, int, int> > result;
 
-    return generated;
+    std::vector<Hex*> matched_hexes = hexes_by_num_[num];
+    for (size_t i = 0; i < matched_hexes.size(); ++i) {
+        std::vector<int> players_ids =
+                matched_hexes[i] -> GetBoundPlayersIds();
+        for (size_t j = 0; j < players_ids.size(); ++j) {
+            result.push_back(Triple<int, int, int>::make_triple(
+                        players_ids[j],
+                        matched_hexes[i] -> get_type(),
+                        1)); //TODO: add support for cities
+        }
+    }
+    return result;
 }
 
 
