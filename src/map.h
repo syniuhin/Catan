@@ -60,6 +60,8 @@ class MapObject {
 
         virtual void Click() = 0;
         virtual bool OnMouse(sf::Vector2i) const = 0;
+        //TODO: make it pure virtual, using tr1::shared_ptr
+        virtual void Draw(sf::RenderWindow*);
     protected:
         MapObject();
         sf::Vector2f pos_;
@@ -225,13 +227,19 @@ class ActionPanel : public MapObject {
         void Click();
         bool OnMouse(sf::Vector2i) const;
 
-        void Draw();
-        void AddComponent(MapObject*, sf::FloatRect comp_rect);
+        void Draw(sf::RenderWindow*);
+
+        template<typename Functor>
+        void AddComponent(MapObject*,
+                Functor OnClickListener,
+                sf::FloatRect comp_rect);
     private:
         sf::FloatRect bounds_;
-        std::vector<MapObject*> components_;
 
-        const sf::RectangleShape panel_shape_;
+        std::vector<MapObject*> components_;
+        sf::Vector2f insertion_pos_;
+
+        sf::RectangleShape panel_shape_;
         const sf::Color panel_color_ =
             sf::Color(212, 193, 131, 255);
 
@@ -303,6 +311,7 @@ class Map {
          * after GeneratePoints()
          */
         void GenerateLines();
+        void InjectListeners() const;
 
         void DrawMap() const;
         void DrawPoints() const;

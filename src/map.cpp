@@ -34,6 +34,8 @@ void MapObject::set_pos(sf::Vector2f new_pos) {
     pos_ = new_pos;
 }
 
+void MapObject::Draw(sf::RenderWindow* window) {}
+
 Hex::Hex(Hex* ul, Hex* ur, Hex* l, Hex* r,
     Hex* dl, Hex* dr, int num, int type)
     : up_left(ul),
@@ -384,15 +386,18 @@ void DiceButton::Draw(sf::RenderWindow* window) {
 ActionPanel* ActionPanel::CreateInstance() {
     ActionPanel* instance = new ActionPanel;
     instance -> pos_ = sf::Vector2f(10, 500);
-    instance -> panel_shape_.setFillColor(panel_color_);
-    instance -> panel_shape_.setPosition(pos_);
+    instance -> panel_shape_
+            .setFillColor(instance -> panel_color_);
+    instance -> panel_shape_
+            .setPosition(instance -> pos_.x, instance -> pos_.y);
     return instance;
 }
 
 ActionPanel::ActionPanel()
     : bounds_(),
       panel_shape_(),
-      panel_color_{}
+      panel_color_(),
+      insertion_pos_() {}
 
 void ActionPanel::Click() {
     for (size_t i = 0; i < components_.size(); ++i)
@@ -401,6 +406,12 @@ void ActionPanel::Click() {
 
 bool ActionPanel::OnMouse(sf::Vector2i cursor) const {
     return bounds_.contains((float) cursor.x, (float) cursor.y);
+}
+
+void ActionPanel::Draw(sf::RenderWindow* window) {
+    window -> draw(panel_shape_);
+    for (size_t i = 0; i < components_.size(); ++i)
+        components_[i] -> Draw(window);
 }
 
 Map::Map(sf::RenderWindow* window)
@@ -644,6 +655,16 @@ void Map::GenerateLines() {
     }
 }
 
+void Map::InjectListeners() const {
+    auto inj_lambdas = std::make_tuple(
+            [mapInstance = this] (Player* curr) mutable { //Add new village OnClickListener
+                mapInstance -> AddVillage(curr);
+            },
+            [=] (Player* curr) mutable {//Add new road OnClickListener
+                this -> AddRoad(curr);
+            });
+}
+
 void Map::DrawMousePointer() const {
     sf::Vector2i point = sf::Mouse::getPosition(*window_);
     mouse_circle_.setPosition((float) point.x, (float) point.y);
@@ -772,7 +793,7 @@ void Map::Draw() const {
     DrawMap();
     DrawPoints();
     DrawLines();
-    DrawMousePointer();
+    InjectListeners();//DrawMousePointer();
     notifications_ -> Draw(window_);
     notifications_ -> Update();
 
