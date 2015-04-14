@@ -381,6 +381,28 @@ void DiceButton::Draw(sf::RenderWindow* window) {
     window -> draw(dice_circle_);
 }
 
+ActionPanel* ActionPanel::CreateInstance() {
+    ActionPanel* instance = new ActionPanel;
+    instance -> pos_ = sf::Vector2f(10, 500);
+    instance -> panel_shape_.setFillColor(panel_color_);
+    instance -> panel_shape_.setPosition(pos_);
+    return instance;
+}
+
+ActionPanel::ActionPanel()
+    : bounds_(),
+      panel_shape_(),
+      panel_color_{}
+
+void ActionPanel::Click() {
+    for (size_t i = 0; i < components_.size(); ++i)
+        components_[i] -> Click();
+}
+
+bool ActionPanel::OnMouse(sf::Vector2i cursor) const {
+    return bounds_.contains((float) cursor.x, (float) cursor.y);
+}
+
 Map::Map(sf::RenderWindow* window)
     : Map(new Hex, window) {}
 
@@ -390,6 +412,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       notifications_(NotificationArea::
               CreateInstance("black_jack.ttf")),
       dice_button_(DiceButton::CreateInstance()),
+      action_panel_(ActionPanel::CreateInstance()),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
       mouse_circle_(sf::CircleShape(MOUSE_POINTER_SIZE,
@@ -406,6 +429,9 @@ Map::~Map() {
     lines_.clear();
 
     delete root_;
+    delete notifications_;
+    delete dice_button_;
+    delete action_panel_;
 }
 
 void Map::Init() {

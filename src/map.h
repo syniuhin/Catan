@@ -218,6 +218,26 @@ class DiceButton : public MapObject {
         DiceButton();
 };
 
+class ActionPanel : public MapObject {
+    public:
+        static ActionPanel* CreateInstance();
+
+        void Click();
+        bool OnMouse(sf::Vector2i) const;
+
+        void Draw();
+        void AddComponent(MapObject*, sf::FloatRect comp_rect);
+    private:
+        sf::FloatRect bounds_;
+        std::vector<MapObject*> components_;
+
+        const sf::RectangleShape panel_shape_;
+        const sf::Color panel_color_ =
+            sf::Color(212, 193, 131, 255);
+
+        ActionPanel();
+};
+
 class Map {
     public:
         explicit Map(sf::RenderWindow*);
@@ -259,6 +279,7 @@ class Map {
         std::vector<Line*> lines_;
         NotificationArea* notifications_;
         DiceButton* dice_button_;
+        ActionPanel* action_panel_;
 
         std::vector<Hex*> hexes_by_num_[13];
 
