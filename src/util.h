@@ -7,7 +7,7 @@ public:
     T2 second;
     T3 third;
 
-    static Triple<T1, T2, T3>& make_triple(T1 f, T2 s, T3 t) {
+    static Triple<T1, T2, T3> make_triple(T1 f, T2 s, T3 t) {
         return Triple(f, s, t);
     }
 

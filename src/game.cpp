@@ -97,8 +97,8 @@ void Game::PerformTurn(Player* curr) {
                    window_ -> close();
                    break;
                case sf::Event::MouseButtonReleased:
-                   game_map_ -> Click();
-                   continued = true;
+                   //game_map_ -> Click();
+                   continued = game_map_ -> NextTurn();
                    break;
                default:
                    break;

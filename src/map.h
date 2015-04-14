@@ -199,6 +199,25 @@ class NotificationArea : public MapObject {
         const int INF_DURATION = -1;
 };
 
+class DiceButton : public MapObject {
+    public:
+        static DiceButton* CreateInstance();
+        void Click();
+        bool OnMouse(sf::Vector2i) const;
+
+        void Draw(sf::RenderWindow*);
+    private:
+        const sf::Color color_idle_ =
+            sf::Color(212, 193, 131, 100);
+        const sf::Color color_focused_ =
+            sf::Color(212, 193, 131, 200);
+        const sf::Color color_selected_ =
+            sf::Color(131, 150, 212, 255);
+        sf::CircleShape dice_circle_;
+
+        DiceButton();
+};
+
 class Map {
     public:
         explicit Map(sf::RenderWindow*);
@@ -209,6 +228,8 @@ class Map {
         void Generate();
         void Draw() const;
         void Click();
+        bool NextTurn() const;
+
         void ShowNotification(std::string);
         void ShowNotification(std::string, int duration);
 
@@ -237,6 +258,7 @@ class Map {
         std::vector<Point*> points_;
         std::vector<Line*> lines_;
         NotificationArea* notifications_;
+        DiceButton* dice_button_;
 
         std::vector<Hex*> hexes_by_num_[13];
 
