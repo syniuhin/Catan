@@ -21,6 +21,11 @@ const int POINT_PRECISION = 72;
 const int DICE_BUTTON_SIZE = 20;
 const int DICE_BUTTON_PRECISION = 36;
 
+OnClickListener::OnClickListener(Map* pmap)
+    : pmap_(pmap) {}
+
+OnClickListener::~OnClickListener() {}
+
 MapObject::MapObject()
     : pos_() {}
 
@@ -32,6 +37,15 @@ sf::Vector2f MapObject::get_pos() const {
 
 void MapObject::set_pos(sf::Vector2f new_pos) {
     pos_ = new_pos;
+}
+
+void MapObject::set_on_click_listener(OnClickListener* ocl) {
+    on_click_listener_ = ocl;
+}
+
+void MapObject::Click() {
+    if (on_click_listener_)
+        on_click_listener_ -> OnClick();
 }
 
 void MapObject::Draw(sf::RenderWindow* window) {}
@@ -397,7 +411,8 @@ ActionPanel::ActionPanel()
     : bounds_(),
       panel_shape_(),
       panel_color_(),
-      insertion_pos_() {}
+      insertion_pos_(),
+      components_() {}
 
 void ActionPanel::Click() {
     for (size_t i = 0; i < components_.size(); ++i)
@@ -412,6 +427,10 @@ void ActionPanel::Draw(sf::RenderWindow* window) {
     window -> draw(panel_shape_);
     for (size_t i = 0; i < components_.size(); ++i)
         components_[i] -> Draw(window);
+}
+
+void ActionPanel::AddComponent(MapObject* component) {
+    components_.push_back(component);
 }
 
 Map::Map(sf::RenderWindow* window)
@@ -655,14 +674,32 @@ void Map::GenerateLines() {
     }
 }
 
-void Map::InjectListeners() const {
-    auto inj_lambdas = std::make_tuple(
-            [mapInstance = this] (Player* curr) mutable { //Add new village OnClickListener
-                mapInstance -> AddVillage(curr);
-            },
-            [=] (Player* curr) mutable {//Add new road OnClickListener
-                this -> AddRoad(curr);
-            });
+void Map::GenerateActionPanel() {
+    class NewVillageOCL : public OnClickListener {
+        public:
+            NewVillageOCL(Map* pmap) : OnClickListener(pmap) {}
+
+            void OnClick() {
+                pmap_ -> AddVillage(pmap_ -> last_requester_);
+            }
+    } nvocl(this);
+    class NewVillageButton : public MapObject {
+        public:
+            sf::RectangleShape shape_;
+
+            NewVillageButton()
+                : shape_() {}
+
+            bool OnMouse(sf::Vector2i cursor) const {
+                return
+                    shape_.getGlobalBounds()
+                        .contains((float) cursor.x,
+                                  (float) cursor.y);
+            }
+    } nvb;
+    nvb.set_on_click_listener(&nvocl);
+    action_panel_ -> AddComponent(&nvb,
+            nvb.shape_.getGlobalBounds());
 }
 
 void Map::DrawMousePointer() const {
@@ -793,14 +830,15 @@ void Map::Draw() const {
     DrawMap();
     DrawPoints();
     DrawLines();
-    InjectListeners();//DrawMousePointer();
+    DrawMousePointer();
     notifications_ -> Draw(window_);
     notifications_ -> Update();
 
     dice_button_ -> Draw(window_);
 }
 
-void Map::Click() {
+void Map::Click(Player* requester) {
+    last_requester_ = requester;
     sf::Vector2i point = sf::Mouse::getPosition(*window_);
     for (size_t i = 0; i < map_objects_.size(); ++i)
         if (map_objects_[i] -> OnMouse(point))

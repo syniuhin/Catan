@@ -51,6 +51,17 @@ const int NUMS_ARR[] = {
 class Player;
 class Point;
 
+class Map;
+
+class OnClickListener {
+    public:
+        Map* pmap_; //this sucks.
+        OnClickListener(Map*);
+        virtual ~OnClickListener();
+
+        virtual void OnClick() = 0;
+};
+
 class MapObject {
     public:
         virtual ~MapObject();
@@ -58,13 +69,17 @@ class MapObject {
         sf::Vector2f get_pos() const;
         void set_pos(sf::Vector2f);
 
-        virtual void Click() = 0;
+        void set_on_click_listener(OnClickListener*);
+
+        virtual void Click();
         virtual bool OnMouse(sf::Vector2i) const = 0;
         //TODO: make it pure virtual, using tr1::shared_ptr
         virtual void Draw(sf::RenderWindow*);
     protected:
         MapObject();
         sf::Vector2f pos_;
+
+        OnClickListener* on_click_listener_;
 };
 
 class Hex : public MapObject {
@@ -229,15 +244,12 @@ class ActionPanel : public MapObject {
 
         void Draw(sf::RenderWindow*);
 
-        template<typename Functor>
-        void AddComponent(MapObject*,
-                Functor OnClickListener,
-                sf::FloatRect comp_rect);
+        /**
+         * Adding already defined component
+         */
+        void AddComponent(MapObject*);
     private:
-        sf::FloatRect bounds_;
-
         std::vector<MapObject*> components_;
-        sf::Vector2f insertion_pos_;
 
         sf::RectangleShape panel_shape_;
         const sf::Color panel_color_ =
@@ -255,7 +267,7 @@ class Map {
 
         void Generate();
         void Draw() const;
-        void Click();
+        void Click(Player* requester);
         bool NextTurn() const;
 
         void ShowNotification(std::string);
@@ -303,6 +315,8 @@ class Map {
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;
 
+        Player* last_requester_;
+
         void Init();
 
         void GeneratePoints();
@@ -311,7 +325,7 @@ class Map {
          * after GeneratePoints()
          */
         void GenerateLines();
-        void InjectListeners() const;
+        void GenerateActionPanel();
 
         void DrawMap() const;
         void DrawPoints() const;
