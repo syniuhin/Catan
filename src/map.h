@@ -245,6 +245,10 @@ class NewVillageButton : public MapObject {
         bool OnMouse(sf::Vector2i cursor) const;
         void Draw(sf::RenderWindow* window);
     private:
+        const sf::Color color_idle_ =
+            sf::Color(210, 95, 105, 192);
+        const sf::Color color_focused_ =
+            sf::Color(255, 60, 75, 255);
         class NewVillageOCL : public OnClickListener {
             public:
                 NewVillageOCL(Map*);

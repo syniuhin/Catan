@@ -21,8 +21,8 @@ const int POINT_PRECISION = 72;
 const int DICE_BUTTON_SIZE = 20;
 const int DICE_BUTTON_PRECISION = 36;
 
-const sf::Vector2f ACTION_PANEL_POS = sf::Vector2f(10, 400);
-const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(400, 50);
+const sf::Vector2f ACTION_PANEL_POS = sf::Vector2f(10, 600);
+const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(300, 50);
 
 OnClickListener::OnClickListener(Map* pmap)
     : pmap_(pmap) {}
@@ -407,6 +407,10 @@ NewVillageButton::NewVillageButton(Map* pmap)
 }
 
 void NewVillageButton::Draw(sf::RenderWindow* window) {
+    if (OnMouse(sf::Mouse::getPosition(*window)))
+        shape_.setFillColor(color_focused_);
+    else
+        shape_.setFillColor(color_idle_);
     window -> draw(shape_);
 }
 
@@ -426,7 +430,7 @@ bool NewVillageButton::OnMouse(sf::Vector2i cursor) const {
 
 ActionPanel* ActionPanel::CreateInstance() {
     ActionPanel* instance = new ActionPanel;
-    instance -> pos_ = ACTION_PANEL_SIZE;
+    instance -> pos_ = ACTION_PANEL_POS;
     instance -> panel_shape_
             .setFillColor(instance -> panel_color_);
     instance -> panel_shape_
@@ -495,7 +499,9 @@ void Map::Init() {
     hexagon_.setOutlineThickness(HEX_OUTLINE_SIZE);
     hexagon_.setOutlineColor(sf::Color::Black);
 
-    mouse_circle_.setFillColor(sf::Color::Blue);
+    mouse_circle_.setFillColor(sf::Color(200, 200, 200, 200));
+    mouse_circle_.setOrigin(.5 * sqrt(2.0) * MOUSE_POINTER_SIZE,
+            .5 * sqrt(2.0) * MOUSE_POINTER_SIZE);
 
     point_circle_.setFillColor(sf::Color::Red);
     point_circle_.setOutlineColor(sf::Color::Black);
@@ -836,12 +842,12 @@ void Map::Draw() const {
     DrawMap();
     DrawPoints();
     DrawLines();
-    DrawMousePointer();
     notifications_ -> Draw(window_);
     notifications_ -> Update();
 
     dice_button_ -> Draw(window_);
     action_panel_ -> Draw(window_);
+    DrawMousePointer();
 }
 
 void Map::Click(Player* requester) {
