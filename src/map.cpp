@@ -21,6 +21,9 @@ const int POINT_PRECISION = 72;
 const int DICE_BUTTON_SIZE = 20;
 const int DICE_BUTTON_PRECISION = 36;
 
+const sf::Vector2f ACTION_PANEL_POS = sf::Vector2f(10, 400);
+const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(400, 50);
+
 OnClickListener::OnClickListener(Map* pmap)
     : pmap_(pmap) {}
 
@@ -44,8 +47,7 @@ void MapObject::set_on_click_listener(OnClickListener* ocl) {
 }
 
 void MapObject::Click() {
-    if (on_click_listener_)
-        on_click_listener_ -> OnClick();
+    on_click_listener_ -> OnClick();
 }
 
 void MapObject::Draw(sf::RenderWindow* window) {}
@@ -397,9 +399,34 @@ void DiceButton::Draw(sf::RenderWindow* window) {
     window -> draw(dice_circle_);
 }
 
+NewVillageButton::NewVillageButton(Map* pmap)
+    : shape_(sf::Vector2f(30, 30)) {
+    shape_.setPosition(ACTION_PANEL_POS +
+            sf::Vector2f(10, 10));
+    on_click_listener_ = new NewVillageOCL(pmap);
+}
+
+void NewVillageButton::Draw(sf::RenderWindow* window) {
+    window -> draw(shape_);
+}
+
+NewVillageButton::NewVillageOCL::NewVillageOCL(Map* pmap)
+    : OnClickListener(pmap) {}
+
+void NewVillageButton::NewVillageOCL::OnClick() {
+    pmap_ -> AddVillage();
+}
+
+bool NewVillageButton::OnMouse(sf::Vector2i cursor) const {
+    return
+        shape_.getGlobalBounds()
+            .contains((float) cursor.x,
+                      (float) cursor.y);
+}
+
 ActionPanel* ActionPanel::CreateInstance() {
     ActionPanel* instance = new ActionPanel;
-    instance -> pos_ = sf::Vector2f(10, 500);
+    instance -> pos_ = ACTION_PANEL_SIZE;
     instance -> panel_shape_
             .setFillColor(instance -> panel_color_);
     instance -> panel_shape_
@@ -408,10 +435,8 @@ ActionPanel* ActionPanel::CreateInstance() {
 }
 
 ActionPanel::ActionPanel()
-    : bounds_(),
-      panel_shape_(),
-      panel_color_(),
-      insertion_pos_(),
+    : panel_shape_(ACTION_PANEL_SIZE),
+      panel_color_(sf::Color(212, 193, 131, 255)),
       components_() {}
 
 void ActionPanel::Click() {
@@ -420,7 +445,9 @@ void ActionPanel::Click() {
 }
 
 bool ActionPanel::OnMouse(sf::Vector2i cursor) const {
-    return bounds_.contains((float) cursor.x, (float) cursor.y);
+    return panel_shape_
+            .getGlobalBounds()
+            .contains((float) cursor.x, (float) cursor.y);
 }
 
 void ActionPanel::Draw(sf::RenderWindow* window) {
@@ -429,8 +456,8 @@ void ActionPanel::Draw(sf::RenderWindow* window) {
         components_[i] -> Draw(window);
 }
 
-void ActionPanel::AddComponent(MapObject* component) {
-    components_.push_back(component);
+void ActionPanel::AddComponent(MapObject* pcomponent) {
+    components_.push_back(pcomponent);
 }
 
 Map::Map(sf::RenderWindow* window)
@@ -473,6 +500,15 @@ void Map::Init() {
     point_circle_.setFillColor(sf::Color::Red);
     point_circle_.setOutlineColor(sf::Color::Black);
     point_circle_.setOutlineThickness(POINT_OUTLINE_SIZE);
+
+    hex_text_.setCharacterSize(HEX_SIZE / 2);
+    hex_text_.setColor(sf::Color::Black);
+    if (!hex_font_.loadFromFile("mplus-1m-regular.ttf")) {
+        LOG(ERROR) << "Error loading font";
+        return;
+    }
+    hex_text_.setFont(hex_font_);
+
 }
 
 void Map::Generate() {
@@ -613,8 +649,10 @@ void Map::Generate() {
 
     GeneratePoints();
     GenerateLines();
+    GenerateActionPanel();
     map_objects_.push_back(notifications_);
     map_objects_.push_back(dice_button_);
+    map_objects_.push_back(action_panel_);
     LOG(INFO) << "Map generated successfully";
 }
 
@@ -675,31 +713,8 @@ void Map::GenerateLines() {
 }
 
 void Map::GenerateActionPanel() {
-    class NewVillageOCL : public OnClickListener {
-        public:
-            NewVillageOCL(Map* pmap) : OnClickListener(pmap) {}
-
-            void OnClick() {
-                pmap_ -> AddVillage(pmap_ -> last_requester_);
-            }
-    } nvocl(this);
-    class NewVillageButton : public MapObject {
-        public:
-            sf::RectangleShape shape_;
-
-            NewVillageButton()
-                : shape_() {}
-
-            bool OnMouse(sf::Vector2i cursor) const {
-                return
-                    shape_.getGlobalBounds()
-                        .contains((float) cursor.x,
-                                  (float) cursor.y);
-            }
-    } nvb;
-    nvb.set_on_click_listener(&nvocl);
-    action_panel_ -> AddComponent(&nvb,
-            nvb.shape_.getGlobalBounds());
+    NewVillageButton* pnvb = new NewVillageButton(this);
+    action_panel_ -> AddComponent(pnvb);
 }
 
 void Map::DrawMousePointer() const {
@@ -777,16 +792,6 @@ void Map::DrawLines() const {
 void Map::DrawMap() const {
     sf::Vector2i point = sf::Mouse::getPosition(*window_);
 
-    sf::Text text;
-    text.setCharacterSize(HEX_SIZE / 2);
-    text.setColor(sf::Color::Black);
-    sf::Font font;
-    if (!font.loadFromFile("mplus-1m-regular.ttf")) {
-        LOG(ERROR) << "Error loading font";
-        return;
-    }
-    text.setFont(font);
-
     int dims_[] = {GRID_SIZE - 1, GRID_SIZE, GRID_SIZE + 1,
         GRID_SIZE + 2, GRID_SIZE + 1, GRID_SIZE, GRID_SIZE - 1};
     int k = 0;
@@ -818,9 +823,10 @@ void Map::DrawMap() const {
 //                         HEX_SIZE * sqrt(2.0) * .5));
 //            window_ -> draw(center_circle);
 
-            text.setPosition(curr_pos + sf::Vector2f(.7f * HEX_SIZE, .7f * HEX_SIZE));
-            text.setString(std::to_string(curr -> get_num()));
-            window_ -> draw(text);
+            hex_text_.setPosition(curr_pos +
+                    sf::Vector2f(.7f * HEX_SIZE, .7f * HEX_SIZE));
+            hex_text_.setString(std::to_string(curr -> get_num()));
+            window_ -> draw(hex_text_);
             curr = hexes_[k++];
         }
     }
@@ -835,6 +841,7 @@ void Map::Draw() const {
     notifications_ -> Update();
 
     dice_button_ -> Draw(window_);
+    action_panel_ -> Draw(window_);
 }
 
 void Map::Click(Player* requester) {
@@ -875,6 +882,9 @@ Point* Map::AddVillage(Player* player) {
     return NULL;
 }
 
+Point* Map::AddVillage() {
+    return AddVillage(last_requester_);
+}
 
 Line* Map::AddRoad(Player* player) {
     sf::Vector2i cursor = sf::Mouse::getPosition(*window_);

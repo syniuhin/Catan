@@ -56,7 +56,8 @@ class Map;
 class OnClickListener {
     public:
         Map* pmap_; //this sucks.
-        OnClickListener(Map*);
+
+        explicit OnClickListener(Map*);
         virtual ~OnClickListener();
 
         virtual void OnClick() = 0;
@@ -235,6 +236,23 @@ class DiceButton : public MapObject {
         DiceButton();
 };
 
+class NewVillageButton : public MapObject {
+    public:
+        sf::RectangleShape shape_;
+
+        NewVillageButton(Map* pmap);
+
+        bool OnMouse(sf::Vector2i cursor) const;
+        void Draw(sf::RenderWindow* window);
+    private:
+        class NewVillageOCL : public OnClickListener {
+            public:
+                NewVillageOCL(Map*);
+
+                void OnClick();
+        };
+};
+
 class ActionPanel : public MapObject {
     public:
         static ActionPanel* CreateInstance();
@@ -252,8 +270,7 @@ class ActionPanel : public MapObject {
         std::vector<MapObject*> components_;
 
         sf::RectangleShape panel_shape_;
-        const sf::Color panel_color_ =
-            sf::Color(212, 193, 131, 255);
+        sf::Color panel_color_;
 
         ActionPanel();
 };
@@ -279,6 +296,7 @@ class Map {
          * after mouse button released!
          */
         Point* AddVillage(Player*);
+        Point* AddVillage();
 
         /**
          * Same note here
@@ -314,6 +332,8 @@ class Map {
         mutable sf::CircleShape mouse_circle_;
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;
+        mutable sf::Text hex_text_;
+        mutable sf::Font hex_font_;
 
         Player* last_requester_;
 
