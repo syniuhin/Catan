@@ -236,25 +236,26 @@ class DiceButton : public MapObject {
         DiceButton();
 };
 
-class NewVillageButton : public MapObject {
+class Button : public MapObject {
     public:
+        static Button* CreateInstance(sf::Vector2f pos,
+                                      sf::Vector2f b_size);
+
+        void Click();
+        bool OnMouse(sf::Vector2i) const;
+
+        void Draw(sf::RenderWindow*);
+
+        /**
+         * Builder method(s)
+         */
+        Button* AddCallback(std::function<void()> cb);
+        Button* SetColor(sf::Color);
+    private:
+        std::vector<std::function<void()> > callbacks_;
         sf::RectangleShape shape_;
 
-        NewVillageButton(Map* pmap);
-
-        bool OnMouse(sf::Vector2i cursor) const;
-        void Draw(sf::RenderWindow* window);
-    private:
-        const sf::Color color_idle_ =
-            sf::Color(210, 95, 105, 192);
-        const sf::Color color_focused_ =
-            sf::Color(255, 60, 75, 255);
-        class NewVillageOCL : public OnClickListener {
-            public:
-                NewVillageOCL(Map*);
-
-                void OnClick();
-        };
+        Button(sf::Vector2f b_size);
 };
 
 class ActionPanel : public MapObject {
@@ -300,7 +301,7 @@ class Map {
          * after mouse button released!
          */
         Point* AddVillage(Player*);
-        Point* AddVillage();
+        void AddVillage();
 
         /**
          * Same note here

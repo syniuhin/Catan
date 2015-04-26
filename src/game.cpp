@@ -21,9 +21,9 @@ void Game::SetUp() {
         Player* curr = players_[i];
         Point* village_added = NULL;
         Line* road_added = NULL;
+        sf::Event event;
         while (window_ -> isOpen() && (!village_added ||
                     !road_added)){
-            sf::Event event;
             game_map_ -> ShowNotification((village_added)
                     ? std::to_string(curr -> get_id() + 1)
                             .append(" player, add a road")
@@ -101,7 +101,7 @@ void Game::PerformTurn(Player* curr) {
                    window_ -> close();
                    break;
                case sf::Event::MouseButtonReleased:
-                   continued = game_map_ -> NextTurn();
+                   game_map_ -> Click(curr);
                    break;
                default:
                    break;

@@ -4,6 +4,7 @@
 #include "util.h"
 
 #include <algorithm>
+#include <functional>
 
 #include "easylogging++.h"
 
@@ -399,33 +400,41 @@ void DiceButton::Draw(sf::RenderWindow* window) {
     window -> draw(dice_circle_);
 }
 
-NewVillageButton::NewVillageButton(Map* pmap)
-    : shape_(sf::Vector2f(30, 30)) {
-    shape_.setPosition(ACTION_PANEL_POS +
-            sf::Vector2f(10, 10));
-    on_click_listener_ = new NewVillageOCL(pmap);
+Button* Button::CreateInstance(sf::Vector2f pos,
+                               sf::Vector2f b_size) {
+    Button* instance = new Button(b_size);
+    instance -> pos_ = pos;
+    instance -> shape_.setPosition(pos);
+    return instance;
 }
 
-void NewVillageButton::Draw(sf::RenderWindow* window) {
-    if (OnMouse(sf::Mouse::getPosition(*window)))
-        shape_.setFillColor(color_focused_);
-    else
-        shape_.setFillColor(color_idle_);
+Button::Button(sf::Vector2f b_size)
+    : shape_(b_size),
+      callbacks_() {}
+
+void Button::Click() {
+    for (size_t i = 0; i < callbacks_.size(); ++i)
+        callbacks_[i]();
+}
+
+bool Button::OnMouse(sf::Vector2i cursor) const {
+    return shape_.getGlobalBounds()
+        .contains((float) cursor.x,
+                  (float) cursor.y);
+}
+
+void Button::Draw(sf::RenderWindow* window) {
     window -> draw(shape_);
 }
 
-NewVillageButton::NewVillageOCL::NewVillageOCL(Map* pmap)
-    : OnClickListener(pmap) {}
-
-void NewVillageButton::NewVillageOCL::OnClick() {
-    pmap_ -> AddVillage();
+Button* Button::AddCallback(std::function<void()> cb) {
+    callbacks_.push_back(cb);
+    return this;
 }
 
-bool NewVillageButton::OnMouse(sf::Vector2i cursor) const {
-    return
-        shape_.getGlobalBounds()
-            .contains((float) cursor.x,
-                      (float) cursor.y);
+Button* Button::SetColor(sf::Color color) {
+    shape_.setFillColor(color);
+    return this;
 }
 
 ActionPanel* ActionPanel::CreateInstance() {
@@ -444,8 +453,9 @@ ActionPanel::ActionPanel()
       components_() {}
 
 void ActionPanel::Click() {
-    for (size_t i = 0; i < components_.size(); ++i)
-        components_[i] -> Click();
+//    for (size_t i = 0; i < components_.size(); ++i)
+//        components_[i] -> Click();
+    LOG(INFO) << "ActionPanel clicked";
 }
 
 bool ActionPanel::OnMouse(sf::Vector2i cursor) const {
@@ -719,8 +729,19 @@ void Map::GenerateLines() {
 }
 
 void Map::GenerateActionPanel() {
-    NewVillageButton* pnvb = new NewVillageButton(this);
-    action_panel_ -> AddComponent(pnvb);
+        //std::bind(&Map::AddVillage, this);
+    Button* p_new_village_btn =
+        Button::CreateInstance(ACTION_PANEL_POS +
+            sf::Vector2f(10, 10), sf::Vector2f(20, 20))
+                -> AddCallback(
+                        [this] () {
+                                this -> AddVillage();
+                                LOG(INFO) <<
+                                    "New village button clicked";
+                        })
+                -> SetColor(sf::Color::Red);
+    action_panel_ -> AddComponent(p_new_village_btn);
+    map_objects_.push_back(p_new_village_btn);
 }
 
 void Map::DrawMousePointer() const {
@@ -888,8 +909,8 @@ Point* Map::AddVillage(Player* player) {
     return NULL;
 }
 
-Point* Map::AddVillage() {
-    return AddVillage(last_requester_);
+void Map::AddVillage() {
+    AddVillage(last_requester_);
 }
 
 Line* Map::AddRoad(Player* player) {
