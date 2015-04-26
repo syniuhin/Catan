@@ -53,16 +53,6 @@ class Point;
 
 class Map;
 
-class OnClickListener {
-    public:
-        Map* pmap_; //this sucks.
-
-        explicit OnClickListener(Map*);
-        virtual ~OnClickListener();
-
-        virtual void OnClick() = 0;
-};
-
 class MapObject {
     public:
         virtual ~MapObject();
@@ -70,17 +60,13 @@ class MapObject {
         sf::Vector2f get_pos() const;
         void set_pos(sf::Vector2f);
 
-        void set_on_click_listener(OnClickListener*);
-
-        virtual void Click();
+        virtual void Click() = 0;
         virtual bool OnMouse(sf::Vector2i) const = 0;
         //TODO: make it pure virtual, using tr1::shared_ptr
         virtual void Draw(sf::RenderWindow*);
     protected:
         MapObject();
         sf::Vector2f pos_;
-
-        OnClickListener* on_click_listener_;
 };
 
 class Hex : public MapObject {
@@ -217,25 +203,6 @@ class NotificationArea : public MapObject {
         const int INF_DURATION = -1;
 };
 
-class DiceButton : public MapObject {
-    public:
-        static DiceButton* CreateInstance();
-        void Click();
-        bool OnMouse(sf::Vector2i) const;
-
-        void Draw(sf::RenderWindow*);
-    private:
-        const sf::Color color_idle_ =
-            sf::Color(212, 193, 131, 100);
-        const sf::Color color_focused_ =
-            sf::Color(212, 193, 131, 200);
-        const sf::Color color_selected_ =
-            sf::Color(131, 150, 212, 255);
-        sf::CircleShape dice_circle_;
-
-        DiceButton();
-};
-
 class Button : public MapObject {
     public:
         static Button* CreateInstance(sf::Vector2f pos,
@@ -250,10 +217,12 @@ class Button : public MapObject {
          * Builder method(s)
          */
         Button* AddCallback(std::function<void()> cb);
-        Button* SetColor(sf::Color);
+        Button* SetColors(sf::Color idle, sf::Color focused);
     private:
         std::vector<std::function<void()> > callbacks_;
         sf::RectangleShape shape_;
+        sf::Color idle_;
+        sf::Color focused_;
 
         Button(sf::Vector2f b_size);
 };
@@ -309,6 +278,11 @@ class Map {
         Line* AddRoad(Player*);
 
         /**
+         * Adds callback from game to perform next turn
+         */
+        void SetNextTurnCallback(std::function<void()>);
+
+        /**
          * Generates triples by dice sum:
          * <player_id, terrain_type, quantity>
          */
@@ -321,7 +295,6 @@ class Map {
         std::vector<Point*> points_;
         std::vector<Line*> lines_;
         NotificationArea* notifications_;
-        DiceButton* dice_button_;
         ActionPanel* action_panel_;
 
         std::vector<Hex*> hexes_by_num_[13];
@@ -332,6 +305,7 @@ class Map {
 
         Hex* root_ = NULL;
         sf::RenderWindow* window_;
+        std::function<void()> next_turn_cb_;
 
         mutable sf::CircleShape hexagon_;
         mutable sf::CircleShape mouse_circle_;

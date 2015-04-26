@@ -65,6 +65,8 @@ class Game {
 
         Map* game_map_;
         std::vector<Player*> players_;
+        int curr_player_ind_;
+
         std::vector<Village*> villages_;
 
         sf::RenderWindow* window_;

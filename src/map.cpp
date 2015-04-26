@@ -19,16 +19,8 @@ const int POINT_SIZE = 10;
 const int POINT_OUTLINE_SIZE = 1;
 const int POINT_PRECISION = 72;
 
-const int DICE_BUTTON_SIZE = 20;
-const int DICE_BUTTON_PRECISION = 36;
-
 const sf::Vector2f ACTION_PANEL_POS = sf::Vector2f(10, 600);
 const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(300, 50);
-
-OnClickListener::OnClickListener(Map* pmap)
-    : pmap_(pmap) {}
-
-OnClickListener::~OnClickListener() {}
 
 MapObject::MapObject()
     : pos_() {}
@@ -41,14 +33,6 @@ sf::Vector2f MapObject::get_pos() const {
 
 void MapObject::set_pos(sf::Vector2f new_pos) {
     pos_ = new_pos;
-}
-
-void MapObject::set_on_click_listener(OnClickListener* ocl) {
-    on_click_listener_ = ocl;
-}
-
-void MapObject::Click() {
-    on_click_listener_ -> OnClick();
 }
 
 void MapObject::Draw(sf::RenderWindow* window) {}
@@ -365,41 +349,6 @@ void NotificationArea::Update() {
         visible_ = --duration_ != 0;
 }
 
-DiceButton* DiceButton::CreateInstance() {
-    DiceButton* instance = new DiceButton;
-    instance -> pos_ = sf::Vector2f(10, 100);
-    instance -> dice_circle_.setPosition(instance -> pos_);
-    instance -> dice_circle_.setFillColor(sf::Color::Yellow);
-    return instance;
-}
-
-DiceButton::DiceButton()
-    : dice_circle_(sf::CircleShape(DICE_BUTTON_SIZE,
-              DICE_BUTTON_PRECISION)) {}
-
-void DiceButton::Click() {
-    LOG(INFO) << "Dice button clicked";
-}
-
-bool DiceButton::OnMouse(sf::Vector2i cursor) const {
-    const double sqrt2 = sqrt(2.0);
-    sf::Vector2f center = pos_ +
-        sf::Vector2f(DICE_BUTTON_SIZE * sqrt2 * .5,
-            DICE_BUTTON_SIZE * sqrt2 * .5);
-
-    double radius = (double) DICE_BUTTON_SIZE;
-    return sqrt((center.x - cursor.x) * (center.x - cursor.x) +
-            (center.y - cursor.y) * (center.y - cursor.y)) - radius < EPS + 20;
-}
-
-void DiceButton::Draw(sf::RenderWindow* window) {
-    if (OnMouse(sf::Mouse::getPosition(*window)))
-        dice_circle_.setFillColor(color_focused_);
-    else
-        dice_circle_.setFillColor(color_idle_);
-    window -> draw(dice_circle_);
-}
-
 Button* Button::CreateInstance(sf::Vector2f pos,
                                sf::Vector2f b_size) {
     Button* instance = new Button(b_size);
@@ -424,6 +373,10 @@ bool Button::OnMouse(sf::Vector2i cursor) const {
 }
 
 void Button::Draw(sf::RenderWindow* window) {
+    if (OnMouse(sf::Mouse::getPosition(*window)))
+        shape_.setFillColor(focused_);
+    else
+        shape_.setFillColor(idle_);
     window -> draw(shape_);
 }
 
@@ -432,8 +385,9 @@ Button* Button::AddCallback(std::function<void()> cb) {
     return this;
 }
 
-Button* Button::SetColor(sf::Color color) {
-    shape_.setFillColor(color);
+Button* Button::SetColors(sf::Color idle, sf::Color focused) {
+    idle_ = idle;
+    focused_ = focused;
     return this;
 }
 
@@ -453,8 +407,6 @@ ActionPanel::ActionPanel()
       components_() {}
 
 void ActionPanel::Click() {
-//    for (size_t i = 0; i < components_.size(); ++i)
-//        components_[i] -> Click();
     LOG(INFO) << "ActionPanel clicked";
 }
 
@@ -482,7 +434,6 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       window_(window),
       notifications_(NotificationArea::
               CreateInstance("black_jack.ttf")),
-      dice_button_(DiceButton::CreateInstance()),
       action_panel_(ActionPanel::CreateInstance()),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
@@ -490,7 +441,8 @@ Map::Map(Hex* root, sf::RenderWindow* window)
               MOUSE_POINTER_PRECISION)),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
               POINT_PRECISION)),
-      line_array_(sf::VertexArray(sf::Lines, 2)) {
+      line_array_(sf::VertexArray(sf::Lines, 2)),
+      next_turn_cb_() {
     Init();
 }
 
@@ -501,7 +453,6 @@ Map::~Map() {
 
     delete root_;
     delete notifications_;
-    delete dice_button_;
     delete action_panel_;
 }
 
@@ -667,7 +618,6 @@ void Map::Generate() {
     GenerateLines();
     GenerateActionPanel();
     map_objects_.push_back(notifications_);
-    map_objects_.push_back(dice_button_);
     map_objects_.push_back(action_panel_);
     LOG(INFO) << "Map generated successfully";
 }
@@ -729,19 +679,31 @@ void Map::GenerateLines() {
 }
 
 void Map::GenerateActionPanel() {
-        //std::bind(&Map::AddVillage, this);
     Button* p_new_village_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(10, 10), sf::Vector2f(20, 20))
+            sf::Vector2f(10, 10), sf::Vector2f(30, 30))
                 -> AddCallback(
                         [this] () {
-                                this -> AddVillage();
-                                LOG(INFO) <<
-                                    "New village button clicked";
+                            this -> AddVillage();
+                            LOG(INFO) << "New village btn clicked";
                         })
-                -> SetColor(sf::Color::Red);
+                -> SetColors(sf::Color(196, 53, 53, 100),
+                             sf::Color(196, 53, 53, 200));
     action_panel_ -> AddComponent(p_new_village_btn);
     map_objects_.push_back(p_new_village_btn);
+
+    Button* p_dice_btn =
+        Button::CreateInstance(ACTION_PANEL_POS +
+            sf::Vector2f(45, 10), sf::Vector2f(30, 30))
+                -> AddCallback(
+                        [this] () {
+                            next_turn_cb_();
+                            LOG(INFO) << "Next turn btn clicked";
+                        })
+                -> SetColors(sf::Color(53, 196, 72, 100),
+                             sf::Color(53, 196, 72, 200));
+    action_panel_ -> AddComponent(p_dice_btn);
+    map_objects_.push_back(p_dice_btn);
 }
 
 void Map::DrawMousePointer() const {
@@ -866,7 +828,6 @@ void Map::Draw() const {
     notifications_ -> Draw(window_);
     notifications_ -> Update();
 
-    dice_button_ -> Draw(window_);
     action_panel_ -> Draw(window_);
     DrawMousePointer();
 }
@@ -880,8 +841,7 @@ void Map::Click(Player* requester) {
 }
 
 bool Map::NextTurn() const {
-   return NULL != dice_button_ &&
-       dice_button_ -> OnMouse(sf::Mouse::getPosition(*window_));
+    return false;
 }
 
 void Map::ShowNotification(std::string text) {
@@ -925,6 +885,10 @@ Line* Map::AddRoad(Player* player) {
         }
     }
     return NULL;
+}
+
+void Map::SetNextTurnCallback(std::function<void()> cb) {
+    next_turn_cb_ = cb;
 }
 
 std::vector<Triple<int, int, int> >

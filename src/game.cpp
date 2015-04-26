@@ -10,7 +10,8 @@ Game::Game(Map* gm, std::vector<Player*> plyrs,
         sf::RenderWindow* win)
     : window_(win),
       game_map_(gm),
-      players_(plyrs.begin(), plyrs.end()) {}
+      players_(plyrs.begin(), plyrs.end()),
+      curr_player_ind_(0) {}
 
 void Game::GenMap(){
     game_map_ -> Generate();
@@ -61,6 +62,13 @@ void Game::SetUp() {
     LOG(INFO) << "Game was set up successfully";
     game_map_ -> ShowNotification("Game was set up successfully",
             30);
+
+    game_map_ -> SetNextTurnCallback(
+            [this] () {
+                this -> curr_player_ind_ =
+                        (curr_player_ind_ + 1) % 4;
+                this -> PerformTurn(players_[curr_player_ind_]);
+            });
 }
 
 void Game::Update(){
