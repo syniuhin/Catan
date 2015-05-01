@@ -75,6 +75,9 @@ class Game {
         std::function<void()> on_click_;
 
         int ThrowDice();
+
+        void RandomSetUp();
+        void ManualSetUp();
 };
 
 #endif

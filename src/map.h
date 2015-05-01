@@ -284,6 +284,8 @@ class Map {
          */
         std::vector<Triple<int, int, int> >
                 GenerateResources(int num);
+
+        void AddRandomVillageRoad(Player*);
     private:
         std::vector<MapObject*> map_objects_;
 

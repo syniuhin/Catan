@@ -478,6 +478,7 @@ void Map::Init() {
 }
 
 void Map::Generate() {
+    srand(time(NULL));
     LOG(INFO) << "Generating map...";
     int v_dims[] = {2, 5, 8, 11, 11, 11, 11};
     double h_dims[] = {
@@ -868,7 +869,8 @@ Line* Map::AddRoad(Player* player) {
     for (size_t i = 0; i < lines_.size(); ++i) {
         Line* line = lines_[i];
         if (line -> OnMouse(cursor) &&
-                line -> CheckOwnership(player_id)) {
+                line -> CheckOwnership(player_id) &&
+                -1 == line -> get_owner_id()) {
             line -> set_owner_id(player_id);
             return line;
         }
@@ -900,6 +902,29 @@ std::vector<Triple<int, int, int> >
         }
     }
     return result;
+}
+
+void Map::AddRandomVillageRoad(Player* curr) {
+    bool added = false;
+    int player_id = curr -> get_id();
+    while (!added) {
+        Point* point = points_[rand() % points_.size()];
+        if (-1 == point -> get_owner_id() &&
+                TryAddPoint(point)) {
+            point -> set_owner_id(player_id);
+            added = true;
+        }
+    }
+
+    added = false;
+    while (!added) {
+        Line* line = lines_[rand() % lines_.size()];
+        if (line -> CheckOwnership(player_id) &&
+                -1 == line -> get_owner_id()) {
+            line -> set_owner_id(player_id);
+            added = true;
+        }
+    }
 }
 
 

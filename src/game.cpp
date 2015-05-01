@@ -70,6 +70,7 @@ void Game::SetUp() {
                             curr_player_ind_ =
                                     (curr_player_ind_ + 1) % 4;
                             PerformTurn(players_[curr_player_ind_]);
+                            on_click_ = [](){};
                         });
     game_map_ -> AddButton(p_dice_btn);
 
@@ -88,6 +89,20 @@ void Game::SetUp() {
 //                };
 //            });
 
+    RandomSetUp();
+    LOG(INFO) << "Game was set up successfully";
+    game_map_ -> ShowNotification("Game was set up successfully",
+            30);
+}
+
+void Game::RandomSetUp() {
+    for (size_t i = 0; i < players_.size(); ++i) {
+        game_map_ -> AddRandomVillageRoad(players_[i]);
+        game_map_ -> AddRandomVillageRoad(players_[i]);
+    }
+}
+
+void Game::ManualSetUp() {
     for (size_t i = 0, k = 0; k < 2 * players_.size(); ++k){
         Player* curr = players_[i];
         Point* village_added = NULL;
@@ -131,9 +146,6 @@ void Game::SetUp() {
         else if (k >= players_.size())
             i--;
     }
-    LOG(INFO) << "Game was set up successfully";
-    game_map_ -> ShowNotification("Game was set up successfully",
-            30);
 }
 
 void Game::Update() {
