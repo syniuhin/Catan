@@ -20,9 +20,8 @@ void Game::GenMap(){
 }
 
 void Game::SetUp() {
-    exit_cond_ = [] () {
-        return false;
-    };
+    exit_cond_ = [] (int et) { return et == sf::Event::Closed; };
+    on_click_ = [](){};
 
     Button* p_new_village_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
@@ -31,7 +30,12 @@ void Game::SetUp() {
                              sf::Color(196, 53, 52, 255))
                 -> AddCallback(
                         [this] () {
-                            game_map_ -> AddVillage();
+                            game_map_ -> ShowNotification(
+                                std::to_string(curr_player_ind_ + 1) +
+                                " player, add a village");
+                            on_click_ = [&]() {
+                                game_map_ -> AddVillage();
+                            };
                             LOG(INFO) << "Add village "
                                 "button clicked";
                         });
@@ -115,15 +119,18 @@ void Game::SetUp() {
 
 void Game::Update() {
     sf::Event e;
-    while (window_ -> isOpen() && !exit_cond_()) {
+    int eventType = -1;
+    while (window_ -> isOpen() && !exit_cond_(eventType)) {
         while (window_ -> pollEvent(e)) {
-            switch (e.type) {
+            eventType = e.type;
+            switch (eventType) {
                 case sf::Event::Closed:
                     window_ -> close();
                     break;
                 case sf::Event::MouseButtonReleased:
                     game_map_ ->
                         Click(players_[curr_player_ind_]);
+                    on_click_();
                     break;
                 default:
                     break;

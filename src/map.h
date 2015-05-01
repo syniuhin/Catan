@@ -270,7 +270,7 @@ class Map {
          * after mouse button released!
          */
         Point* AddVillage(Player*);
-        void AddVillage();
+        bool AddVillage();
 
         /**
          * Same note here

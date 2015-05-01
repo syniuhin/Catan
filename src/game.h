@@ -71,7 +71,8 @@ class Game {
 
         sf::RenderWindow* window_;
         bool continued_ = true;
-        std::function<bool()> exit_cond_;
+        std::function<bool(int eventType)> exit_cond_;
+        std::function<void()> on_click_;
 
         int ThrowDice();
 };

@@ -858,11 +858,8 @@ Point* Map::AddVillage(Player* player) {
     return NULL;
 }
 
-void Map::AddVillage() {
-    ShowNotification(
-            std::to_string(last_requester_ -> get_id() + 1) +
-            " player, add a village");
-    AddVillage(last_requester_);
+bool Map::AddVillage() {
+    return NULL != AddVillage(last_requester_);
 }
 
 Line* Map::AddRoad(Player* player) {
