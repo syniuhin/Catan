@@ -41,6 +41,25 @@ void Game::SetUp() {
                         });
     game_map_ -> AddButton(p_new_village_btn);
 
+    Button* p_new_road_btn =
+        Button::CreateInstance(ACTION_PANEL_POS +
+            sf::Vector2f(80, 10), sf::Vector2f(30, 30))
+                -> SetColors(sf::Color(96, 153, 52, 196),
+                             sf::Color(96, 153, 52, 255))
+                -> AddCallback(
+                        [this] () {
+                            game_map_ -> ShowNotification(
+                                std::to_string(curr_player_ind_ + 1) +
+                                " player, add a road");
+                            on_click_ = [&]() {
+                                game_map_ ->
+                                    AddRoad(players_[curr_player_ind_]);
+                            };
+                            LOG(INFO) << "Add road "
+                                "button clicked";
+                        });
+    game_map_ -> AddButton(p_new_road_btn);
+
     Button* p_dice_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
             sf::Vector2f(10, 10), sf::Vector2f(30, 30))
