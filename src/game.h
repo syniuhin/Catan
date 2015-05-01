@@ -70,6 +70,8 @@ class Game {
         std::vector<Village*> villages_;
 
         sf::RenderWindow* window_;
+        bool continued_ = true;
+        std::function<bool()> exit_cond_;
 
         int ThrowDice();
 };

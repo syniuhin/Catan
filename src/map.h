@@ -277,12 +277,8 @@ class Map {
          */
         Line* AddRoad(Player*);
 
-        /**
-         * Adds callback from game to perform next turn
-         */
-        void SetNextTurnCallback(std::function<void()>);
-
-        /**
+        void AddButton(Button*);
+       /**
          * Generates triples by dice sum:
          * <player_id, terrain_type, quantity>
          */
@@ -305,7 +301,6 @@ class Map {
 
         Hex* root_ = NULL;
         sf::RenderWindow* window_;
-        std::function<void()> next_turn_cb_;
 
         mutable sf::CircleShape hexagon_;
         mutable sf::CircleShape mouse_circle_;

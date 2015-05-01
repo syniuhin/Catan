@@ -441,8 +441,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
               MOUSE_POINTER_PRECISION)),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
               POINT_PRECISION)),
-      line_array_(sf::VertexArray(sf::Lines, 2)),
-      next_turn_cb_() {
+      line_array_(sf::VertexArray(sf::Lines, 2)) {
     Init();
 }
 
@@ -616,7 +615,7 @@ void Map::Generate() {
 
     GeneratePoints();
     GenerateLines();
-    GenerateActionPanel();
+    //GenerateActionPanel();
     map_objects_.push_back(notifications_);
     map_objects_.push_back(action_panel_);
     LOG(INFO) << "Map generated successfully";
@@ -681,27 +680,17 @@ void Map::GenerateLines() {
 void Map::GenerateActionPanel() {
     Button* p_new_village_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(10, 10), sf::Vector2f(30, 30))
-                -> AddCallback(
-                        [this] () {
-                            this -> AddVillage();
-                            LOG(INFO) << "New village btn clicked";
-                        })
-                -> SetColors(sf::Color(196, 53, 53, 100),
-                             sf::Color(196, 53, 53, 200));
+            sf::Vector2f(45, 10), sf::Vector2f(30, 30))
+                -> SetColors(sf::Color(196, 53, 52, 196),
+                             sf::Color(196, 53, 52, 255));
     action_panel_ -> AddComponent(p_new_village_btn);
     map_objects_.push_back(p_new_village_btn);
 
     Button* p_dice_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(45, 10), sf::Vector2f(30, 30))
-                -> AddCallback(
-                        [this] () {
-                            next_turn_cb_();
-                            LOG(INFO) << "Next turn btn clicked";
-                        })
-                -> SetColors(sf::Color(53, 196, 72, 100),
-                             sf::Color(53, 196, 72, 200));
+            sf::Vector2f(10, 10), sf::Vector2f(30, 30))
+                -> SetColors(sf::Color(53, 196, 72, 196),
+                             sf::Color(53, 196, 72, 255));
     action_panel_ -> AddComponent(p_dice_btn);
     map_objects_.push_back(p_dice_btn);
 }
@@ -870,6 +859,9 @@ Point* Map::AddVillage(Player* player) {
 }
 
 void Map::AddVillage() {
+    ShowNotification(
+            std::to_string(last_requester_ -> get_id() + 1) +
+            " player, add a village");
     AddVillage(last_requester_);
 }
 
@@ -887,8 +879,9 @@ Line* Map::AddRoad(Player* player) {
     return NULL;
 }
 
-void Map::SetNextTurnCallback(std::function<void()> cb) {
-    next_turn_cb_ = cb;
+void Map::AddButton(Button* b) {
+    action_panel_ -> AddComponent(b);
+    map_objects_.push_back(b);
 }
 
 std::vector<Triple<int, int, int> >

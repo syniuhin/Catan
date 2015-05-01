@@ -6,6 +6,8 @@
 
 #include "easylogging++.h"
 
+const sf::Vector2f ACTION_PANEL_POS = sf::Vector2f(10, 600);
+
 Game::Game(Map* gm, std::vector<Player*> plyrs,
         sf::RenderWindow* win)
     : window_(win),
@@ -18,6 +20,51 @@ void Game::GenMap(){
 }
 
 void Game::SetUp() {
+    exit_cond_ = [] () {
+        return false;
+    };
+
+    Button* p_new_village_btn =
+        Button::CreateInstance(ACTION_PANEL_POS +
+            sf::Vector2f(45, 10), sf::Vector2f(30, 30))
+                -> SetColors(sf::Color(196, 53, 52, 196),
+                             sf::Color(196, 53, 52, 255))
+                -> AddCallback(
+                        [this] () {
+                            game_map_ -> AddVillage();
+                            LOG(INFO) << "Add village "
+                                "button clicked";
+                        });
+    game_map_ -> AddButton(p_new_village_btn);
+
+    Button* p_dice_btn =
+        Button::CreateInstance(ACTION_PANEL_POS +
+            sf::Vector2f(10, 10), sf::Vector2f(30, 30))
+                -> SetColors(sf::Color(53, 196, 72, 196),
+                             sf::Color(53, 196, 72, 255))
+                -> AddCallback(
+                        [this] () {
+                            curr_player_ind_ =
+                                    (curr_player_ind_ + 1) % 4;
+                            PerformTurn(players_[curr_player_ind_]);
+                        });
+    game_map_ -> AddButton(p_dice_btn);
+
+//    game_map_ -> SetNextTurnCallback(
+//            [this] () {
+//                curr_player_ind_ =
+//                        (curr_player_ind_ + 1) % 4;
+//                PerformTurn(players_[curr_player_ind_]);
+//            });
+//
+//    game_map_ -> SetAddVillageCallback(
+//            [this] () {
+//                exit_cond_ = [&] () {
+//                    game_map_ -> AddVillage();
+//                    return false;
+//                };
+//            });
+
     for (size_t i = 0, k = 0; k < 2 * players_.size(); ++k){
         Player* curr = players_[i];
         Point* village_added = NULL;
@@ -36,6 +83,8 @@ void Game::SetUp() {
                         window_ -> close();
                         break;
                     case sf::Event::MouseButtonReleased:
+                        game_map_ ->
+                            Click(players_[curr_player_ind_]);
                         if (!village_added) {
                             village_added = game_map_ ->
                                 AddVillage(curr);
@@ -62,18 +111,27 @@ void Game::SetUp() {
     LOG(INFO) << "Game was set up successfully";
     game_map_ -> ShowNotification("Game was set up successfully",
             30);
-
-    game_map_ -> SetNextTurnCallback(
-            [this] () {
-                this -> curr_player_ind_ =
-                        (curr_player_ind_ + 1) % 4;
-                this -> PerformTurn(players_[curr_player_ind_]);
-            });
 }
 
-void Game::Update(){
-    for (size_t i = 0; i < players_.size(); ++i) {
-        PerformTurn(players_[i]);
+void Game::Update() {
+    sf::Event e;
+    while (window_ -> isOpen() && !exit_cond_()) {
+        while (window_ -> pollEvent(e)) {
+            switch (e.type) {
+                case sf::Event::Closed:
+                    window_ -> close();
+                    break;
+                case sf::Event::MouseButtonReleased:
+                    game_map_ ->
+                        Click(players_[curr_player_ind_]);
+                    break;
+                default:
+                    break;
+            }
+        }
+        window_ -> clear();
+        game_map_ -> Draw();
+        window_ -> display();
     }
 }
 
@@ -96,29 +154,10 @@ void Game::PerformTurn(Player* curr) {
     } else {
         //TODO: activate robber
     }
-    for (size_t i = 0; i < players_.size(); ++i) {
-        LOG(INFO) << players_[i] -> to_string();
-    }
 
-    bool continued = false;
-    sf::Event event;
-    while (window_ -> isOpen() && !continued) {
-       while (window_ -> pollEvent(event)) {
-           switch (event.type) {
-               case sf::Event::Closed:
-                   window_ -> close();
-                   break;
-               case sf::Event::MouseButtonReleased:
-                   game_map_ -> Click(curr);
-                   break;
-               default:
-                   break;
-           }
-       }
-       window_ -> clear();
-       game_map_ -> Draw();
-       window_ -> display();
-    }
+    //Res output
+    for (size_t i = 0; i < players_.size(); ++i)
+        LOG(INFO) << players_[i] -> to_string();
 }
 
 int Game::ThrowDice() {
