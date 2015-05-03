@@ -4,9 +4,9 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "easylogging++.h"
+#include "constants.h"
 
-const sf::Vector2f ACTION_PANEL_POS = sf::Vector2f(10, 600);
+#include "easylogging++.h"
 
 Game::Game(Map* gm, std::vector<Player*> plyrs,
         sf::RenderWindow* win)
@@ -20,7 +20,6 @@ void Game::GenMap(){
 }
 
 void Game::SetUp() {
-    exit_cond_ = [] (int et) { return et == sf::Event::Closed; };
     on_click_ = [](){};
 
     Button* p_new_village_btn =
@@ -73,21 +72,6 @@ void Game::SetUp() {
                             on_click_ = [](){};
                         });
     game_map_ -> AddButton(p_dice_btn);
-
-//    game_map_ -> SetNextTurnCallback(
-//            [this] () {
-//                curr_player_ind_ =
-//                        (curr_player_ind_ + 1) % 4;
-//                PerformTurn(players_[curr_player_ind_]);
-//            });
-//
-//    game_map_ -> SetAddVillageCallback(
-//            [this] () {
-//                exit_cond_ = [&] () {
-//                    game_map_ -> AddVillage();
-//                    return false;
-//                };
-//            });
 
     RandomSetUp();
     LOG(INFO) << "Game was set up successfully";
@@ -151,7 +135,7 @@ void Game::ManualSetUp() {
 void Game::Update() {
     sf::Event e;
     int eventType = -1;
-    while (window_ -> isOpen() && !exit_cond_(eventType)) {
+    while (window_ -> isOpen()) {
         while (window_ -> pollEvent(e)) {
             eventType = e.type;
             switch (eventType) {

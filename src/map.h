@@ -249,6 +249,23 @@ class ActionPanel : public MapObject {
         ActionPanel();
 };
 
+class PlayerPanel : public MapObject {
+    public:
+        static PlayerPanel* CreateInstance();
+
+        void Click();
+        bool OnMouse(sf::Vector2i) const;
+
+        void Draw(sf::RenderWindow*);
+    private:
+        sf::RectangleShape panel_shape_;
+        sf::Color panel_color_;
+
+        std::vector<MapObject*> player_cards_;
+
+        PlayerPanel();
+};
+
 class Map {
     public:
         explicit Map(sf::RenderWindow*);
@@ -294,6 +311,7 @@ class Map {
         std::vector<Line*> lines_;
         NotificationArea* notifications_;
         ActionPanel* action_panel_;
+        PlayerPanel* player_panel_;
 
         std::vector<Hex*> hexes_by_num_[13];
 

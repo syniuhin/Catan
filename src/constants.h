@@ -1,6 +1,8 @@
 #ifndef Catan_constants_h
 #define Catan_constants_h
 
+#include <SFML/Graphics.hpp>
+
 #include <string.h>
 #include <string>
 
@@ -42,5 +44,18 @@ static const int CARD_COST[] = {0, 1, 1, 1, 0};
  * Common constants
  */
 static const double EPS = 0.0000005;
+
+static const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(300, 50);
+static const sf::Vector2f ACTION_PANEL_POS =
+        sf::Vector2f(SCREEN_WIDTH - ACTION_PANEL_SIZE.x - 20,
+                SCREEN_HEIGHT - ACTION_PANEL_SIZE.y - 40);
+
+static const sf::Vector2f PLAYER_CARD_SIZE = sf::Vector2f(200, 80);
+
+static const sf::Vector2f PLAYER_PANEL_SIZE =
+        sf::Vector2f(PLAYER_CARD_SIZE.x + 20,
+            4 * (PLAYER_CARD_SIZE.y + 20));
+static const sf::Vector2f PLAYER_PANEL_POS =
+        sf::Vector2f(10, .5 * (SCREEN_HEIGHT - PLAYER_PANEL_SIZE.y));
 
 #endif

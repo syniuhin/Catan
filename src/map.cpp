@@ -2,6 +2,7 @@
 
 #include "game.h"
 #include "util.h"
+#include "constants.h"
 
 #include <algorithm>
 #include <functional>
@@ -18,9 +19,6 @@ const int MOUSE_POINTER_PRECISION = 17;
 const int POINT_SIZE = 10;
 const int POINT_OUTLINE_SIZE = 1;
 const int POINT_PRECISION = 72;
-
-const sf::Vector2f ACTION_PANEL_POS = sf::Vector2f(10, 600);
-const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(300, 50);
 
 MapObject::MapObject()
     : pos_() {}
@@ -302,16 +300,16 @@ NotificationArea*
     }
     instance -> notification_text_
         .setFont(instance -> notification_text_font_);
-    instance -> notification_text_.setCharacterSize(20);
+    instance -> notification_text_.setCharacterSize(40);
     instance -> notification_text_.setColor(sf::Color::White);
+    instance -> set_pos(sf::Vector2f(.5f * (float) SCREEN_WIDTH,
+                10));
     return instance;
 }
 
 NotificationArea::NotificationArea()
     : notification_text_(),
-      notification_text_font_() {
-    pos_ = sf::Vector2f(10.0f, 10.0f);
-}
+      notification_text_font_() {}
 
 void NotificationArea::Click() {}
 
@@ -342,6 +340,8 @@ void NotificationArea::Draw(sf::RenderWindow* const window) {
 
 void NotificationArea::SetContent(std::string text) {
     notification_text_.setString(text);
+    set_pos(sf::Vector2f(.5f * ((float)SCREEN_WIDTH -
+                notification_text_.getLocalBounds().width), 10));
 }
 
 void NotificationArea::Update() {
@@ -426,6 +426,37 @@ void ActionPanel::AddComponent(MapObject* pcomponent) {
     components_.push_back(pcomponent);
 }
 
+PlayerPanel* PlayerPanel::CreateInstance() {
+    PlayerPanel* instance = new PlayerPanel;
+    instance -> pos_ = PLAYER_PANEL_POS;
+    instance -> panel_shape_
+            .setFillColor(instance -> panel_color_);
+    instance -> panel_shape_
+            .setPosition(instance -> pos_.x, instance -> pos_.y);
+    return instance;
+}
+
+PlayerPanel::PlayerPanel()
+    : panel_shape_(PLAYER_PANEL_SIZE),
+      panel_color_(sf::Color::Green),
+      player_cards_() {}
+
+void PlayerPanel::Click() {
+    LOG(INFO) << "PlayerPanel clicked";
+}
+
+bool PlayerPanel::OnMouse(sf::Vector2i cursor) const {
+    return panel_shape_
+            .getGlobalBounds()
+            .contains((float) cursor.x, (float) cursor.y);
+}
+
+void PlayerPanel::Draw(sf::RenderWindow* window) {
+    window -> draw(panel_shape_);
+    for (size_t i = 0; i < player_cards_.size(); ++i)
+        player_cards_[i] -> Draw(window);
+}
+
 Map::Map(sf::RenderWindow* window)
     : Map(new Hex, window) {}
 
@@ -433,8 +464,9 @@ Map::Map(Hex* root, sf::RenderWindow* window)
     : root_(root),
       window_(window),
       notifications_(NotificationArea::
-              CreateInstance("black_jack.ttf")),
+              CreateInstance("cb.ttf")),
       action_panel_(ActionPanel::CreateInstance()),
+      player_panel_(PlayerPanel::CreateInstance()),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
       mouse_circle_(sf::CircleShape(MOUSE_POINTER_SIZE,
@@ -453,6 +485,7 @@ Map::~Map() {
     delete root_;
     delete notifications_;
     delete action_panel_;
+    delete player_panel_;
 }
 
 void Map::Init() {
@@ -469,7 +502,7 @@ void Map::Init() {
 
     hex_text_.setCharacterSize(HEX_SIZE / 2);
     hex_text_.setColor(sf::Color::Black);
-    if (!hex_font_.loadFromFile("mplus-1m-regular.ttf")) {
+    if (!hex_font_.loadFromFile("cb.ttf")) {
         LOG(ERROR) << "Error loading font";
         return;
     }
@@ -619,6 +652,7 @@ void Map::Generate() {
     //GenerateActionPanel();
     map_objects_.push_back(notifications_);
     map_objects_.push_back(action_panel_);
+    map_objects_.push_back(player_panel_);
     LOG(INFO) << "Map generated successfully";
 }
 
@@ -819,6 +853,7 @@ void Map::Draw() const {
     notifications_ -> Update();
 
     action_panel_ -> Draw(window_);
+    player_panel_ -> Draw(window_);
     DrawMousePointer();
 }
 
