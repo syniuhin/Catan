@@ -73,6 +73,7 @@ void Game::SetUp() {
                         });
     game_map_ -> AddButton(p_dice_btn);
 
+    game_map_ -> DisplayPlayersInfo(players_);
     RandomSetUp();
     LOG(INFO) << "Game was set up successfully";
     game_map_ -> ShowNotification("Game was set up successfully",

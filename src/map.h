@@ -249,6 +249,25 @@ class ActionPanel : public MapObject {
         ActionPanel();
 };
 
+class PlayerCard : public MapObject {
+    public:
+        static PlayerCard* CreateInstance(sf::Vector2f pos, Player&);
+
+        void Click();
+        bool OnMouse(sf::Vector2i) const;
+
+        void Draw(sf::RenderWindow*);
+    private:
+        sf::RectangleShape card_shape_;
+        sf::RectangleShape playerpic_shape_;
+        sf::Text name_text_;
+        sf::Text resources_text_;
+
+        sf::Font font_;
+
+        PlayerCard();
+};
+
 class PlayerPanel : public MapObject {
     public:
         static PlayerPanel* CreateInstance();
@@ -257,6 +276,8 @@ class PlayerPanel : public MapObject {
         bool OnMouse(sf::Vector2i) const;
 
         void Draw(sf::RenderWindow*);
+
+        void Insert(Player&);
     private:
         sf::RectangleShape panel_shape_;
         sf::Color panel_color_;
@@ -303,6 +324,8 @@ class Map {
                 GenerateResources(int num);
 
         void AddRandomVillageRoad(Player*);
+
+        void DisplayPlayersInfo(std::vector<Player*>);
     private:
         std::vector<MapObject*> map_objects_;
 

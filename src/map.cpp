@@ -426,6 +426,49 @@ void ActionPanel::AddComponent(MapObject* pcomponent) {
     components_.push_back(pcomponent);
 }
 
+
+PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
+    PlayerCard* instance = new PlayerCard;
+    instance -> pos_ = pos;
+
+    instance -> card_shape_.setPosition(pos);
+    instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(5, 5));
+
+    if (!instance -> font_.loadFromFile("cb.ttf")) {
+        return NULL;
+    }
+    instance -> name_text_.setPosition(pos + sf::Vector2f(55, 15));
+    instance -> name_text_.setCharacterSize(20);
+    instance -> name_text_.setFont(instance -> font_);
+    instance -> name_text_.setString(std::to_string(player.get_id()));
+
+    instance -> resources_text_.setPosition(pos +
+            sf::Vector2f(55, 75));
+    instance -> resources_text_.setCharacterSize(10);
+    instance -> resources_text_.setFont(instance -> font_);
+    instance -> resources_text_.setString("0");
+    return instance;
+}
+
+PlayerCard::PlayerCard()
+    : card_shape_(PLAYER_CARD_SIZE),
+      playerpic_shape_(sf::Vector2f(40, 60)) {}
+
+void PlayerCard::Click() {}
+
+bool PlayerCard::OnMouse(sf::Vector2i cursor) const {
+    return card_shape_
+            .getGlobalBounds()
+            .contains((float) cursor.x, (float) cursor.y);
+}
+
+void PlayerCard::Draw(sf::RenderWindow* window) {
+    window -> draw(card_shape_);
+    window -> draw(playerpic_shape_);
+    window -> draw(name_text_);
+    window -> draw(resources_text_);
+}
+
 PlayerPanel* PlayerPanel::CreateInstance() {
     PlayerPanel* instance = new PlayerPanel;
     instance -> pos_ = PLAYER_PANEL_POS;
@@ -455,6 +498,12 @@ void PlayerPanel::Draw(sf::RenderWindow* window) {
     window -> draw(panel_shape_);
     for (size_t i = 0; i < player_cards_.size(); ++i)
         player_cards_[i] -> Draw(window);
+}
+
+void PlayerPanel::Insert(Player& player) {
+    PlayerCard* pc = PlayerCard::CreateInstance(pos_ + sf::Vector2f(5, 5 +
+                    player_cards_.size() * (PLAYER_CARD_SIZE.y + 10)), player);
+    player_cards_.push_back(pc);
 }
 
 Map::Map(sf::RenderWindow* window)
@@ -962,6 +1011,11 @@ void Map::AddRandomVillageRoad(Player* curr) {
     }
 }
 
+void Map::DisplayPlayersInfo(std::vector<Player*> players) {
+    for (size_t i = 0; i < players.size(); ++i) {
+        player_panel_ -> Insert(*players[i]);
+    }
+}
 
 Point* Map::AddPoint(Point* point) {
     points_.push_back(point);
