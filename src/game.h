@@ -3,6 +3,7 @@
 
 #include "constants.h"
 #include "map.h"
+#include "trade.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -60,6 +61,13 @@ class Game {
 
         void PerformTurn(Player*);
     private:
+        /**
+         * Defining active windows, on_click behavior etc.
+         * 0: Map shown
+         * 1: Trade window shown
+         */
+        int visual_mode_ = 0;
+
         int res_left_[5] = {RES_CARDS_NUM_FOREACH};
         int knights_left_ = KNIGHT_CARDS_NUM;
         int progress_left_ = PROGRESS_CARDS_NUM;
@@ -67,6 +75,7 @@ class Game {
         int build_costs_ = BUILD_COSTS_CARDS_NUM;
 
         Map* game_map_;
+        TradeWindow* trade_win_;
         std::vector<Player*> players_;
         int curr_player_ind_;
 

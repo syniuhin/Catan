@@ -1,17 +1,16 @@
 #include "game.h"
 
 #include "util.h"
+#include "constants.h"
+#include "easylogging++.h"
 
 #include <SFML/Graphics.hpp>
-
-#include "constants.h"
-
-#include "easylogging++.h"
 
 Game::Game(Map* gm, std::vector<Player*> plyrs,
         sf::RenderWindow* win)
     : window_(win),
       game_map_(gm),
+      trade_win_(TradeWindow::CreateInstance()),
       players_(plyrs.begin(), plyrs.end()),
       curr_player_ind_(0) {}
 
@@ -78,6 +77,17 @@ void Game::SetUp() {
                             on_click_ = [](){};
                         });
     game_map_ -> AddButton(p_dice_btn);
+
+    Button* p_trade_button =
+        Button::CreateInstance(ACTION_PANEL_POS +
+            sf::Vector2f(115, 10), sf::Vector2f(30, 30))
+                -> SetColors(sf::Color(100, 73, 66, 196),
+                             sf::Color(100, 73, 66, 255))
+                -> AddCallback(
+                        [this] () {
+                            visual_mode_ = 1;
+                        });
+    game_map_ -> AddButton(p_trade_button);
 
     game_map_ -> DisplayPlayersInfo(players_);
     RandomSetUp();
@@ -151,7 +161,9 @@ void Game::Update() {
                 case sf::Event::MouseButtonReleased:
                     game_map_ ->
                         Click(players_[curr_player_ind_]);
-                    on_click_();
+                    if (0 == visual_mode_) {
+                        on_click_();
+                    }
                     break;
                 default:
                     break;
@@ -159,6 +171,8 @@ void Game::Update() {
         }
         window_ -> clear();
         game_map_ -> Draw();
+        if (1 == visual_mode_)
+            trade_win_ -> Draw(window_);
         window_ -> display();
     }
 }

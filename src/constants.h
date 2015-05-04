@@ -9,6 +9,9 @@
 const int SCREEN_HEIGHT = 700;
 const int SCREEN_WIDTH = 1200;
 
+const int TRADE_WINDOW_HEIGHT = 500;
+const int TRADE_WINDOW_WIDTH = 700;
+
 const std::string APP_NAME = "Catan";
 
 /**
