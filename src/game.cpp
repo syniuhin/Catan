@@ -208,6 +208,10 @@ int Player::get_id() {
     return player_id_;
 }
 
+int* Player::get_resources() {
+    return resources_;
+}
+
 void Player::AddResource(int res_id, int count) {
     resources_[res_id] += count;
 }

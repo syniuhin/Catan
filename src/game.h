@@ -16,6 +16,7 @@ class Player {
         Player(int);
 
         int get_id();
+        int* get_resources();
 
         void AddResource(int res_id, int count);
 

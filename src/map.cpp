@@ -428,31 +428,35 @@ void ActionPanel::AddComponent(MapObject* pcomponent) {
 
 
 PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
-    PlayerCard* instance = new PlayerCard;
+    PlayerCard* instance = new PlayerCard(player);
     instance -> pos_ = pos;
 
     instance -> card_shape_.setPosition(pos);
-    instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(5, 5));
+    instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(10, 10));
+    instance -> playerpic_shape_.setFillColor(sf::Color::Magenta);
 
     if (!instance -> font_.loadFromFile("cb.ttf")) {
         return NULL;
     }
-    instance -> name_text_.setPosition(pos + sf::Vector2f(55, 15));
+    instance -> name_text_.setPosition(pos + sf::Vector2f(75, 10));
     instance -> name_text_.setCharacterSize(20);
     instance -> name_text_.setFont(instance -> font_);
     instance -> name_text_.setString(std::to_string(player.get_id()));
+    instance -> name_text_.setColor(sf::Color::Black);
 
     instance -> resources_text_.setPosition(pos +
-            sf::Vector2f(55, 75));
-    instance -> resources_text_.setCharacterSize(10);
+            sf::Vector2f(115, 5));
+    instance -> resources_text_.setCharacterSize(12);
     instance -> resources_text_.setFont(instance -> font_);
     instance -> resources_text_.setString("0");
+    instance -> resources_text_.setColor(sf::Color::Black);
     return instance;
 }
 
-PlayerCard::PlayerCard()
-    : card_shape_(PLAYER_CARD_SIZE),
-      playerpic_shape_(sf::Vector2f(40, 60)) {}
+PlayerCard::PlayerCard(Player& p)
+    : player_(p),
+      card_shape_(PLAYER_CARD_SIZE),
+      playerpic_shape_(sf::Vector2f(60, 60)) {}
 
 void PlayerCard::Click() {}
 
@@ -463,6 +467,15 @@ bool PlayerCard::OnMouse(sf::Vector2i cursor) const {
 }
 
 void PlayerCard::Draw(sf::RenderWindow* window) {
+    int* res = player_.get_resources();
+    resources_text_.setString(
+            "bricks " + std::to_string(res[0]) + ",\n" +
+            "wool " + std::to_string(res[1]) + ",\n" +
+            "ore " + std::to_string(res[2]) + ",\n" +
+            "grain " + std::to_string(res[3]) + ",\n" +
+            "lumber " + std::to_string(res[4])
+        );
+
     window -> draw(card_shape_);
     window -> draw(playerpic_shape_);
     window -> draw(name_text_);
@@ -501,8 +514,8 @@ void PlayerPanel::Draw(sf::RenderWindow* window) {
 }
 
 void PlayerPanel::Insert(Player& player) {
-    PlayerCard* pc = PlayerCard::CreateInstance(pos_ + sf::Vector2f(5, 5 +
-                    player_cards_.size() * (PLAYER_CARD_SIZE.y + 10)), player);
+    PlayerCard* pc = PlayerCard::CreateInstance(pos_ + sf::Vector2f(10, 10 +
+                    player_cards_.size() * (PLAYER_CARD_SIZE.y + 20)), player);
     player_cards_.push_back(pc);
 }
 

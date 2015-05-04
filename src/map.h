@@ -265,7 +265,9 @@ class PlayerCard : public MapObject {
 
         sf::Font font_;
 
-        PlayerCard();
+        Player& player_;
+
+        PlayerCard(Player&);
 };
 
 class PlayerPanel : public MapObject {
