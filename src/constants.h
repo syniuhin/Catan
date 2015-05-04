@@ -36,7 +36,7 @@ static const int LUMBER_ID = 4;
  * Buildings' costs
  */
 static const int ROAD_COST[] = {1, 0, 0, 0, 1};
-static const int STTL_COST[] = {1, 0, 1, 1, 1};
+static const int VILLAGE_COST[] = {1, 0, 1, 1, 1};
 static const int CITY_COST[] = {0, 0, 3, 2, 0};
 static const int CARD_COST[] = {0, 1, 1, 1, 0};
 

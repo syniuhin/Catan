@@ -20,12 +20,14 @@ class Player {
 
         void AddResource(int res_id, int count);
 
+        bool TryBuildVillage();
+        bool TryBuildRoad();
         std::string to_string();
     private:
         int player_id_;
 
         int cities_;
-        int sttls_;
+        int villages_;
         int roads_;
 
         int resources_[5] = {0};

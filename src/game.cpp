@@ -29,12 +29,15 @@ void Game::SetUp() {
                              sf::Color(196, 53, 52, 255))
                 -> AddCallback(
                         [this] () {
-                            game_map_ -> ShowNotification(
-                                std::to_string(curr_player_ind_ + 1) +
-                                " player, add a village");
-                            on_click_ = [&]() {
-                                game_map_ -> AddVillage();
-                            };
+                            Player* curr = players_[curr_player_ind_];
+                            if (curr -> TryBuildVillage()) {
+                                on_click_ = [&]() {
+                                    game_map_ -> AddVillage();
+                                };
+                                game_map_ -> ShowNotification("Add a village");
+                            } else {
+                                game_map_ -> ShowNotification("Can't add village");
+                            }
                             LOG(INFO) << "Add village "
                                 "button clicked";
                         });
@@ -47,13 +50,16 @@ void Game::SetUp() {
                              sf::Color(96, 153, 52, 255))
                 -> AddCallback(
                         [this] () {
-                            game_map_ -> ShowNotification(
-                                std::to_string(curr_player_ind_ + 1) +
-                                " player, add a road");
-                            on_click_ = [&]() {
-                                game_map_ ->
-                                    AddRoad(players_[curr_player_ind_]);
-                            };
+                            Player* curr = players_[curr_player_ind_];
+                            if (curr -> TryBuildRoad()) {
+                                on_click_ = [&]() {
+                                    game_map_ ->
+                                        AddRoad(players_[curr_player_ind_]);
+                                };
+                                game_map_ -> ShowNotification("Add a road");
+                            } else {
+                                game_map_ -> ShowNotification("Can't add a road");
+                            }
                             LOG(INFO) << "Add road "
                                 "button clicked";
                         });
@@ -75,9 +81,8 @@ void Game::SetUp() {
 
     game_map_ -> DisplayPlayersInfo(players_);
     RandomSetUp();
+    PerformTurn(players_[0]);
     LOG(INFO) << "Game was set up successfully";
-    game_map_ -> ShowNotification("Game was set up successfully",
-            30);
 }
 
 void Game::RandomSetUp() {
@@ -161,8 +166,9 @@ void Game::Update() {
 void Game::PerformTurn(Player* curr) {
     //TODO: Complete when added all logic
     const int num = ThrowDice();
-    game_map_ -> ShowNotification(std::string("Dice showed ")
-            .append(std::to_string(num)));
+    game_map_ -> ShowNotification(std::to_string(curr -> get_id()) +
+                " make a turn, dice " +
+                std::to_string(num));
     if (num != 7) {
         std::vector<Triple<int, int, int> > generated_resources =
                 game_map_ -> GenerateResources(num);
@@ -200,9 +206,11 @@ City::City(Point* loc, Player* ownr){
     owner_ = ownr;
 }
 
-Player::Player(int p_id) {
-    this -> player_id_ = p_id;
-}
+Player::Player(int p_id)
+    : player_id_(p_id),
+      cities_(0),
+      villages_(0),
+      roads_(0) {}
 
 int Player::get_id() {
     return player_id_;
@@ -214,6 +222,32 @@ int* Player::get_resources() {
 
 void Player::AddResource(int res_id, int count) {
     resources_[res_id] += count;
+}
+
+bool Player::TryBuildVillage() {
+    bool res_enough = true;
+    for (int i = 0; i < 5 && res_enough; ++i)
+        res_enough = resources_[i] >= VILLAGE_COST[i];
+    if (res_enough) {
+        for (int i = 0; i < 5; ++i)
+            resources_[i] -= VILLAGE_COST[i];
+        villages_++;
+        return true;
+    }
+    return false;
+}
+
+bool Player::TryBuildRoad() {
+    bool res_enough = true;
+    for (int i = 0; i < 5 && res_enough; ++i)
+        res_enough = resources_[i] >= ROAD_COST[i];
+    if (res_enough) {
+        for (int i = 0; i < 5; ++i)
+            resources_[i] -= ROAD_COST[i];
+        roads_++;
+        return true;
+    }
+    return false;
 }
 
 std::string Player::to_string() {
