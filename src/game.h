@@ -76,6 +76,7 @@ class Game {
 
         Map* game_map_;
         TradeWindow* trade_win_;
+        mutable sf::CircleShape mouse_circle_;
         std::vector<Player*> players_;
         int curr_player_ind_;
 
@@ -89,6 +90,8 @@ class Game {
 
         void RandomSetUp();
         void ManualSetUp();
+
+        void DrawMousePointer() const;
 };
 
 #endif

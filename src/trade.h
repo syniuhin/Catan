@@ -30,7 +30,7 @@ class TradeWindow : public UiObject {
         bool OnMouse(sf::Vector2i) const;
     private:
         sf::RectangleShape shape_;
-        const sf::Color bg_color_ = sf::Color(73, 66, 255, 196);
+        const sf::Color bg_color_ = sf::Color(73, 66, 255, 245);
         TradeWindow();
 };
 

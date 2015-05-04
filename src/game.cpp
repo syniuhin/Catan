@@ -6,10 +6,15 @@
 
 #include <SFML/Graphics.hpp>
 
+const int MOUSE_POINTER_SIZE = 10;
+const int MOUSE_POINTER_PRECISION = 17;
+
 Game::Game(Map* gm, std::vector<Player*> plyrs,
         sf::RenderWindow* win)
     : window_(win),
       game_map_(gm),
+      mouse_circle_(sf::CircleShape(MOUSE_POINTER_SIZE,
+              MOUSE_POINTER_PRECISION)),
       trade_win_(TradeWindow::CreateInstance()),
       players_(plyrs.begin(), plyrs.end()),
       curr_player_ind_(0) {}
@@ -90,6 +95,10 @@ void Game::SetUp() {
     game_map_ -> AddButton(p_trade_button);
 
     game_map_ -> DisplayPlayersInfo(players_);
+    mouse_circle_.setFillColor(sf::Color(200, 200, 200, 250));
+    mouse_circle_.setOrigin(.5 * sqrt(2.0) * MOUSE_POINTER_SIZE,
+            .5 * sqrt(2.0) * MOUSE_POINTER_SIZE);
+
     RandomSetUp();
     PerformTurn(players_[0]);
     LOG(INFO) << "Game was set up successfully";
@@ -173,6 +182,7 @@ void Game::Update() {
         game_map_ -> Draw();
         if (1 == visual_mode_)
             trade_win_ -> Draw(window_);
+        DrawMousePointer();
         window_ -> display();
     }
 }
@@ -201,6 +211,12 @@ void Game::PerformTurn(Player* curr) {
     //Res output
     for (size_t i = 0; i < players_.size(); ++i)
         LOG(INFO) << players_[i] -> to_string();
+}
+
+void Game::DrawMousePointer() const {
+    sf::Vector2i point = sf::Mouse::getPosition(*window_);
+    mouse_circle_.setPosition((float) point.x, (float) point.y);
+    window_ -> draw(mouse_circle_);
 }
 
 int Game::ThrowDice() {

@@ -13,9 +13,6 @@ const int HEX_SIZE = 60;
 const int HEX_OUTLINE_SIZE = 4;
 const int HEX_PRECISION = 6;
 
-const int MOUSE_POINTER_SIZE = 10;
-const int MOUSE_POINTER_PRECISION = 17;
-
 const int POINT_SIZE = 10;
 const int POINT_OUTLINE_SIZE = 1;
 const int POINT_PRECISION = 72;
@@ -545,8 +542,6 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       player_panel_(PlayerPanel::CreateInstance()),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
-      mouse_circle_(sf::CircleShape(MOUSE_POINTER_SIZE,
-              MOUSE_POINTER_PRECISION)),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
               POINT_PRECISION)),
       line_array_(sf::VertexArray(sf::Lines, 2)) {
@@ -567,10 +562,6 @@ Map::~Map() {
 void Map::Init() {
     hexagon_.setOutlineThickness(HEX_OUTLINE_SIZE);
     hexagon_.setOutlineColor(sf::Color::Black);
-
-    mouse_circle_.setFillColor(sf::Color(200, 200, 200, 200));
-    mouse_circle_.setOrigin(.5 * sqrt(2.0) * MOUSE_POINTER_SIZE,
-            .5 * sqrt(2.0) * MOUSE_POINTER_SIZE);
 
     point_circle_.setFillColor(sf::Color::Red);
     point_circle_.setOutlineColor(sf::Color::Black);
@@ -797,12 +788,6 @@ void Map::GenerateActionPanel() {
     map_objects_.push_back(p_dice_btn);
 }
 
-void Map::DrawMousePointer() const {
-    sf::Vector2i point = sf::Mouse::getPosition(*window_);
-    mouse_circle_.setPosition((float) point.x, (float) point.y);
-    window_ -> draw(mouse_circle_);
-}
-
 void Map::DrawPoints() const {
 //    TODO : remove stub
     for (size_t i = 0; i < points_.size(); ++i) {
@@ -921,7 +906,6 @@ void Map::Draw() const {
 
     action_panel_ -> Draw(window_);
     player_panel_ -> Draw(window_);
-    DrawMousePointer();
 }
 
 void Map::Click(Player* requester) {

@@ -354,7 +354,6 @@ class Map {
         sf::RenderWindow* window_;
 
         mutable sf::CircleShape hexagon_;
-        mutable sf::CircleShape mouse_circle_;
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;
         mutable sf::Text hex_text_;
@@ -375,7 +374,6 @@ class Map {
         void DrawMap() const;
         void DrawPoints() const;
         void DrawLines() const;
-        void DrawMousePointer() const;
 
         Point* AddPoint(Point*);
         Line* AddLine(Line*);
