@@ -91,6 +91,9 @@ void Game::SetUp() {
                 -> AddCallback(
                         [this] () {
                             visual_mode_ = 1;
+                            on_escape_ = [&] () {
+                                visual_mode_ = 0;
+                            };
                         });
     game_map_ -> AddButton(p_trade_button);
 
@@ -174,6 +177,9 @@ void Game::Update() {
                         on_click_();
                     }
                     break;
+                case sf::Event::KeyPressed:
+                    if (e.key.code == sf::Keyboard::Escape)
+                        on_escape_();
                 default:
                     break;
             }
