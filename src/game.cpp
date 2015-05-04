@@ -15,7 +15,7 @@ Game::Game(Map* gm, std::vector<Player*> plyrs,
       game_map_(gm),
       mouse_circle_(sf::CircleShape(MOUSE_POINTER_SIZE,
               MOUSE_POINTER_PRECISION)),
-      trade_win_(TradeWindow::CreateInstance(0, 0)),
+      trade_win_(TradeWindow::CreateInstance(0)),
       players_(plyrs.begin(), plyrs.end()),
       curr_player_ind_(0) {}
 
@@ -91,6 +91,7 @@ void Game::SetUp() {
                 -> AddCallback(
                         [this] () {
                             visual_mode_ = 1;
+                            trade_win_ -> set_seller(curr_player_ind_);
                             on_escape_ = [&] () {
                                 visual_mode_ = 0;
                             };

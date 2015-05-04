@@ -33,22 +33,21 @@ class ResourceCell;
 
 class TradeWindow : public UiObject {
     public:
-        static TradeWindow* CreateInstance(int seller, int buyer);
+        static TradeWindow* CreateInstance(int seller);
 
         void Draw(sf::RenderWindow*);
         bool OnMouse(sf::Vector2i) const;
+
+        void set_seller(int);
     private:
         sf::RectangleShape shape_;
         const sf::Color bg_color_ = sf::Color(73, 66, 255, 245);
-        sf::Text text_seller_;
-        sf::Text text_buyer_;
         sf::Font font_;
 
         int give_balance[5] = {0, 0, 0, 0, 0};
         int take_balance[5] = {0, 0, 0, 0, 0};
 
         int seller_id_;
-        int buyer_id_;
 
         TradeWindow();
 

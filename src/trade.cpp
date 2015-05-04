@@ -37,10 +37,9 @@ void UiObject::set_pos(sf::Vector2f p) {
     pos_ = p;
 }
 
-TradeWindow* TradeWindow::CreateInstance(int seller, int buyer) {
+TradeWindow* TradeWindow::CreateInstance(int seller) {
     TradeWindow* instance = new TradeWindow;
     instance -> seller_id_ = seller;
-    instance -> buyer_id_ = buyer;
 
     instance -> shape_.setPosition(instance -> pos_);
     instance -> shape_.setFillColor(instance -> bg_color_);
@@ -70,20 +69,6 @@ TradeWindow* TradeWindow::CreateInstance(int seller, int buyer) {
 
     if (!instance -> font_.loadFromFile("cb.ttf"))
         return NULL;
-    instance -> text_seller_.setFont(instance -> font_);
-    instance -> text_seller_.setPosition(instance -> pos_ +
-            sf::Vector2f(.5f * (TRADE_WINDOW_WIDTH - 250),
-                TRADE_WINDOW_HEIGHT + 10));
-    instance -> text_seller_.setCharacterSize(20);
-    instance -> text_seller_.setColor(sf::Color::Black);
-    instance -> text_seller_.setString(std::to_string(seller));
-    instance -> text_buyer_.setFont(instance -> font_);
-    instance -> text_buyer_.setPosition(instance -> pos_ +
-            sf::Vector2f(.5f * (TRADE_WINDOW_WIDTH + 250),
-                TRADE_WINDOW_HEIGHT + 10));
-    instance -> text_buyer_.setCharacterSize(20);
-    instance -> text_buyer_.setColor(sf::Color::Black);
-    instance -> text_buyer_.setString(std::to_string(buyer));
     return instance;
 }
 
@@ -94,13 +79,15 @@ TradeWindow::TradeWindow()
 
 void TradeWindow::Draw(sf::RenderWindow* window) {
     window -> draw(shape_);
-    window -> draw(text_seller_);
-    window -> draw(text_buyer_);
     UiObject::Draw(window);
 }
 
 bool TradeWindow::OnMouse(sf::Vector2i cursor) const {
     return false;
+}
+
+void TradeWindow::set_seller(int s) {
+    seller_id_ = s;
 }
 
 void TradeWindow::PlusGiven(int res_id) {
