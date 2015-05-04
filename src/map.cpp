@@ -211,6 +211,20 @@ bool Point::OnMouse(sf::Vector2i cursor) const {
     return res;
 }
 
+bool Point::CanBeOwned(const int _id) {
+    bool res = false;
+    for (std::set<Line*>::iterator it = lines_.begin();
+            it != lines_.end() && !res; ++it) {
+        int l_id = (*it) -> get_owner_id();
+        res = _id == l_id;
+    }
+    return res;
+}
+
+void Point::AddLine(Line* l) {
+    lines_.insert(l);
+}
+
 int Point::get_owner_id() const {
     return this -> owner_id_;
 }
@@ -271,9 +285,9 @@ bool Line::OnMouse(sf::Vector2i cursor) const {
 bool Line::CheckOwnership(int owner_id) const {
     int fid = first_ -> get_owner_id();
     int sid = second_ -> get_owner_id();
-    return (fid == -1 && sid == owner_id) ||
-        (fid == owner_id && sid == -1) ||
-        (fid == owner_id && sid == owner_id);
+    return (fid == -1 && (second_ -> CanBeOwned(owner_id) || sid == owner_id)) ||
+        ((first_ -> CanBeOwned(owner_id) || fid == owner_id) && sid == -1) ||
+        ((first_ -> CanBeOwned(owner_id) || fid == owner_id) && (second_ -> CanBeOwned(owner_id) || sid == owner_id));
 }
 
 void Line::set_owner_id(int owner_id) {
@@ -757,18 +771,9 @@ void Map::GenerateLines() {
             Line* line = Line::FromPoints(points_[i], points_[j]);
             if (line) {
                 line -> set_pos(points_[i] -> get_pos());
-
-//                sf::Vector2f deltas = points_[i] -> get_pos() -
-//                        points_[j] -> get_pos();
-//                double dist = sqrt(deltas.x * deltas.x +
-//                        deltas.y * deltas.y);
-//                if (deltas.y < 0 || deltas.x < 0)
-//                    dist *= -1;
-//                double angle_rad = acos(deltas.x / dist);
-//                double angle_deg = angle_rad * 180.f / M_PI;
-//                line -> set_rotation(angle_deg);
-
                 AddLine(line);
+                points_[i] -> AddLine(line);
+                points_[j] -> AddLine(line);
             }
         }
     }
@@ -947,7 +952,7 @@ Point* Map::AddVillage(Player* player) {
     for (size_t i = 0; i < points_.size(); ++i) {
         Point* point = points_[i];
         if (point -> OnMouse(cursor) &&
-                -1 == point -> get_owner_id() &&
+                point -> CanBeOwned(player_id) &&
                 TryAddPoint(point)) {
             point -> set_owner_id(player_id);
             return point;

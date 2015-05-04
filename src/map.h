@@ -114,6 +114,8 @@ class Hex : public MapObject {
         int GetIndexForPoint(Point*);
 };
 
+class Line;
+
 class Point : public MapObject {
     public:
         Point(Hex* first_,
@@ -126,6 +128,9 @@ class Point : public MapObject {
         void Click();
         bool OnMouse(sf::Vector2i) const;
 
+        bool CanBeOwned(const int _id);
+
+        void AddLine(Line*);
         int get_owner_id() const;
         void set_owner_id(int);
 
@@ -133,6 +138,7 @@ class Point : public MapObject {
         std::set<Hex*> get_hexes();
     private:
         std::set<Hex*> hexes_;
+        std::set<Line*> lines_;
         int owner_id_ = -1;
 };
 
