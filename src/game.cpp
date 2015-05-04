@@ -171,10 +171,12 @@ void Game::Update() {
                     window_ -> close();
                     break;
                 case sf::Event::MouseButtonReleased:
-                    game_map_ ->
-                        Click(players_[curr_player_ind_]);
                     if (0 == visual_mode_) {
+                        game_map_ ->
+                            Click(players_[curr_player_ind_]);
                         on_click_();
+                    } else if (1 == visual_mode_) {
+                        trade_win_ -> Click(window_);
                     }
                     break;
                 case sf::Event::KeyPressed:
