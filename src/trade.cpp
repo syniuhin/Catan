@@ -37,8 +37,11 @@ void UiObject::set_pos(sf::Vector2f p) {
     pos_ = p;
 }
 
-TradeWindow* TradeWindow::CreateInstance() {
+TradeWindow* TradeWindow::CreateInstance(int seller, int buyer) {
     TradeWindow* instance = new TradeWindow;
+    instance -> seller_id_ = seller;
+    instance -> buyer_id_ = buyer;
+
     instance -> shape_.setPosition(instance -> pos_);
     instance -> shape_.setFillColor(instance -> bg_color_);
 
@@ -54,6 +57,33 @@ TradeWindow* TradeWindow::CreateInstance() {
                                 i * (RESOURCE_CELL_SIZE.x + 20),
                             10)));
     }
+
+    sf::Vector2f go_btn_size = sf::Vector2f(200, 40);
+    instance -> AddChild(
+            (new TradeButton())
+                         -> set_position(instance -> pos_ + sf::Vector2f(
+                                 .5f * (TRADE_WINDOW_WIDTH - go_btn_size.x),
+                                 TRADE_WINDOW_HEIGHT))
+                         -> set_color(sf::Color::Red)
+                         -> set_size(go_btn_size)
+                         -> set_callback([instance] () {}));
+
+    if (!instance -> font_.loadFromFile("cb.ttf"))
+        return NULL;
+    instance -> text_seller_.setFont(instance -> font_);
+    instance -> text_seller_.setPosition(instance -> pos_ +
+            sf::Vector2f(.5f * (TRADE_WINDOW_WIDTH - 250),
+                TRADE_WINDOW_HEIGHT + 10));
+    instance -> text_seller_.setCharacterSize(20);
+    instance -> text_seller_.setColor(sf::Color::Black);
+    instance -> text_seller_.setString(std::to_string(seller));
+    instance -> text_buyer_.setFont(instance -> font_);
+    instance -> text_buyer_.setPosition(instance -> pos_ +
+            sf::Vector2f(.5f * (TRADE_WINDOW_WIDTH + 250),
+                TRADE_WINDOW_HEIGHT + 10));
+    instance -> text_buyer_.setCharacterSize(20);
+    instance -> text_buyer_.setColor(sf::Color::Black);
+    instance -> text_buyer_.setString(std::to_string(buyer));
     return instance;
 }
 
@@ -64,6 +94,8 @@ TradeWindow::TradeWindow()
 
 void TradeWindow::Draw(sf::RenderWindow* window) {
     window -> draw(shape_);
+    window -> draw(text_seller_);
+    window -> draw(text_buyer_);
     UiObject::Draw(window);
 }
 
@@ -157,29 +189,30 @@ ResourceCell* ResourceCell::CreateInstance(int res_id,
             sf::Vector2f(10, 10);
     sf::Vector2f dr = instance -> pos_ +
             RESOURCE_CELL_SIZE - sf::Vector2f(30, 30);
+    sf::Vector2f bsz = sf::Vector2f(20, 20);
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(ul)
                          -> set_color(sf::Color::Black)
-                         -> set_size(sf::Vector2f(20, 20))
+                         -> set_size(bsz)
                          -> set_callback(pg));
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(sf::Vector2f(dr.x, ul.y))
                          -> set_color(sf::Color::White)
-                         -> set_size(sf::Vector2f(20, 20))
+                         -> set_size(bsz)
                          -> set_callback(mg));
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(sf::Vector2f(ul.x, dr.y))
                          -> set_color(sf::Color::Black)
-                         -> set_size(sf::Vector2f(20, 20))
+                         -> set_size(bsz)
                          -> set_callback(pt));
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(dr)
                          -> set_color(sf::Color::White)
-                         -> set_size(sf::Vector2f(20, 20))
+                         -> set_size(bsz)
                          -> set_callback(mt));
     return instance;
 }

@@ -7,10 +7,10 @@
 #include <functional>
 
 static const sf::Vector2f TRADE_WIN_SIZE =
-        sf::Vector2f(TRADE_WINDOW_WIDTH, TRADE_WINDOW_HEIGHT);
+        sf::Vector2f(TRADE_WINDOW_WIDTH, TRADE_WINDOW_HEIGHT + 50);
 
 static const sf::Vector2f RESOURCE_CELL_SIZE =
-        sf::Vector2f(TRADE_WIN_SIZE.x / 5 - 20, TRADE_WIN_SIZE.y - 20);
+        sf::Vector2f(TRADE_WIN_SIZE.x / 5 - 20, TRADE_WIN_SIZE.y - 70);
 
 class UiObject {
     public:
@@ -33,16 +33,22 @@ class ResourceCell;
 
 class TradeWindow : public UiObject {
     public:
-        static TradeWindow* CreateInstance();
+        static TradeWindow* CreateInstance(int seller, int buyer);
 
         void Draw(sf::RenderWindow*);
         bool OnMouse(sf::Vector2i) const;
     private:
         sf::RectangleShape shape_;
         const sf::Color bg_color_ = sf::Color(73, 66, 255, 245);
+        sf::Text text_seller_;
+        sf::Text text_buyer_;
+        sf::Font font_;
 
         int give_balance[5] = {0, 0, 0, 0, 0};
         int take_balance[5] = {0, 0, 0, 0, 0};
+
+        int seller_id_;
+        int buyer_id_;
 
         TradeWindow();
 

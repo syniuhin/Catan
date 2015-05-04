@@ -15,7 +15,7 @@ Game::Game(Map* gm, std::vector<Player*> plyrs,
       game_map_(gm),
       mouse_circle_(sf::CircleShape(MOUSE_POINTER_SIZE,
               MOUSE_POINTER_PRECISION)),
-      trade_win_(TradeWindow::CreateInstance()),
+      trade_win_(TradeWindow::CreateInstance(0, 0)),
       players_(plyrs.begin(), plyrs.end()),
       curr_player_ind_(0) {}
 
