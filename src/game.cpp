@@ -102,9 +102,16 @@ void Game::SetUp() {
                             LOG(INFO) << balance[0] << balance[1] <<
                                     " " << _id;
                             //TODO: check
-                            players_[curr_player_ind_] ->
-                                ExchangeWith(players_[_id],
-                                    balance[0], balance[1]);
+                            Player* ths = players_[curr_player_ind_];
+                            Player* tht = players_[_id];
+                            if (ths -> HasResources(balance[0]) &&
+                                tht -> HasResources(balance[1]))
+                                ths -> ExchangeWith(tht,
+                                        balance[0], balance[1]);
+                            else
+                                game_map_ -> ShowNotification(
+                                        "Insufficient resources",
+                                        80);
                             delete[] balance;
                         };
                     }
@@ -328,6 +335,13 @@ void Player::ExchangeWith(Player* that, int give[5], int take[5]) {
 
     LOG(INFO) << "Exchanged from " << player_id_ << " to " <<
             that -> get_id() << " successfully";
+}
+
+bool Player::HasResources(int res[5]) {
+    bool has = true;
+    for (int i = 0; i < 5 && has; ++i)
+        has = resources_[i] >= res[i];
+    return has;
 }
 
 void Player::subtract_resources(int* r) {

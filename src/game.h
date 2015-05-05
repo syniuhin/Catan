@@ -25,6 +25,7 @@ class Player {
         bool TryBuildRoad();
 
         void ExchangeWith(Player*, int give[5], int take[5]);
+        bool HasResources(int res[5]);
 
         void subtract_resources(int*);
         void add_resources(int*);
