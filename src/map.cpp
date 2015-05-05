@@ -439,10 +439,10 @@ void ActionPanel::AddComponent(MapObject* pcomponent) {
 
 
 PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
-    PlayerCard* instance = new PlayerCard(player);
+    PlayerCard* instance = new PlayerCard(PLAYER_CARD_SIZE, player);
     instance -> pos_ = pos;
+    instance -> shape_.setPosition(pos);
 
-    instance -> card_shape_.setPosition(pos);
     instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(10, 10));
     instance -> playerpic_shape_.setFillColor(sf::Color::Magenta);
 
@@ -464,18 +464,10 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
     return instance;
 }
 
-PlayerCard::PlayerCard(Player& p)
-    : player_(p),
-      card_shape_(PLAYER_CARD_SIZE),
+PlayerCard::PlayerCard(sf::Vector2f sz, Player& p)
+    : Button(sz),
+      player_(p),
       playerpic_shape_(sf::Vector2f(60, 60)) {}
-
-void PlayerCard::Click() {}
-
-bool PlayerCard::OnMouse(sf::Vector2i cursor) const {
-    return card_shape_
-            .getGlobalBounds()
-            .contains((float) cursor.x, (float) cursor.y);
-}
 
 void PlayerCard::Draw(sf::RenderWindow* window) {
     int* res = player_.get_resources();
@@ -487,19 +479,20 @@ void PlayerCard::Draw(sf::RenderWindow* window) {
             "lumber " + std::to_string(res[4])
         );
 
-    window -> draw(card_shape_);
+    Button::Draw(window);
     window -> draw(playerpic_shape_);
     window -> draw(name_text_);
     window -> draw(resources_text_);
 }
 
-PlayerPanel* PlayerPanel::CreateInstance() {
+PlayerPanel* PlayerPanel::CreateInstance(int* lpc) {
     PlayerPanel* instance = new PlayerPanel;
     instance -> pos_ = PLAYER_PANEL_POS;
     instance -> panel_shape_
             .setFillColor(instance -> panel_color_);
     instance -> panel_shape_
             .setPosition(instance -> pos_.x, instance -> pos_.y);
+    instance -> lpc_ = lpc;
     return instance;
 }
 
@@ -510,6 +503,15 @@ PlayerPanel::PlayerPanel()
 
 void PlayerPanel::Click() {
     LOG(INFO) << "PlayerPanel clicked";
+    sf::Vector2i cursor = sf::Mouse::getPosition(*window_);
+    for (size_t i = 0; i < player_cards_.size(); ++i) {
+        if (player_cards_[i] -> OnMouse(cursor)) {
+            player_cards_[i] -> Click();
+            *lpc_ = i;
+            LOG(INFO) << "lpc " << *lpc_;
+        }
+    }
+
 }
 
 bool PlayerPanel::OnMouse(sf::Vector2i cursor) const {
@@ -522,11 +524,21 @@ void PlayerPanel::Draw(sf::RenderWindow* window) {
     window -> draw(panel_shape_);
     for (size_t i = 0; i < player_cards_.size(); ++i)
         player_cards_[i] -> Draw(window);
+    window_ = window;
 }
 
 void PlayerPanel::Insert(Player& player) {
-    PlayerCard* pc = PlayerCard::CreateInstance(pos_ + sf::Vector2f(10, 10 +
-                    player_cards_.size() * (PLAYER_CARD_SIZE.y + 20)), player);
+    PlayerCard* pc = (PlayerCard*)
+        PlayerCard::CreateInstance(pos_ +
+                sf::Vector2f(10, 10 + player_cards_.size() *
+                    (PLAYER_CARD_SIZE.y + 20)), player)
+                -> SetColors(sf::Color(155, 155, 255, 240),
+                             sf::Color(255, 255, 255, 255))
+                -> AddCallback(
+                        [this] () {
+                            LOG(INFO) << "PlayerCard clicked";
+                        });
+
     player_cards_.push_back(pc);
 }
 
@@ -539,7 +551,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       notifications_(NotificationArea::
               CreateInstance("cb.ttf")),
       action_panel_(ActionPanel::CreateInstance()),
-      player_panel_(PlayerPanel::CreateInstance()),
+      player_panel_(PlayerPanel::CreateInstance(&last_player_clicked_)),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
@@ -1017,6 +1029,11 @@ void Map::DisplayPlayersInfo(std::vector<Player*> players) {
     for (size_t i = 0; i < players.size(); ++i) {
         player_panel_ -> Insert(*players[i]);
     }
+}
+
+int Map::get_lpc() const {
+    LOG(INFO) << "get_lpc() == " << last_player_clicked_;
+    return last_player_clicked_;
 }
 
 Point* Map::AddPoint(Point* point) {

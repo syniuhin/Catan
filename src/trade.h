@@ -39,6 +39,9 @@ class TradeWindow : public UiObject {
         bool OnMouse(sf::Vector2i) const;
 
         void set_seller(int);
+        void set_on_propose(std::function<void()>);
+
+        int** get_balance(int**);
     private:
         sf::RectangleShape shape_;
         const sf::Color bg_color_ = sf::Color(73, 66, 255, 245);
@@ -48,6 +51,7 @@ class TradeWindow : public UiObject {
         int take_balance[5] = {0, 0, 0, 0, 0};
 
         int seller_id_;
+        std::function<void()> on_propose_ = [] () {};
 
         TradeWindow();
 

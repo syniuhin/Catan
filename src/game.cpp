@@ -25,6 +25,8 @@ void Game::GenMap(){
 
 void Game::SetUp() {
     on_click_ = [](){};
+    on_escape_ = [](){};
+    on_enter_ = [](){};
 
     Button* p_new_village_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
@@ -82,6 +84,32 @@ void Game::SetUp() {
                             on_click_ = [](){};
                         });
     game_map_ -> AddButton(p_dice_btn);
+
+    trade_win_ -> set_on_propose([this] () {
+                LOG(INFO) << "on_propose called";
+                visual_mode_ = 0;
+                game_map_ -> ShowNotification("Choose a player to trade with");
+                on_click_ = [&] () {
+                    int _id = game_map_ -> get_lpc();
+                    if (-1 != _id) {
+                        game_map_ -> ShowNotification("Trading with " +
+                                std::to_string(_id));
+                        on_enter_ = [&, _id] () {
+                            int** balance = new int*[2];
+                            for (int i = 0; i < 2; ++i)
+                                balance[i] = new int[5];
+                            trade_win_ -> get_balance(balance);
+                            LOG(INFO) << balance[0] << balance[1] <<
+                                    " " << _id;
+                            //TODO: check
+                            players_[curr_player_ind_] ->
+                                ExchangeWith(players_[_id],
+                                    balance[0], balance[1]);
+                            delete[] balance;
+                        };
+                    }
+                };
+            });
 
     Button* p_trade_button =
         Button::CreateInstance(ACTION_PANEL_POS +
@@ -183,6 +211,8 @@ void Game::Update() {
                 case sf::Event::KeyPressed:
                     if (e.key.code == sf::Keyboard::Escape)
                         on_escape_();
+                    else if (e.key.code == sf::Keyboard::Return)
+                        on_enter_();
                 default:
                     break;
             }
@@ -287,6 +317,27 @@ bool Player::TryBuildRoad() {
         return true;
     }
     return false;
+}
+
+void Player::ExchangeWith(Player* that, int give[5], int take[5]) {
+    this -> subtract_resources(give);
+    that -> add_resources(give);
+
+    that -> subtract_resources(take);
+    this -> add_resources(take);
+
+    LOG(INFO) << "Exchanged from " << player_id_ << " to " <<
+            that -> get_id() << " successfully";
+}
+
+void Player::subtract_resources(int* r) {
+    for (int i = 0; i < 5; ++i)
+        resources_[i] -= r[i];
+}
+
+void Player::add_resources(int* r) {
+    for (int i = 0; i < 5; ++i)
+        resources_[i] += r[i];
 }
 
 std::string Player::to_string() {

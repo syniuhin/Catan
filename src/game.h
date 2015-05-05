@@ -23,6 +23,11 @@ class Player {
 
         bool TryBuildVillage();
         bool TryBuildRoad();
+
+        void ExchangeWith(Player*, int give[5], int take[5]);
+
+        void subtract_resources(int*);
+        void add_resources(int*);
         std::string to_string();
     private:
         int player_id_;
@@ -87,6 +92,7 @@ class Game {
 
         std::function<void()> on_click_;
         std::function<void()> on_escape_;
+        std::function<void()> on_enter_;
 
         int ThrowDice();
 

@@ -214,23 +214,23 @@ class Button : public MapObject {
         static Button* CreateInstance(sf::Vector2f pos,
                                       sf::Vector2f b_size);
 
-        void Click();
-        bool OnMouse(sf::Vector2i) const;
+        virtual void Click();
+        virtual bool OnMouse(sf::Vector2i) const;
 
-        void Draw(sf::RenderWindow*);
+        virtual void Draw(sf::RenderWindow*);
 
         /**
          * Builder method(s)
          */
         Button* AddCallback(std::function<void()> cb);
         Button* SetColors(sf::Color idle, sf::Color focused);
-    private:
+    protected:
         std::vector<std::function<void()> > callbacks_;
         sf::RectangleShape shape_;
         sf::Color idle_;
         sf::Color focused_;
 
-        Button(sf::Vector2f b_size);
+        explicit Button(sf::Vector2f b_size);
 };
 
 class ActionPanel : public MapObject {
@@ -255,16 +255,12 @@ class ActionPanel : public MapObject {
         ActionPanel();
 };
 
-class PlayerCard : public MapObject {
+class PlayerCard : public Button {
     public:
         static PlayerCard* CreateInstance(sf::Vector2f pos, Player&);
 
-        void Click();
-        bool OnMouse(sf::Vector2i) const;
-
         void Draw(sf::RenderWindow*);
     private:
-        sf::RectangleShape card_shape_;
         sf::RectangleShape playerpic_shape_;
         sf::Text name_text_;
         sf::Text resources_text_;
@@ -273,12 +269,12 @@ class PlayerCard : public MapObject {
 
         Player& player_;
 
-        PlayerCard(Player&);
+        PlayerCard(sf::Vector2f sz, Player&);
 };
 
 class PlayerPanel : public MapObject {
     public:
-        static PlayerPanel* CreateInstance();
+        static PlayerPanel* CreateInstance(int* lpc);
 
         void Click();
         bool OnMouse(sf::Vector2i) const;
@@ -287,10 +283,12 @@ class PlayerPanel : public MapObject {
 
         void Insert(Player&);
     private:
+        sf::RenderWindow* window_;
         sf::RectangleShape panel_shape_;
         sf::Color panel_color_;
 
         std::vector<MapObject*> player_cards_;
+        int* lpc_;
 
         PlayerPanel();
 };
@@ -334,6 +332,8 @@ class Map {
         void AddRandomVillageRoad(Player*);
 
         void DisplayPlayersInfo(std::vector<Player*>);
+
+        int get_lpc() const;
     private:
         std::vector<MapObject*> map_objects_;
 
@@ -360,6 +360,7 @@ class Map {
         mutable sf::Font hex_font_;
 
         Player* last_requester_;
+        int last_player_clicked_ = -1;
 
         void Init();
 

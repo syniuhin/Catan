@@ -65,7 +65,9 @@ TradeWindow* TradeWindow::CreateInstance(int seller) {
                                  TRADE_WINDOW_HEIGHT))
                          -> set_color(sf::Color::Red)
                          -> set_size(go_btn_size)
-                         -> set_callback([instance] () {}));
+                         -> set_callback([instance] () {
+                                instance -> on_propose_();
+                             }));
 
     if (!instance -> font_.loadFromFile("cb.ttf"))
         return NULL;
@@ -88,6 +90,16 @@ bool TradeWindow::OnMouse(sf::Vector2i cursor) const {
 
 void TradeWindow::set_seller(int s) {
     seller_id_ = s;
+}
+
+void TradeWindow::set_on_propose(std::function<void()> f) {
+    on_propose_ = f;
+}
+
+int** TradeWindow::get_balance(int** balance) {
+    balance[0] = give_balance;
+    balance[1] = take_balance;
+    return balance;
 }
 
 void TradeWindow::PlusGiven(int res_id) {
