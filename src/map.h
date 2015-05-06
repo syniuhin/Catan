@@ -24,7 +24,7 @@ static const int TYPE_MOUNTAINS = 4;
 static const int TYPE_FIELDS = 5;
 static const int TYPE_FOREST = 6;
 
-static const int TYPE_COUNT[] = {0, 1, 3, 4, 3, 4, 4};
+static const int TYPE_COUNT[] = {0, 0, 3, 4, 3, 4, 4};
 static const sf::Color TYPE_COLOR[] = {
     sf::Color(10, 10, 255, 180),
     sf::Color(255, 255, 255, 180),

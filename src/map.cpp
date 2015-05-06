@@ -602,6 +602,10 @@ void Map::Generate() {
         2 * cos(30.0 * M_PI / 180.0)
     };
 
+    int nums_arr[] = {7, 8, 5, 4, 3, 10, 2, 11,
+        6, 11, 9, 6, 12, 5, 4, 3, 9, 10, 8};
+    int nums_ind = 0;
+
     int wx = window_ -> getSize().x;
     int wy = window_ -> getSize().y;
     int deltax = HEX_SIZE * cos(30.0 * M_PI / 180.0);
@@ -612,8 +616,8 @@ void Map::Generate() {
         for (int j = 0; j < TYPE_COUNT[i]; ++j)
             types.push_back(i);
 
-    std::vector<int> nums(&NUMS_ARR[0], &NUMS_ARR[0]
-            + (HEXES_NUM - 1));
+//    std::vector<int> nums(&NUMS_ARR[0], &NUMS_ARR[0]
+//            + (HEXES_NUM - 1));
 
     int m = HEXES_NUM - 1;
     int k = types.size();
@@ -650,51 +654,56 @@ void Map::Generate() {
             int type;
             if ((i > 0 && i < GRID_SIZE + 1) &&
                     (j > 0 && j < dims_[i] - 1)) {
-                int type_ind = rand() % k;
-                type = types[type_ind];
-                types.erase(types.begin() + type_ind);
-                --k;
+                if (1 == i && 1 == j) {
+                    type = TYPE_DESERT;
+                } else {
+                    int type_ind = rand() % k;
+                    type = types[type_ind];
+                    types.erase(types.begin() + type_ind);
+                    --k;
+                }
             } else {
                 type = TYPE_SEA;
             }
 
             curr -> set_type(type);
-            if (TYPE_DESERT == type || TYPE_SEA == type) {
+            if (TYPE_SEA == type) {
                 curr -> set_num(0);
             } else {
-                int neighbor_sum = 0;
-                int neighbor_count = 0;
-                if (NULL != curr -> up_left) {
-                    neighbor_count++;
-                    neighbor_sum += curr -> up_left -> get_num();
-                }
-                if (NULL != curr -> left) {
-                    neighbor_count++;
-                    neighbor_sum += curr -> left -> get_num();
-                }
-                if (NULL != curr -> down_left) {
-                    neighbor_count++;
-                    neighbor_sum += curr -> down_left -> get_num();
-                }
+                //int neighbor_sum = 0;
+                //int neighbor_count = 0;
+                //if (NULL != curr -> up_left) {
+                //    neighbor_count++;
+                //    neighbor_sum += curr -> up_left -> get_num();
+                //}
+                //if (NULL != curr -> left) {
+                //    neighbor_count++;
+                //    neighbor_sum += curr -> left -> get_num();
+                //}
+                //if (NULL != curr -> down_left) {
+                //    neighbor_count++;
+                //    neighbor_sum += curr -> down_left -> get_num();
+                //}
 
-                int num_ind;
-                if (neighbor_count == 0) {
-                    num_ind = rand() % m;
-                } else {
-                    num_ind = 0;
-                    int desired = 6 + neighbor_count * 6 -
-                        neighbor_sum;
-                    int minabs = 6;
-                    for (int ind = 0; ind < m; ++ind) {
-                        int currabs = abs(desired - nums[ind]);
-                        if (minabs > currabs) {
-                            minabs = currabs;
-                            num_ind = ind;
-                        }
-                    }
-                }
-                curr -> set_num(nums[num_ind]);
-                nums.erase(nums.begin() + num_ind);
+                //int num_ind;
+                //if (neighbor_count == 0) {
+                //    num_ind = rand() % m;
+                //} else {
+                //    num_ind = 0;
+                //    int desired = 6 + neighbor_count * 6 -
+                //        neighbor_sum;
+                //    int minabs = 6;
+                //    for (int ind = 0; ind < m; ++ind) {
+                //        int currabs = abs(desired - nums[ind]);
+                //        if (minabs > currabs) {
+                //            minabs = currabs;
+                //            num_ind = ind;
+                //        }
+                //    }
+                //}
+                //curr -> set_num(nums[num_ind]);
+                curr -> set_num(nums_arr[nums_ind++]);
+                //nums.erase(nums.begin() + num_ind);
                 --m;
             }
             hexes_.push_back(curr);
@@ -1032,7 +1041,6 @@ void Map::DisplayPlayersInfo(std::vector<Player*> players) {
 }
 
 int Map::get_lpc() const {
-    LOG(INFO) << "get_lpc() == " << last_player_clicked_;
     return last_player_clicked_;
 }
 
