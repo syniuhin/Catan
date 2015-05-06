@@ -118,9 +118,34 @@ void Game::SetUp() {
                 };
             });
 
-    Button* p_trade_button =
+    Button* p_dev_card_button =
         Button::CreateInstance(ACTION_PANEL_POS +
             sf::Vector2f(115, 10), sf::Vector2f(30, 30))
+                -> SetColors(sf::Color(10, 73, 166, 196),
+                             sf::Color(10, 73, 166, 255))
+                -> AddCallback(
+                        [this] () {
+                            int which = rand() % 3;
+                            switch (which) {
+                                case 0:
+                                    game_map_ -> ShowNotification("Knight card", 50);
+                                    players_[curr_player_ind_] -> add_knight_card();
+                                    break;
+                                case 1:
+                                    game_map_ -> ShowNotification("Progress card", 50);
+                                    players_[curr_player_ind_] -> add_progress_card();
+                                    break;
+                                case 2:
+                                    game_map_ -> ShowNotification("Victory points card", 50);
+                                    players_[curr_player_ind_] -> add_victory_card();
+                                    break;
+                            }
+                        });
+    game_map_ -> AddButton(p_dev_card_button);
+
+    Button* p_trade_button =
+        Button::CreateInstance(ACTION_PANEL_POS +
+            sf::Vector2f(150, 10), sf::Vector2f(30, 30))
                 -> SetColors(sf::Color(100, 73, 66, 196),
                              sf::Color(100, 73, 66, 255))
                 -> AddCallback(
@@ -352,6 +377,18 @@ void Player::subtract_resources(int* r) {
 void Player::add_resources(int* r) {
     for (int i = 0; i < 5; ++i)
         resources_[i] += r[i];
+}
+
+void Player::add_victory_card() {
+    vic_cards_++;
+}
+
+void Player::add_knight_card() {
+    knight_cards_++;
+}
+
+void Player::add_progress_card() {
+    progress_cards_++;
 }
 
 std::string Player::to_string() {

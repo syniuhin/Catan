@@ -29,6 +29,10 @@ class Player {
 
         void subtract_resources(int*);
         void add_resources(int*);
+
+        void add_victory_card();
+        void add_knight_card();
+        void add_progress_card(); //WTF is this, actually?
         std::string to_string();
     private:
         int player_id_;
@@ -38,6 +42,10 @@ class Player {
         int roads_;
 
         int resources_[5] = {0};
+
+        int vic_cards_ = 0;
+        int knight_cards_ = 0;
+        int progress_cards_; //!?!?!?!?
 };
 
 class Village {
