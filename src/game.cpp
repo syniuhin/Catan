@@ -38,7 +38,9 @@ void Game::SetUp() {
                             Player* curr = players_[curr_player_ind_];
                             if (curr -> TryBuildVillage()) {
                                 on_click_ = [&]() {
-                                    game_map_ -> AddVillage();
+                                    bool added = game_map_ -> AddVillage();
+                                    if (added)
+                                        curr -> on_village_added();
                                 };
                                 game_map_ -> ShowNotification("Add a village");
                             } else {
@@ -56,11 +58,13 @@ void Game::SetUp() {
                              sf::Color(96, 153, 52, 255))
                 -> AddCallback(
                         [this] () {
-                            Player* curr = players_[curr_player_ind_];
-                            if (curr -> TryBuildRoad()) {
+                            if (players_[curr_player_ind_] -> TryBuildRoad()) {
                                 on_click_ = [&]() {
-                                    game_map_ ->
-                                        AddRoad(players_[curr_player_ind_]);
+                                    Player* curr = players_[curr_player_ind_];
+                                    bool added = game_map_ ->
+                                        AddRoad(curr);
+                                    if (added)
+                                        curr -> on_road_added();
                                 };
                                 game_map_ -> ShowNotification("Add a road");
                             } else {
@@ -199,11 +203,16 @@ void Game::ManualSetUp() {
                         if (!village_added) {
                             village_added = game_map_ ->
                                 AddVillage(curr);
-                            if (village_added)
+                            if (village_added) {
                                 villages_.push_back(new Village(
                                             village_added, curr));
+                                curr -> on_village_added();
+                            }
                         } else {
                             road_added = game_map_ -> AddRoad(curr);
+                            if (road_added) {
+                                curr -> on_road_added();
+                            }
                         }
                         break;
                     default:
@@ -308,10 +317,7 @@ City::City(Point* loc, Player* ownr){
 }
 
 Player::Player(int p_id)
-    : player_id_(p_id),
-      cities_(0),
-      villages_(0),
-      roads_(0) {}
+    : player_id_(p_id) {}
 
 int Player::get_id() {
     return player_id_;
@@ -389,6 +395,14 @@ void Player::add_knight_card() {
 
 void Player::add_progress_card() {
     progress_cards_++;
+}
+
+void Player::on_village_added() {
+    villages_++;
+}
+
+void Player::on_road_added() {
+    roads_++;
 }
 
 std::string Player::to_string() {

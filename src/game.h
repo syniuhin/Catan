@@ -14,7 +14,7 @@
 const int TERRAIN_RES[7] = {-1, -1, 0, 1, 2, 3, 4};
 class Player {
     public:
-        Player(int);
+        explicit Player(int _id);
 
         int get_id();
         int* get_resources();
@@ -33,19 +33,22 @@ class Player {
         void add_victory_card();
         void add_knight_card();
         void add_progress_card(); //WTF is this, actually?
+
+        void on_village_added();
+        void on_road_added();
         std::string to_string();
     private:
         int player_id_;
 
-        int cities_;
-        int villages_;
-        int roads_;
+        int cities_ = 0;
+        int villages_ = 0;
+        int roads_ = 0;
 
         int resources_[5] = {0};
 
         int vic_cards_ = 0;
         int knight_cards_ = 0;
-        int progress_cards_; //!?!?!?!?
+        int progress_cards_ = 666; //!?!?!?!?
 };
 
 class Village {
