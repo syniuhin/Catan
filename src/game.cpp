@@ -109,13 +109,17 @@ void Game::SetUp() {
                             Player* ths = players_[curr_player_ind_];
                             Player* tht = players_[_id];
                             if (ths -> HasResources(balance[0]) &&
-                                tht -> HasResources(balance[1]))
+                                tht -> HasResources(balance[1])) {
                                 ths -> ExchangeWith(tht,
                                         balance[0], balance[1]);
-                            else
+                                game_map_ -> ShowNotification(
+                                        "Traded successfully",
+                                        80);
+                            } else {
                                 game_map_ -> ShowNotification(
                                         "Insufficient resources",
                                         80);
+                            }
                             delete[] balance;
                         };
                     }
