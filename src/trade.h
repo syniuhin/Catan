@@ -42,6 +42,7 @@ class TradeWindow : public UiObject {
         void set_on_propose(std::function<void()>);
 
         int** get_balance(int**);
+        void ClearValues();
     private:
         sf::RectangleShape shape_;
         const sf::Color bg_color_ = sf::Color(73, 66, 255, 245);

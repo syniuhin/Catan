@@ -40,3 +40,4 @@ src/logs
 *.swp
 
 src/game.dSYM
+debug

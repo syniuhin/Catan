@@ -7,6 +7,8 @@ SFML_FLAGS = -framework sfml-system -framework \
 
 bin: main.o game.o map.o menu.o sqlite3.o trade.o userbase.o util.o
 	$(CXX) $(SFML_FLAGS) $(FLAGS) -o $@ $^
+debug: main.o game.o map.o menu.o sqlite3.o trade.o userbase.o util.o
+	$(CXX) $(SFML_FLAGS) $(FLAGS) -o $@ $^
 main.o: main.cpp
 	$(CXX) $(FLAGS) -c $^
 game.o: game.cpp

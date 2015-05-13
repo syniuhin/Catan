@@ -136,6 +136,12 @@ void TradeWindow::UpdateValues() {
     }
 }
 
+void TradeWindow::ClearValues() {
+    for (int i = 0; i < 5; ++i)
+        give_balance[i] = take_balance[i] = 0;
+    UpdateValues();
+}
+
 ResourceCell* ResourceCell::CreateInstance(int res_id,
             std::function<void()> pg,
             std::function<void()> mg,

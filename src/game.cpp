@@ -121,6 +121,16 @@ void Game::SetUp() {
                                         80);
                             }
                             delete[] balance;
+                            trade_win_ -> ClearValues();
+                            on_escape_ = [](){};
+                        };
+                        on_escape_ = [&] () {
+                            game_map_ -> ShowNotification(
+                                    "Player denied your proposal",
+                                    120);
+                            LOG(INFO) << "Trading denial";
+                            trade_win_ -> ClearValues();
+                            on_enter_ = [](){};
                         };
                     }
                 };
@@ -254,10 +264,13 @@ void Game::Update() {
                     }
                     break;
                 case sf::Event::KeyPressed:
-                    if (e.key.code == sf::Keyboard::Escape)
+                    if (e.key.code == sf::Keyboard::Escape) {
                         on_escape_();
-                    else if (e.key.code == sf::Keyboard::Return)
+                        on_escape_ = [](){};
+                    } else if (e.key.code == sf::Keyboard::Return) {
                         on_enter_();
+                        on_enter_ = [](){};
+                    }
                 default:
                     break;
             }
