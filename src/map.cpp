@@ -444,7 +444,22 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
     instance -> shape_.setPosition(pos);
 
     instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(10, 10));
-    instance -> playerpic_shape_.setFillColor(sf::Color::Magenta);
+    sf::Color player_color;
+    switch (player.get_id()) {
+        case 0:
+            player_color = sf::Color::Red;
+            break;
+        case 1:
+            player_color = sf::Color::Cyan;
+            break;
+        case 2:
+            player_color = sf::Color::Magenta;
+            break;
+        default:
+            player_color = sf::Color::White;
+            break;
+    }
+    instance -> playerpic_shape_.setFillColor(player_color);
 
     if (!instance -> font_.loadFromFile("cb.ttf")) {
         return NULL;
