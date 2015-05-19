@@ -560,6 +560,14 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       pasture_texture_(),
       mountains_texture_(),
       fields_texture_(),
+      village_texture_(),
+      sea_sprite_(),
+      desert_sprite_(),
+      hills_sprite_(),
+      pasture_sprite_(),
+      mountains_sprite_(),
+      fields_sprite_(),
+      village_sprite_(),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
               POINT_PRECISION)),
       line_array_(sf::VertexArray(sf::Lines, 2)) {
@@ -620,6 +628,13 @@ void Map::Init() {
         LOG(ERROR) << "Can't load forest texture";
     } else {
         forest_sprite_.setTexture(forest_texture_);
+    }
+
+    if (!village_texture_.loadFromFile("village.png")) {
+        LOG(ERROR) << "Can't load village texture";
+    } else {
+        village_sprite_.setTexture(village_texture_);
+        village_sprite_.scale(sf::Vector2f(0.25, 0.25));
     }
 
     point_circle_.setFillColor(sf::Color::Red);
@@ -860,7 +875,9 @@ void Map::DrawPoints() const {
 //    TODO : remove stub
     for (size_t i = 0; i < points_.size(); ++i) {
         Point* curr = points_[i];
-        point_circle_.setPosition(curr -> get_pos());
+//        point_circle_.setPosition(curr -> get_pos());
+        village_sprite_.setPosition(curr -> get_pos() -
+                sf::Vector2f(4, 4));
         sf::Color fill_color;
         switch (curr -> get_owner_id()) {
             case 0:
@@ -879,8 +896,10 @@ void Map::DrawPoints() const {
                 fill_color = sf::Color(255, 255, 255, 20);
                 break;
         }
-        point_circle_.setFillColor(fill_color);
-        window_ -> draw(point_circle_);
+//        point_circle_.setFillColor(fill_color);
+        village_sprite_.setColor(fill_color);
+//        window_ -> draw(point_circle_);
+        window_ -> draw(village_sprite_);
     }
 }
 
@@ -971,10 +990,14 @@ void Map::DrawMap() const {
             }
             curr_sprite -> setPosition(curr_pos);
             if (curr -> OnMouse(point)) {
-                hexagon_.setFillColor(TYPE_COLOR[curr_type] +
-                        sf::Color(0, 0, 0, 75));
+//                hexagon_.setFillColor(TYPE_COLOR[curr_type] +
+//                        sf::Color(0, 0, 0, 75));
+                curr_sprite -> setColor(
+                        sf::Color(255, 255, 255, 255));
             } else {
-                hexagon_.setFillColor(TYPE_COLOR[curr_type]);
+//                hexagon_.setFillColor(TYPE_COLOR[curr_type]);
+                curr_sprite -> setColor(
+                        sf::Color(255, 255, 255, 205));
             }
 //            window_ -> draw(hexagon_);
             window_ -> draw(*curr_sprite);
@@ -998,8 +1021,8 @@ void Map::DrawMap() const {
 
 void Map::Draw() const {
     DrawMap();
-    DrawPoints();
     DrawLines();
+    DrawPoints();
     notifications_ -> Draw(window_);
     notifications_ -> Update();
 

@@ -362,6 +362,8 @@ class Map {
         sf::Texture mountains_texture_;
         sf::Texture fields_texture_;
         sf::Texture forest_texture_;
+
+        sf::Texture village_texture_;
         std::vector<sf::Texture> textures_;
 
         mutable sf::Sprite sea_sprite_;
@@ -371,6 +373,8 @@ class Map {
         mutable sf::Sprite mountains_sprite_;
         mutable sf::Sprite fields_sprite_;
         mutable sf::Sprite forest_sprite_;
+
+        mutable sf::Sprite village_sprite_;
 
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;
