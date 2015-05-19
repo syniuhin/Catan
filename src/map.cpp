@@ -554,6 +554,10 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       player_panel_(PlayerPanel::CreateInstance(&last_player_clicked_)),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
+      sea_texture_(),
+      desert_texture_(),
+      hills_texture_(),
+      pasture_texture_(),
       mountains_texture_(),
       fields_texture_(),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
@@ -576,6 +580,30 @@ Map::~Map() {
 void Map::Init() {
     hexagon_.setOutlineThickness(HEX_OUTLINE_SIZE);
     hexagon_.setOutlineColor(sf::Color::Black);
+    if (!sea_texture_.loadFromFile("hexes_sea.png")) {
+        LOG(ERROR) << "Can't load sea texture";
+    } else {
+        sea_sprite_.setTexture(sea_texture_);
+    }
+
+    if (!desert_texture_.loadFromFile("hexes_desert.png")) {
+        LOG(ERROR) << "Can't load desert texture";
+    } else {
+        desert_sprite_.setTexture(desert_texture_);
+    }
+
+    if (!hills_texture_.loadFromFile("hexes_hills.png")) {
+        LOG(ERROR) << "Can't load hills texture";
+    } else {
+        hills_sprite_.setTexture(hills_texture_);
+    }
+
+    if (!pasture_texture_.loadFromFile("hexes_pasture.png")) {
+        LOG(ERROR) << "Can't load pasture texture";
+    } else {
+        pasture_sprite_.setTexture(pasture_texture_);
+    }
+
     if (!mountains_texture_.loadFromFile("hexes_mountains.png")) {
         LOG(ERROR) << "Can't load mountains texture";
     } else {
@@ -586,6 +614,12 @@ void Map::Init() {
         LOG(ERROR) << "Can't load fields texture";
     } else {
         fields_sprite_.setTexture(fields_texture_);
+    }
+
+    if (!forest_texture_.loadFromFile("hexes_forest.png")) {
+        LOG(ERROR) << "Can't load forest texture";
+    } else {
+        forest_sprite_.setTexture(forest_texture_);
     }
 
     point_circle_.setFillColor(sf::Color::Red);
@@ -909,23 +943,38 @@ void Map::DrawMap() const {
             sf::Vector2f curr_pos = curr -> get_pos();
             hexagon_.setPosition(curr_pos);
             sf::Sprite* curr_sprite;
-            switch (curr -> get_type()) {
+            int curr_type = curr -> get_type();
+            switch (curr_type) {
+                case TYPE_SEA:
+                    curr_sprite = &sea_sprite_;
+                    break;
+                case TYPE_DESERT:
+                    curr_sprite = &desert_sprite_;
+                    break;
+                case TYPE_HILLS:
+                    curr_sprite = &hills_sprite_;
+                    break;
+                case TYPE_PASTURE:
+                    curr_sprite = &pasture_sprite_;
+                    break;
                 case TYPE_MOUNTAINS:
                     curr_sprite = &mountains_sprite_;
                     break;
                 case TYPE_FIELDS:
                     curr_sprite = &fields_sprite_;
                     break;
+                case TYPE_FOREST:
+                    curr_sprite = &forest_sprite_;
+                    break;
                 default:
-                    curr_sprite = &fields_sprite_;
                     break;
             }
             curr_sprite -> setPosition(curr_pos);
             if (curr -> OnMouse(point)) {
-                hexagon_.setFillColor(TYPE_COLOR[curr -> get_type()] +
+                hexagon_.setFillColor(TYPE_COLOR[curr_type] +
                         sf::Color(0, 0, 0, 75));
             } else {
-                hexagon_.setFillColor(TYPE_COLOR[curr -> get_type()]);
+                hexagon_.setFillColor(TYPE_COLOR[curr_type]);
             }
 //            window_ -> draw(hexagon_);
             window_ -> draw(*curr_sprite);
@@ -936,10 +985,12 @@ void Map::DrawMap() const {
 //                         HEX_SIZE * sqrt(2.0) * .5));
 //            window_ -> draw(center_circle);
 
-            hex_text_.setPosition(curr_pos +
-                    sf::Vector2f(.7f * HEX_SIZE, .7f * HEX_SIZE));
-            hex_text_.setString(std::to_string(curr -> get_num()));
-            window_ -> draw(hex_text_);
+            if (curr_type != 0) {
+                hex_text_.setPosition(curr_pos +
+                        sf::Vector2f(.7f * HEX_SIZE, .7f * HEX_SIZE));
+                hex_text_.setString(std::to_string(curr -> get_num()));
+                window_ -> draw(hex_text_);
+            }
             curr = hexes_[k++];
         }
     }

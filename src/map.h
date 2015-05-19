@@ -355,12 +355,22 @@ class Map {
 
         mutable sf::CircleShape hexagon_;
 
+        sf::Texture sea_texture_;
+        sf::Texture desert_texture_;
+        sf::Texture hills_texture_;
+        sf::Texture pasture_texture_;
         sf::Texture mountains_texture_;
         sf::Texture fields_texture_;
+        sf::Texture forest_texture_;
         std::vector<sf::Texture> textures_;
 
+        mutable sf::Sprite sea_sprite_;
+        mutable sf::Sprite desert_sprite_;
+        mutable sf::Sprite hills_sprite_;
+        mutable sf::Sprite pasture_sprite_;
         mutable sf::Sprite mountains_sprite_;
         mutable sf::Sprite fields_sprite_;
+        mutable sf::Sprite forest_sprite_;
 
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;
