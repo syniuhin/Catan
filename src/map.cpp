@@ -554,6 +554,8 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       player_panel_(PlayerPanel::CreateInstance(&last_player_clicked_)),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
+      mountains_texture_(),
+      fields_texture_(),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
               POINT_PRECISION)),
       line_array_(sf::VertexArray(sf::Lines, 2)) {
@@ -574,6 +576,17 @@ Map::~Map() {
 void Map::Init() {
     hexagon_.setOutlineThickness(HEX_OUTLINE_SIZE);
     hexagon_.setOutlineColor(sf::Color::Black);
+    if (!mountains_texture_.loadFromFile("hexes_mountains.png")) {
+        LOG(ERROR) << "Can't load mountains texture";
+    } else {
+        mountains_sprite_.setTexture(mountains_texture_);
+    }
+
+    if (!fields_texture_.loadFromFile("hexes_fields.png")) {
+        LOG(ERROR) << "Can't load fields texture";
+    } else {
+        fields_sprite_.setTexture(fields_texture_);
+    }
 
     point_circle_.setFillColor(sf::Color::Red);
     point_circle_.setOutlineColor(sf::Color::Black);
@@ -895,13 +908,27 @@ void Map::DrawMap() const {
 
             sf::Vector2f curr_pos = curr -> get_pos();
             hexagon_.setPosition(curr_pos);
+            sf::Sprite* curr_sprite;
+            switch (curr -> get_type()) {
+                case TYPE_MOUNTAINS:
+                    curr_sprite = &mountains_sprite_;
+                    break;
+                case TYPE_FIELDS:
+                    curr_sprite = &fields_sprite_;
+                    break;
+                default:
+                    curr_sprite = &fields_sprite_;
+                    break;
+            }
+            curr_sprite -> setPosition(curr_pos);
             if (curr -> OnMouse(point)) {
                 hexagon_.setFillColor(TYPE_COLOR[curr -> get_type()] +
                         sf::Color(0, 0, 0, 75));
             } else {
                 hexagon_.setFillColor(TYPE_COLOR[curr -> get_type()]);
             }
-            window_ -> draw(hexagon_);
+//            window_ -> draw(hexagon_);
+            window_ -> draw(*curr_sprite);
 
 //            pos_circle.setPosition(curr_pos);
 //            window_ -> draw(pos_circle);

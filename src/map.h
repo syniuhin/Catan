@@ -354,6 +354,14 @@ class Map {
         sf::RenderWindow* window_;
 
         mutable sf::CircleShape hexagon_;
+
+        sf::Texture mountains_texture_;
+        sf::Texture fields_texture_;
+        std::vector<sf::Texture> textures_;
+
+        mutable sf::Sprite mountains_sprite_;
+        mutable sf::Sprite fields_sprite_;
+
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;
         mutable sf::Text hex_text_;
