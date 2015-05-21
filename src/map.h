@@ -259,7 +259,10 @@ class PlayerCard : public Button {
     public:
         static PlayerCard* CreateInstance(sf::Vector2f pos, Player&);
 
-        void Draw(sf::RenderWindow*);
+        void Draw(sf::RenderWindow*) override;
+
+        void GainFocus();
+        void LoseFocus();
     private:
         sf::RectangleShape playerpic_shape_;
         sf::Text name_text_;
@@ -268,6 +271,10 @@ class PlayerCard : public Button {
         sf::Font font_;
 
         Player& player_;
+
+        const sf::Color color_active_delta_ =
+            sf::Color(40, 50, -100, 15);
+        sf::Color backed_color_idle_;
 
         PlayerCard(sf::Vector2f sz, Player&);
 };
@@ -282,6 +289,8 @@ class PlayerPanel : public MapObject {
         void Draw(sf::RenderWindow*);
 
         void Insert(Player&);
+        void SetIdle(int index);
+        void SetActive(int index);
     private:
         sf::RenderWindow* window_;
         sf::RectangleShape panel_shape_;
@@ -289,6 +298,7 @@ class PlayerPanel : public MapObject {
 
         std::vector<MapObject*> player_cards_;
         int* lpc_;
+        int last_active_id_ = -1;
 
         PlayerPanel();
 };
@@ -303,7 +313,6 @@ class Map {
         void Generate();
         void Draw() const;
         void Click(Player* requester);
-        bool NextTurn() const;
 
         void ShowNotification(std::string);
         void ShowNotification(std::string, int duration);
@@ -332,6 +341,7 @@ class Map {
         void AddRandomVillageRoad(Player*);
 
         void DisplayPlayersInfo(std::vector<Player*>);
+        void SetActivePlayer(int _id);
 
         int get_lpc() const;
     private:

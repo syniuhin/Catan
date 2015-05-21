@@ -500,6 +500,14 @@ void PlayerCard::Draw(sf::RenderWindow* window) {
     window -> draw(resources_text_);
 }
 
+void PlayerCard::GainFocus() {
+    idle_ += color_active_delta_;
+}
+
+void PlayerCard::LoseFocus() {
+    idle_ -= color_active_delta_;
+}
+
 PlayerPanel* PlayerPanel::CreateInstance(int* lpc) {
     PlayerPanel* instance = new PlayerPanel;
     instance -> pos_ = PLAYER_PANEL_POS;
@@ -557,6 +565,19 @@ void PlayerPanel::Insert(Player& player) {
     player_cards_.push_back(pc);
 }
 
+void PlayerPanel::SetIdle(int index) {
+    dynamic_cast<PlayerCard*>(player_cards_[index]) ->
+        LoseFocus();
+}
+
+void PlayerPanel::SetActive(int index) {
+    if (last_active_id_ != -1)
+        SetIdle(last_active_id_);
+    last_active_id_ = index;
+    dynamic_cast<PlayerCard*>(player_cards_[index]) ->
+        GainFocus();
+}
+
 Map::Map(sf::RenderWindow* window)
     : Map(new Hex, window) {}
 
@@ -569,6 +590,8 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       player_panel_(PlayerPanel::CreateInstance(&last_player_clicked_)),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
+      hex_text_(),
+      hex_font_(),
       sea_texture_(),
       desert_texture_(),
       hills_texture_(),
@@ -661,9 +684,9 @@ void Map::Init() {
     if (!hex_font_.loadFromFile("cb.ttf")) {
         LOG(ERROR) << "Error loading font";
         return;
+    } else {
+        hex_text_.setFont(hex_font_);
     }
-    hex_text_.setFont(hex_font_);
-
 }
 
 void Map::Generate() {
@@ -1053,10 +1076,6 @@ void Map::Click(Player* requester) {
             map_objects_[i] -> Click();
 }
 
-bool Map::NextTurn() const {
-    return false;
-}
-
 void Map::ShowNotification(std::string text) {
     notifications_ -> MakeVisible();
     notifications_ -> SetContent(text);
@@ -1154,6 +1173,10 @@ void Map::DisplayPlayersInfo(std::vector<Player*> players) {
     for (size_t i = 0; i < players.size(); ++i) {
         player_panel_ -> Insert(*players[i]);
     }
+}
+
+void Map::SetActivePlayer(int _id) {
+    player_panel_ -> SetActive(_id);
 }
 
 int Map::get_lpc() const {

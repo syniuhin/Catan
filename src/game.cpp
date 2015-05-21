@@ -308,6 +308,7 @@ void Game::PerformTurn(Player* curr) {
     //Res output
     for (size_t i = 0; i < players_.size(); ++i)
         LOG(INFO) << players_[i] -> to_string();
+    game_map_ -> SetActivePlayer(curr -> get_id());
 }
 
 void Game::DrawMousePointer() const {
