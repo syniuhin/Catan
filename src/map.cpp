@@ -435,7 +435,7 @@ ActionPanel* ActionPanel::CreateInstance() {
 
 ActionPanel::ActionPanel()
     : panel_shape_(ACTION_PANEL_SIZE),
-      panel_color_(sf::Color(212, 193, 131, 255)),
+      panel_color_(sf::Color(201, 214, 213, 255)),
       components_() {}
 
 void ActionPanel::Click() {

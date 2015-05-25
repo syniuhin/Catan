@@ -5,10 +5,10 @@ FLAGS = -g -std=c++11
 SFML_FLAGS = -framework sfml-system -framework \
 			 sfml-window -framework sfml-graphics
 
-bin: main.o game.o map.o menu.o sqlite3.o trade.o userbase.o util.o
-	$(CXX) $(SFML_FLAGS) $(FLAGS) -o $@ $^
 debug: main.o game.o map.o menu.o sqlite3.o trade.o userbase.o util.o
 	$(CXX) $(SFML_FLAGS) $(FLAGS) -o $@ $^
+bin: main.o game.o map.o menu.o sqlite3.o trade.o userbase.o util.o
+	$(CXX) $(SFML_FLAGS) -std=c++11 -o $@ $^
 main.o: main.cpp
 	$(CXX) $(FLAGS) -c $^
 game.o: game.cpp
@@ -26,4 +26,4 @@ userbase.o: userbase.cpp
 util.o: util.cpp
 	$(CXX) $(FLAGS) -c $^
 clean:
-	rm *.o bin
+	rm *.o bin debug

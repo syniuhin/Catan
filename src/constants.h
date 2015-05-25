@@ -48,7 +48,7 @@ static const int CARD_COST[] = {0, 1, 1, 1, 0};
  */
 static const double EPS = 0.0000005;
 
-static const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(300, 50);
+static const sf::Vector2f ACTION_PANEL_SIZE = sf::Vector2f(210, 50);
 static const sf::Vector2f ACTION_PANEL_POS =
         sf::Vector2f(SCREEN_WIDTH - ACTION_PANEL_SIZE.x - 20,
                 SCREEN_HEIGHT - ACTION_PANEL_SIZE.y - 40);

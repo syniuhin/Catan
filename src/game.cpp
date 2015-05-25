@@ -30,9 +30,10 @@ void Game::SetUp() {
 
     Button* p_new_village_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(45, 10), sf::Vector2f(30, 30))
+            sf::Vector2f(50, 10), sf::Vector2f(30, 30))
                 -> SetColors(sf::Color(196, 53, 52, 196),
                              sf::Color(196, 53, 52, 255))
+                -> LoadTextureFrom("village_small.png")
                 -> AddCallback(
                         [this] () {
                             Player* curr = players_[curr_player_ind_];
@@ -53,9 +54,10 @@ void Game::SetUp() {
 
     Button* p_new_road_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(80, 10), sf::Vector2f(30, 30))
+            sf::Vector2f(90, 10), sf::Vector2f(30, 30))
                 -> SetColors(sf::Color(96, 153, 52, 196),
                              sf::Color(96, 153, 52, 255))
+                -> LoadTextureFrom("road_small.png")
                 -> AddCallback(
                         [this] () {
                             if (players_[curr_player_ind_] -> TryBuildRoad()) {
@@ -78,8 +80,8 @@ void Game::SetUp() {
     Button* p_dice_btn =
         Button::CreateInstance(ACTION_PANEL_POS +
             sf::Vector2f(10, 10), sf::Vector2f(30, 30))
-                -> SetColors(sf::Color(53, 196, 72, 196),
-                             sf::Color(53, 196, 72, 255))
+                -> SetColors(sf::Color(255, 255, 240, 196),
+                             sf::Color(255, 255, 240, 255))
                 -> LoadTextureFrom("dice_small.png")
                 -> AddCallback(
                         [this] () {
@@ -139,9 +141,10 @@ void Game::SetUp() {
 
     Button* p_dev_card_button =
         Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(115, 10), sf::Vector2f(30, 30))
+            sf::Vector2f(130, 10), sf::Vector2f(30, 30))
                 -> SetColors(sf::Color(10, 73, 166, 196),
                              sf::Color(10, 73, 166, 255))
+                -> LoadTextureFrom("cards_small.png")
                 -> AddCallback(
                         [this] () {
                             int which = rand() % 3;
@@ -164,9 +167,10 @@ void Game::SetUp() {
 
     Button* p_trade_button =
         Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(150, 10), sf::Vector2f(30, 30))
+            sf::Vector2f(170, 10), sf::Vector2f(30, 30))
                 -> SetColors(sf::Color(100, 73, 66, 196),
                              sf::Color(100, 73, 66, 255))
+                -> LoadTextureFrom("trade_small.png")
                 -> AddCallback(
                         [this] () {
                             visual_mode_ = 1;
