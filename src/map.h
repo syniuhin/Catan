@@ -224,9 +224,15 @@ class Button : public MapObject {
          */
         Button* AddCallback(std::function<void()> cb);
         Button* SetColors(sf::Color idle, sf::Color focused);
+
+        Button* LoadTextureFrom(std::string filename);
     protected:
         std::vector<std::function<void()> > callbacks_;
         sf::RectangleShape shape_;
+        sf::Texture texture_;
+        sf::Sprite sprite_;
+        bool has_texture_ = false;
+
         sf::Color idle_;
         sf::Color focused_;
 

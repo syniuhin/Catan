@@ -80,6 +80,7 @@ void Game::SetUp() {
             sf::Vector2f(10, 10), sf::Vector2f(30, 30))
                 -> SetColors(sf::Color(53, 196, 72, 196),
                              sf::Color(53, 196, 72, 255))
+                -> LoadTextureFrom("dice_small.png")
                 -> AddCallback(
                         [this] () {
                             curr_player_ind_ =

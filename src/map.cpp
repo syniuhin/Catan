@@ -307,7 +307,7 @@ NotificationArea*
     if (!instance -> notification_text_font_.loadFromFile(
                 font_path)) {
         LOG(ERROR) << "Error loading font";
-        return NULL;
+        return nullptr;
     }
     instance -> notification_text_
         .setFont(instance -> notification_text_font_);
@@ -365,11 +365,14 @@ Button* Button::CreateInstance(sf::Vector2f pos,
     Button* instance = new Button(b_size);
     instance -> pos_ = pos;
     instance -> shape_.setPosition(pos);
+    instance -> sprite_.setPosition(pos);
     return instance;
 }
 
 Button::Button(sf::Vector2f b_size)
     : shape_(b_size),
+      texture_(),
+      sprite_(),
       callbacks_() {}
 
 void Button::Click() {
@@ -384,11 +387,19 @@ bool Button::OnMouse(sf::Vector2i cursor) const {
 }
 
 void Button::Draw(sf::RenderWindow* window) {
-    if (OnMouse(sf::Mouse::getPosition(*window)))
-        shape_.setFillColor(focused_);
-    else
-        shape_.setFillColor(idle_);
-    window -> draw(shape_);
+    if (has_texture_) {
+        if (OnMouse(sf::Mouse::getPosition(*window)))
+            sprite_.setColor(focused_);
+        else
+            sprite_.setColor(idle_);
+        window -> draw(sprite_);
+    } else {
+        if (OnMouse(sf::Mouse::getPosition(*window)))
+            shape_.setFillColor(focused_);
+        else
+            shape_.setFillColor(idle_);
+        window -> draw(shape_);
+    }
 }
 
 Button* Button::AddCallback(std::function<void()> cb) {
@@ -399,6 +410,16 @@ Button* Button::AddCallback(std::function<void()> cb) {
 Button* Button::SetColors(sf::Color idle, sf::Color focused) {
     idle_ = idle;
     focused_ = focused;
+    return this;
+}
+
+Button* Button::LoadTextureFrom(std::string filename) {
+    if (texture_.loadFromFile(filename)) {
+        sprite_.setTexture(texture_);
+        has_texture_ = true;
+    } else {
+        has_texture_ = false;
+    }
     return this;
 }
 
@@ -461,8 +482,8 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
     }
     instance -> playerpic_shape_.setFillColor(player_color);
 
-    if (!instance -> font_.loadFromFile("cb.ttf")) {
-        return NULL;
+    if (!instance -> font_.loadFromFile("/Library/Fonts/Arial Black.ttf")) {
+        return nullptr;
     }
     instance -> name_text_.setPosition(pos + sf::Vector2f(75, 10));
     instance -> name_text_.setCharacterSize(20);
@@ -482,7 +503,8 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
 PlayerCard::PlayerCard(sf::Vector2f sz, Player& p)
     : Button(sz),
       player_(p),
-      playerpic_shape_(sf::Vector2f(60, 60)) {}
+      playerpic_shape_(sf::Vector2f(60, 60)),
+      font_() {}
 
 void PlayerCard::Draw(sf::RenderWindow* window) {
     int* res = player_.get_resources();
@@ -585,7 +607,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
     : root_(root),
       window_(window),
       notifications_(NotificationArea::
-              CreateInstance("cb.ttf")),
+              CreateInstance("/Library/Fonts/Arial Black.ttf")),
       action_panel_(ActionPanel::CreateInstance()),
       player_panel_(PlayerPanel::CreateInstance(&last_player_clicked_)),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
@@ -681,7 +703,7 @@ void Map::Init() {
 
     hex_text_.setCharacterSize(HEX_SIZE / 2);
     hex_text_.setColor(sf::Color::Black);
-    if (!hex_font_.loadFromFile("cb.ttf")) {
+    if (!hex_font_.loadFromFile("/Library/Fonts/Arial Black.ttf")) {
         LOG(ERROR) << "Error loading font";
         return;
     } else {
@@ -891,23 +913,26 @@ void Map::GenerateLines() {
     }
 }
 
-void Map::GenerateActionPanel() {
-    Button* p_new_village_btn =
-        Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(45, 10), sf::Vector2f(30, 30))
-                -> SetColors(sf::Color(196, 53, 52, 196),
-                             sf::Color(196, 53, 52, 255));
-    action_panel_ -> AddComponent(p_new_village_btn);
-    map_objects_.push_back(p_new_village_btn);
-
-    Button* p_dice_btn =
-        Button::CreateInstance(ACTION_PANEL_POS +
-            sf::Vector2f(10, 10), sf::Vector2f(30, 30))
-                -> SetColors(sf::Color(53, 196, 72, 196),
-                             sf::Color(53, 196, 72, 255));
-    action_panel_ -> AddComponent(p_dice_btn);
-    map_objects_.push_back(p_dice_btn);
-}
+/**
+ * Deprecated
+ */
+//void Map::GenerateActionPanel() {
+//    Button* p_new_village_btn =
+//        Button::CreateInstance(ACTION_PANEL_POS +
+//            sf::Vector2f(45, 10), sf::Vector2f(30, 30))
+//                -> SetColors(sf::Color(196, 53, 52, 196),
+//                             sf::Color(196, 53, 52, 255));
+//    action_panel_ -> AddComponent(p_new_village_btn);
+//    map_objects_.push_back(p_new_village_btn);
+//
+//    Button* p_dice_btn =
+//        Button::CreateInstance(ACTION_PANEL_POS +
+//            sf::Vector2f(10, 10), sf::Vector2f(30, 30))
+//                -> SetColors(sf::Color(53, 196, 72, 196),
+//                             sf::Color(53, 196, 72, 255));
+//    action_panel_ -> AddComponent(p_dice_btn);
+//    map_objects_.push_back(p_dice_btn);
+//}
 
 void Map::DrawPoints() const {
 //    TODO : remove stub
