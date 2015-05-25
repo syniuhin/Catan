@@ -65,8 +65,11 @@ class MapObject {
         //TODO: make it pure virtual, using tr1::shared_ptr
         virtual void Draw(sf::RenderWindow*);
     protected:
-        MapObject();
         sf::Vector2f pos_;
+        sf::Texture texture_;
+        sf::Sprite sprite_;
+
+        MapObject();
 };
 
 class Hex : public MapObject {
@@ -229,8 +232,6 @@ class Button : public MapObject {
     protected:
         std::vector<std::function<void()> > callbacks_;
         sf::RectangleShape shape_;
-        sf::Texture texture_;
-        sf::Sprite sprite_;
         bool has_texture_ = false;
 
         sf::Color idle_;
@@ -380,6 +381,7 @@ class Map {
         sf::Texture forest_texture_;
 
         sf::Texture village_texture_;
+        sf::Texture road_texture_;
         std::vector<sf::Texture> textures_;
 
         mutable sf::Sprite sea_sprite_;
@@ -391,6 +393,7 @@ class Map {
         mutable sf::Sprite forest_sprite_;
 
         mutable sf::Sprite village_sprite_;
+        mutable sf::Sprite road_sprite_;
 
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;

@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <math.h>
 
 #include "easylogging++.h"
 
@@ -18,7 +19,9 @@ const int POINT_OUTLINE_SIZE = 1;
 const int POINT_PRECISION = 72;
 
 MapObject::MapObject()
-    : pos_() {}
+    : pos_(),
+      texture_(),
+      sprite_() {}
 
 MapObject::~MapObject() {}
 
@@ -371,8 +374,6 @@ Button* Button::CreateInstance(sf::Vector2f pos,
 
 Button::Button(sf::Vector2f b_size)
     : shape_(b_size),
-      texture_(),
-      sprite_(),
       callbacks_() {}
 
 void Button::Click() {
@@ -621,6 +622,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       mountains_texture_(),
       fields_texture_(),
       village_texture_(),
+      road_texture_(),
       sea_sprite_(),
       desert_sprite_(),
       hills_sprite_(),
@@ -628,6 +630,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       mountains_sprite_(),
       fields_sprite_(),
       village_sprite_(),
+      road_sprite_(),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
               POINT_PRECISION)),
       line_array_(sf::VertexArray(sf::Lines, 2)) {
@@ -695,6 +698,13 @@ void Map::Init() {
     } else {
         village_sprite_.setTexture(village_texture_);
         village_sprite_.scale(sf::Vector2f(0.25, 0.25));
+    }
+
+    if (!road_texture_.loadFromFile("road_tile.png")) {
+        LOG(ERROR) << "Can't load road texture";
+    } else {
+        road_texture_.setRepeated(true);
+        road_sprite_.setTexture(road_texture_);
     }
 
     point_circle_.setFillColor(sf::Color::Red);
@@ -996,11 +1006,43 @@ void Map::DrawLines() const {
                 fill_color = sf::Color(255, 255, 255, 20);
                 break;
         }
-        line_array_[0].position = points[0] -> get_pos() + to_center;
-        line_array_[0].color = fill_color;
-        line_array_[1].position = points[1] -> get_pos() + to_center;
-        line_array_[1].color = fill_color;
-        window_ -> draw(line_array_);
+        auto pos0 = points[0] -> get_pos();
+        auto pos1 = points[1] -> get_pos();
+//        line_array_[0].position = pos0 + to_center;
+//        line_array_[0].color = fill_color;
+//        line_array_[1].position = pos1 + to_center;
+//        line_array_[1].color = fill_color;
+//        window_ -> draw(line_array_);
+
+        auto road_dim = sf::Vector2i {
+            std::max(abs(pos0.y - pos1.y),
+                    abs(pos0.x - pos1.x)), 10
+        };
+        int dx = pos0.x - pos1.x;
+        int dy = pos0.y - pos1.y;
+        int rotation = 0;
+        if (!dx) {
+            if (dy > 0)
+                rotation = -90;
+            else
+                rotation = 90;
+        } else if (dx > 0) {
+            if (dy > 0)
+                rotation = -150;
+            else
+                rotation = 150;
+        } else {
+            if (dy > 0)
+                rotation = -30;
+            else
+                rotation = 30;
+        }
+        road_sprite_.setRotation(rotation);
+        road_sprite_.setPosition(pos0 + to_center);
+        road_sprite_.setTextureRect({ 0, 0,
+                road_dim.x, road_dim.y });
+        road_sprite_.setColor(fill_color);
+        window_ -> draw(road_sprite_);
     }
 }
 
