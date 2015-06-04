@@ -48,6 +48,12 @@ class TradeWindow : public UiObject {
         const sf::Color bg_color_ = sf::Color(73, 66, 255, 245);
         sf::Font font_;
 
+        sf::Texture brick_texture_;
+        sf::Texture wool_texture_;
+        sf::Texture ore_texture_;
+        sf::Texture grain_texture_;
+        sf::Texture lumber_texture_;
+
         int give_balance[5] = {0, 0, 0, 0, 0};
         int take_balance[5] = {0, 0, 0, 0, 0};
 
@@ -71,7 +77,8 @@ class ResourceCell : public UiObject {
                 std::function<void()> mg,
                 std::function<void()> pt,
                 std::function<void()> mt,
-                sf::Vector2f pos);
+                sf::Vector2f pos,
+                sf::Texture& texture);
 
         void Draw(sf::RenderWindow*);
         bool OnMouse(sf::Vector2i) const;
@@ -83,6 +90,7 @@ class ResourceCell : public UiObject {
         int res_id_;
         int given_, taken_;
 
+        sf::Sprite sprite_;
         sf::RectangleShape shape_;
         const sf::Color brick_color = sf::Color(191, 89, 0, 255);
         const sf::Color wool_color = sf::Color(232, 232, 232, 255);

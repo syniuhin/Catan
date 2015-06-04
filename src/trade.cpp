@@ -44,6 +44,23 @@ TradeWindow* TradeWindow::CreateInstance(int seller) {
     instance -> shape_.setPosition(instance -> pos_);
     instance -> shape_.setFillColor(instance -> bg_color_);
 
+    //TODO: handle errors
+    instance -> brick_texture_.loadFromFile("brick_small.png");
+    instance -> brick_texture_.setRepeated(true);
+    instance -> wool_texture_.loadFromFile("wool_small.png");
+    instance -> wool_texture_.setRepeated(true);
+    instance -> ore_texture_.loadFromFile("ore_small.png");
+    instance -> ore_texture_.setRepeated(true);
+    instance -> grain_texture_.loadFromFile("grain_small.png");
+    instance -> grain_texture_.setRepeated(true);
+    instance -> lumber_texture_.loadFromFile("lumber_small.png");
+    instance -> lumber_texture_.setRepeated(true);
+
+    sf::Texture* pts[] = { &(instance -> brick_texture_),
+        &(instance -> wool_texture_),
+        &(instance -> ore_texture_),
+        &(instance -> grain_texture_),
+        &(instance -> lumber_texture_)};
     for (int i = 0; i < 5; ++i) {
         instance -> children_
             .insert(ResourceCell::CreateInstance(i,
@@ -54,7 +71,8 @@ TradeWindow* TradeWindow::CreateInstance(int seller) {
                         instance -> pos_ +
                             sf::Vector2f(10 +
                                 i * (RESOURCE_CELL_SIZE.x + 20),
-                            10)));
+                            10),
+                        *(pts[i])));
     }
 
     sf::Vector2f go_btn_size = sf::Vector2f(200, 40);
@@ -147,7 +165,8 @@ ResourceCell* ResourceCell::CreateInstance(int res_id,
             std::function<void()> mg,
             std::function<void()> pt,
             std::function<void()> mt,
-            sf::Vector2f pos) {
+            sf::Vector2f pos,
+            sf::Texture& texture) {
     ResourceCell* instance = new ResourceCell(res_id);
     switch (res_id) {
         case BRICKS_ID:
@@ -169,6 +188,11 @@ ResourceCell* ResourceCell::CreateInstance(int res_id,
 
     instance -> pos_ = pos;
     instance -> shape_.setPosition(pos);
+    instance -> sprite_.setPosition(pos);
+    instance -> sprite_.setTexture(texture);
+    instance -> sprite_.setTextureRect({ 0, 0,
+            (int) RESOURCE_CELL_SIZE.x,
+            (int) RESOURCE_CELL_SIZE.y });
     if (!instance -> font_.loadFromFile("cb.ttf")) {
         return NULL;
     }
@@ -236,10 +260,12 @@ ResourceCell::ResourceCell(int res_id)
       taken_(0),
       plus_texture_(),
       minus_texture_(),
+      sprite_(),
       shape_(RESOURCE_CELL_SIZE) {}
 
 void ResourceCell::Draw(sf::RenderWindow* window) {
-    window -> draw(shape_);
+//    window -> draw(shape_);
+    window -> draw(sprite_);
     window -> draw(text_give_);
     window -> draw(text_take_);
     UiObject::Draw(window);
