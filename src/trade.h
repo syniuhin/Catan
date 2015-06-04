@@ -94,6 +94,9 @@ class ResourceCell : public UiObject {
         sf::Text text_give_;
         sf::Text text_take_;
 
+        sf::Texture plus_texture_;
+        sf::Texture minus_texture_;
+
         ResourceCell(int res_id);
 };
 
@@ -109,8 +112,11 @@ class TradeButton : public UiObject {
         TradeButton* set_callback(std::function<void()> cb);
         TradeButton* set_color(sf::Color);
         TradeButton* set_size(sf::Vector2f);
+        TradeButton* set_texture(const sf::Texture&);
     private:
         std::function<void()> cb_ = [] () {};
         sf::RectangleShape shape_;
+
+        sf::Sprite sprite_;
 };
 #endif
