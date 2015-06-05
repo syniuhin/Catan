@@ -15,7 +15,7 @@
 const int TEXT_VERTICAL_OFFSET = 100;
 const int TEXT_SIZE = 60;
 
-const int BUTTONS_NUM = 5;
+const int BUTTONS_NUM = 2;
 const float BUTTON_WIDTH = 180;
 const float BUTTON_HEIGHT = 35;
 const float BUTTON_MARGIN = 10;
@@ -35,6 +35,8 @@ private:
     sf::RectangleShape buttons[BUTTONS_NUM];
     bool buttons_initialized = false;
     int selected_button = -1;
+    sf::Font font_;
+    sf::Text text_;
 
     bool draw_background();
     bool draw_text();

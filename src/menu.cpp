@@ -6,8 +6,12 @@
 
 #include "constants.h"
 
-Main_menu::Main_menu(sf::RenderWindow* window){
+Main_menu::Main_menu(sf::RenderWindow* window)
+    : text_(),
+      font_() {
     this -> window = window;
+    font_.loadFromFile("black_jack.ttf");
+    text_.setFont(font_);
 }
 
 Main_menu::~Main_menu(){
@@ -59,17 +63,30 @@ bool Main_menu::draw_buttons(){
         for (int i = 0; i < BUTTONS_NUM; ++i){
             b.setSize(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
             b.setOrigin(BUTTON_WIDTH / 2, BUTTON_HEIGHT / 2);
-            b.setPosition(sf::Vector2f(SCREEN_WIDTH / 2.0f,
-                                       SCREEN_HEIGHT / 2.0f + BUTTON_VERTICAL_OFFSET
-                                       + i * (BUTTON_HEIGHT + BUTTON_MARGIN)));
+            sf::Vector2f pos(SCREEN_WIDTH / 2.0f,
+                    SCREEN_HEIGHT / 2.0f + BUTTON_VERTICAL_OFFSET
+                    + i * (BUTTON_HEIGHT + BUTTON_MARGIN));
+            b.setPosition(pos);
+
             buttons[i] = b;
         }
     } else {
         refresh_buttons();
         highlight_buttons();
     }
-    for (int i = 0; i < BUTTONS_NUM; ++i)
+    for (int i = 0; i < BUTTONS_NUM; ++i) {
         window -> draw(buttons[i]);
+
+        text_.setColor(sf::Color::Black);
+        text_.setCharacterSize(24);
+        text_.setString( (i)
+                ? "Exit"
+                : "Start");
+        sf::FloatRect rect = text_.getLocalBounds();
+        text_.setOrigin(rect.width / 2, rect.height / 2);
+        text_.setPosition(buttons[i].getPosition());
+        window -> draw(text_);
+    }
     return true;
 }
 
@@ -87,7 +104,7 @@ bool Main_menu::highlight_buttons(){
             selected_button = i;
         }
     }
-	return true;
+    return true;
 }
 
 void Main_menu::refresh_buttons(){

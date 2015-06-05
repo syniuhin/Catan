@@ -22,29 +22,28 @@ int main(int, char const**){
     sqlite3* db;
 
     db_connect(db);
-//    auth(db);
+    auth(db);
 
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH,
                 SCREEN_HEIGHT), APP_NAME);
     window.setFramerateLimit(30);
-//    Main_menu menu(&window);
-//    int clicked_button = process_menu(&window, &menu);
-//    switch (clicked_button){
-//        case 0:
-//            //start game
-//            game_map.generate();
-//            window.clear();
-//            game_map.draw(&window);
-//            window.display();
-//            break;
-//        case 4:
-//            window.close();
-//            break;
-//        default:
-//            break;
-//    }
-    start_game(&window);
-    db_close(db);
+    Main_menu menu(&window);
+    int clicked_button = process_menu(&window, &menu);
+    switch (clicked_button){
+        case 0:
+            //start game
+            db_close(db);
+            window.clear();
+            start_game(&window);
+            break;
+        case 1:
+            db_close(db);
+            window.close();
+            break;
+        default:
+            db_close(db);
+            break;
+    }
     return 0;
 }
 
