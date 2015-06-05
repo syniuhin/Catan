@@ -461,14 +461,17 @@ void ActionPanel::AddComponent(MapObject* pcomponent) {
 
 
 PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos,
-        Player& player, sf::Texture& texture) {
+        Player& player, sf::Texture& texture,
+        sf::Texture* res_textures[]) {
     PlayerCard* instance = new PlayerCard(PLAYER_CARD_SIZE, player);
     instance -> pos_ = pos;
     instance -> player_sprite_
-        .setPosition(pos + sf::Vector2f(10, 10));
+        .setPosition(pos + sf::Vector2f(5, 10));
     instance -> shape_.setPosition(pos);
 
     instance -> player_sprite_.setTexture(texture);
+    for (int i = 0; i < 5; ++i)
+        instance -> res_textures_[i] = res_textures[i];
 //    instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(10, 10));
 //    sf::Color player_color;
 //    switch (player.get_id()) {
@@ -490,18 +493,19 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos,
     if (!instance -> font_.loadFromFile("/Library/Fonts/Arial Black.ttf")) {
         return nullptr;
     }
-    instance -> name_text_.setPosition(pos + sf::Vector2f(75, 10));
+    instance -> name_text_.setPosition(pos + sf::Vector2f(70, 10));
     instance -> name_text_.setCharacterSize(20);
     instance -> name_text_.setFont(instance -> font_);
     instance -> name_text_.setString(instance
             -> player_names_[player.get_id()]);
     instance -> name_text_.setColor(sf::Color::Black);
 
-    instance -> resources_text_.setPosition(pos +
-            sf::Vector2f(115, 5));
-    instance -> resources_text_.setCharacterSize(12);
+    instance -> basic_res_offset_ = {70, 40};
+    instance -> resource_sprite_.setTextureRect({ 0, 0, 40, 15 });
+//    instance -> resources_text_.setPosition(pos +
+//            sf::Vector2f(115, 5));
+    instance -> resources_text_.setCharacterSize(20);
     instance -> resources_text_.setFont(instance -> font_);
-    instance -> resources_text_.setString("0");
     instance -> resources_text_.setColor(sf::Color::Black);
     return instance;
 }
@@ -510,24 +514,38 @@ PlayerCard::PlayerCard(sf::Vector2f sz, Player& p)
     : Button(sz),
       player_(p),
       player_sprite_(),
+      resource_sprite_(),
       playerpic_shape_(sf::Vector2f(60, 60)),
       font_() {}
 
 void PlayerCard::Draw(sf::RenderWindow* window) {
-    int* res = player_.get_resources();
-    resources_text_.setString(
-            "bricks " + std::to_string(res[0]) + ",\n" +
-            "wool " + std::to_string(res[1]) + ",\n" +
-            "ore " + std::to_string(res[2]) + ",\n" +
-            "grain " + std::to_string(res[3]) + ",\n" +
-            "lumber " + std::to_string(res[4])
-        );
+//    resources_text_.setString(
+//            "bricks " + std::to_string(res[0]) + ",\n" +
+//            "wool " + std::to_string(res[1]) + ",\n" +
+//            "ore " + std::to_string(res[2]) + ",\n" +
+//            "grain " + std::to_string(res[3]) + ",\n" +
+//            "lumber " + std::to_string(res[4])
+//        );
 
     Button::Draw(window);
     window -> draw(player_sprite_);
 //    window -> draw(playerpic_shape_);
     window -> draw(name_text_);
-    window -> draw(resources_text_);
+//    window -> draw(resources_text_);
+    int* res = player_.get_resources();
+    for (int i = 0; i < 5; ++i) {
+        sf::Vector2f curr_pos = pos_ + basic_res_offset_ +
+                sf::Vector2f(45, 0) * (float) i;
+        resource_sprite_.setPosition(curr_pos);
+        resource_sprite_.setTexture(*(res_textures_[i]));
+        window -> draw(resource_sprite_);
+
+        resources_text_
+            .setPosition(curr_pos + sf::Vector2f(8, 15));
+        resources_text_.setString(std::to_string(res[i]));
+        window -> draw(resources_text_);
+    }
+
 }
 
 void PlayerCard::GainFocus() {
@@ -550,6 +568,13 @@ PlayerPanel* PlayerPanel::CreateInstance(int* lpc) {
     instance -> hildegard_texture_.loadFromFile("hildegard.png");
     instance -> jean_texture_.loadFromFile("jean.png");
     instance -> louis_texture_.loadFromFile("louis.png");
+
+    instance -> brick_texture_.loadFromFile("brick_small.png");
+    instance -> wool_texture_.loadFromFile("wool_small.png");
+    instance -> ore_texture_.loadFromFile("ore_small.png");
+    instance -> grain_texture_.loadFromFile("grain_small.png");
+    instance -> lumber_texture_.loadFromFile("lumber_small.png");
+
     instance -> lpc_ = lpc;
     return instance;
 }
@@ -561,6 +586,11 @@ PlayerPanel::PlayerPanel()
       hildegard_texture_(),
       jean_texture_(),
       louis_texture_(),
+      brick_texture_(),
+      wool_texture_(),
+      ore_texture_(),
+      grain_texture_(),
+      lumber_texture_(),
       player_cards_() {}
 
 void PlayerPanel::Click() {
@@ -594,7 +624,8 @@ void PlayerPanel::Insert(Player& player) {
         PlayerCard::CreateInstance(pos_ +
                 sf::Vector2f(10, 10 + player_cards_.size() *
                     (PLAYER_CARD_SIZE.y + 20)), player,
-                *(player_textures_[player_cards_.size()]))
+                *(player_textures_[player_cards_.size()]),
+                res_textures_)
                 -> SetColors(sf::Color(155, 155, 255, 240),
                              sf::Color(255, 255, 255, 255))
                 -> AddCallback(

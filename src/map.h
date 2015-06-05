@@ -265,7 +265,8 @@ class ActionPanel : public MapObject {
 class PlayerCard : public Button {
     public:
         static PlayerCard* CreateInstance(sf::Vector2f pos,
-                Player&, sf::Texture&);
+                Player&, sf::Texture& player_textures,
+                sf::Texture* res_textures[]);
 
         void Draw(sf::RenderWindow*) override;
 
@@ -273,6 +274,10 @@ class PlayerCard : public Button {
         void LoseFocus();
     private:
         sf::Sprite player_sprite_;
+        sf::Sprite resource_sprite_;
+        sf::Texture* res_textures_[5];
+        sf::Vector2f basic_res_offset_;
+
         sf::RectangleShape playerpic_shape_;
         sf::Text name_text_;
         sf::Text resources_text_;
@@ -317,11 +322,25 @@ class PlayerPanel : public MapObject {
         sf::Texture jean_texture_;
         sf::Texture louis_texture_;
 
+        sf::Texture brick_texture_;
+        sf::Texture wool_texture_;
+        sf::Texture ore_texture_;
+        sf::Texture grain_texture_;
+        sf::Texture lumber_texture_;
+
         sf::Texture* player_textures_[4] = {
             &candamir_texture_,
             &hildegard_texture_,
             &jean_texture_,
             &louis_texture_
+        };
+
+        sf::Texture* res_textures_[5] = {
+            &brick_texture_,
+            &wool_texture_,
+            &ore_texture_,
+            &grain_texture_,
+            &lumber_texture_
         };
 
         std::vector<MapObject*> player_cards_;

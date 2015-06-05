@@ -53,7 +53,7 @@ static const sf::Vector2f ACTION_PANEL_POS =
         sf::Vector2f(SCREEN_WIDTH - ACTION_PANEL_SIZE.x - 20,
                 SCREEN_HEIGHT - ACTION_PANEL_SIZE.y - 40);
 
-static const sf::Vector2f PLAYER_CARD_SIZE = sf::Vector2f(200, 80);
+static const sf::Vector2f PLAYER_CARD_SIZE = sf::Vector2f(300, 80);
 
 static const sf::Vector2f PLAYER_PANEL_SIZE =
         sf::Vector2f(PLAYER_CARD_SIZE.x + 20,
