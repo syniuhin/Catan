@@ -581,7 +581,7 @@ PlayerPanel* PlayerPanel::CreateInstance(int* lpc) {
 
 PlayerPanel::PlayerPanel()
     : panel_shape_(PLAYER_PANEL_SIZE),
-      panel_color_(sf::Color::Green),
+      panel_color_(sf::Color(69, 69, 69, 180)),
       candamir_texture_(),
       hildegard_texture_(),
       jean_texture_(),
@@ -626,7 +626,7 @@ void PlayerPanel::Insert(Player& player) {
                     (PLAYER_CARD_SIZE.y + 20)), player,
                 *(player_textures_[player_cards_.size()]),
                 res_textures_)
-                -> SetColors(sf::Color(155, 155, 255, 240),
+                -> SetColors(sf::Color(168, 120, 80, 240),
                              sf::Color(255, 255, 255, 255))
                 -> AddCallback(
                         [this] () {

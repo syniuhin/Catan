@@ -294,7 +294,7 @@ class PlayerCard : public Button {
         };
 
         const sf::Color color_active_delta_ =
-            sf::Color(40, 50, -100, 15);
+            sf::Color(40, 40, 40, 15);
         sf::Color backed_color_idle_;
 
         PlayerCard(sf::Vector2f sz, Player&);
