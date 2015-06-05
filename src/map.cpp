@@ -464,27 +464,28 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos,
         Player& player, sf::Texture& texture) {
     PlayerCard* instance = new PlayerCard(PLAYER_CARD_SIZE, player);
     instance -> pos_ = pos;
-    instance -> player_sprite_.setPosition(pos);
+    instance -> player_sprite_
+        .setPosition(pos + sf::Vector2f(10, 10));
     instance -> shape_.setPosition(pos);
 
     instance -> player_sprite_.setTexture(texture);
-    instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(10, 10));
-    sf::Color player_color;
-    switch (player.get_id()) {
-        case 0:
-            player_color = sf::Color::Red;
-            break;
-        case 1:
-            player_color = sf::Color::Cyan;
-            break;
-        case 2:
-            player_color = sf::Color::Magenta;
-            break;
-        default:
-            player_color = sf::Color::White;
-            break;
-    }
-    instance -> playerpic_shape_.setFillColor(player_color);
+//    instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(10, 10));
+//    sf::Color player_color;
+//    switch (player.get_id()) {
+//        case 0:
+//            player_color = sf::Color::Red;
+//            break;
+//        case 1:
+//            player_color = sf::Color::Cyan;
+//            break;
+//        case 2:
+//            player_color = sf::Color::Magenta;
+//            break;
+//        default:
+//            player_color = sf::Color::White;
+//            break;
+//    }
+//    instance -> playerpic_shape_.setFillColor(player_color);
 
     if (!instance -> font_.loadFromFile("/Library/Fonts/Arial Black.ttf")) {
         return nullptr;
@@ -492,7 +493,8 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos,
     instance -> name_text_.setPosition(pos + sf::Vector2f(75, 10));
     instance -> name_text_.setCharacterSize(20);
     instance -> name_text_.setFont(instance -> font_);
-    instance -> name_text_.setString(std::to_string(player.get_id()));
+    instance -> name_text_.setString(instance
+            -> player_names_[player.get_id()]);
     instance -> name_text_.setColor(sf::Color::Black);
 
     instance -> resources_text_.setPosition(pos +
@@ -545,6 +547,9 @@ PlayerPanel* PlayerPanel::CreateInstance(int* lpc) {
             .setPosition(instance -> pos_.x, instance -> pos_.y);
 
     instance -> candamir_texture_.loadFromFile("candamir.png");
+    instance -> hildegard_texture_.loadFromFile("hildegard.png");
+    instance -> jean_texture_.loadFromFile("jean.png");
+    instance -> louis_texture_.loadFromFile("louis.png");
     instance -> lpc_ = lpc;
     return instance;
 }
@@ -553,6 +558,9 @@ PlayerPanel::PlayerPanel()
     : panel_shape_(PLAYER_PANEL_SIZE),
       panel_color_(sf::Color::Green),
       candamir_texture_(),
+      hildegard_texture_(),
+      jean_texture_(),
+      louis_texture_(),
       player_cards_() {}
 
 void PlayerPanel::Click() {
@@ -586,7 +594,7 @@ void PlayerPanel::Insert(Player& player) {
         PlayerCard::CreateInstance(pos_ +
                 sf::Vector2f(10, 10 + player_cards_.size() *
                     (PLAYER_CARD_SIZE.y + 20)), player,
-                candamir_texture_)
+                *(player_textures_[player_cards_.size()]))
                 -> SetColors(sf::Color(155, 155, 255, 240),
                              sf::Color(255, 255, 255, 255))
                 -> AddCallback(

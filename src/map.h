@@ -281,6 +281,13 @@ class PlayerCard : public Button {
 
         Player& player_;
 
+        std::string player_names_[4] = {
+            "Candamir",
+            "Hildegard",
+            "Jean",
+            "Louis"
+        };
+
         const sf::Color color_active_delta_ =
             sf::Color(40, 50, -100, 15);
         sf::Color backed_color_idle_;
@@ -304,7 +311,18 @@ class PlayerPanel : public MapObject {
         sf::RenderWindow* window_;
         sf::RectangleShape panel_shape_;
         sf::Color panel_color_;
+
         sf::Texture candamir_texture_;
+        sf::Texture hildegard_texture_;
+        sf::Texture jean_texture_;
+        sf::Texture louis_texture_;
+
+        sf::Texture* player_textures_[4] = {
+            &candamir_texture_,
+            &hildegard_texture_,
+            &jean_texture_,
+            &louis_texture_
+        };
 
         std::vector<MapObject*> player_cards_;
         int* lpc_;
