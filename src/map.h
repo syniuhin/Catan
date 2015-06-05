@@ -264,13 +264,15 @@ class ActionPanel : public MapObject {
 
 class PlayerCard : public Button {
     public:
-        static PlayerCard* CreateInstance(sf::Vector2f pos, Player&);
+        static PlayerCard* CreateInstance(sf::Vector2f pos,
+                Player&, sf::Texture&);
 
         void Draw(sf::RenderWindow*) override;
 
         void GainFocus();
         void LoseFocus();
     private:
+        sf::Sprite player_sprite_;
         sf::RectangleShape playerpic_shape_;
         sf::Text name_text_;
         sf::Text resources_text_;
@@ -302,6 +304,7 @@ class PlayerPanel : public MapObject {
         sf::RenderWindow* window_;
         sf::RectangleShape panel_shape_;
         sf::Color panel_color_;
+        sf::Texture candamir_texture_;
 
         std::vector<MapObject*> player_cards_;
         int* lpc_;

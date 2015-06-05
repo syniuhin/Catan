@@ -460,11 +460,14 @@ void ActionPanel::AddComponent(MapObject* pcomponent) {
 }
 
 
-PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
+PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos,
+        Player& player, sf::Texture& texture) {
     PlayerCard* instance = new PlayerCard(PLAYER_CARD_SIZE, player);
     instance -> pos_ = pos;
+    instance -> player_sprite_.setPosition(pos);
     instance -> shape_.setPosition(pos);
 
+    instance -> player_sprite_.setTexture(texture);
     instance -> playerpic_shape_.setPosition(pos + sf::Vector2f(10, 10));
     sf::Color player_color;
     switch (player.get_id()) {
@@ -504,6 +507,7 @@ PlayerCard* PlayerCard::CreateInstance(sf::Vector2f pos, Player& player) {
 PlayerCard::PlayerCard(sf::Vector2f sz, Player& p)
     : Button(sz),
       player_(p),
+      player_sprite_(),
       playerpic_shape_(sf::Vector2f(60, 60)),
       font_() {}
 
@@ -518,7 +522,8 @@ void PlayerCard::Draw(sf::RenderWindow* window) {
         );
 
     Button::Draw(window);
-    window -> draw(playerpic_shape_);
+    window -> draw(player_sprite_);
+//    window -> draw(playerpic_shape_);
     window -> draw(name_text_);
     window -> draw(resources_text_);
 }
@@ -538,6 +543,8 @@ PlayerPanel* PlayerPanel::CreateInstance(int* lpc) {
             .setFillColor(instance -> panel_color_);
     instance -> panel_shape_
             .setPosition(instance -> pos_.x, instance -> pos_.y);
+
+    instance -> candamir_texture_.loadFromFile("candamir.png");
     instance -> lpc_ = lpc;
     return instance;
 }
@@ -545,6 +552,7 @@ PlayerPanel* PlayerPanel::CreateInstance(int* lpc) {
 PlayerPanel::PlayerPanel()
     : panel_shape_(PLAYER_PANEL_SIZE),
       panel_color_(sf::Color::Green),
+      candamir_texture_(),
       player_cards_() {}
 
 void PlayerPanel::Click() {
@@ -577,7 +585,8 @@ void PlayerPanel::Insert(Player& player) {
     PlayerCard* pc = (PlayerCard*)
         PlayerCard::CreateInstance(pos_ +
                 sf::Vector2f(10, 10 + player_cards_.size() *
-                    (PLAYER_CARD_SIZE.y + 20)), player)
+                    (PLAYER_CARD_SIZE.y + 20)), player,
+                candamir_texture_)
                 -> SetColors(sf::Color(155, 155, 255, 240),
                              sf::Color(255, 255, 255, 255))
                 -> AddCallback(
