@@ -45,7 +45,7 @@ class TradeWindow : public UiObject {
         void ClearValues();
     private:
         sf::RectangleShape shape_;
-        const sf::Color bg_color_ = sf::Color(73, 66, 255, 245);
+        const sf::Color bg_color_ = sf::Color(89, 89, 89, 245);
         sf::Font font_;
 
         sf::Texture brick_texture_;
@@ -53,6 +53,9 @@ class TradeWindow : public UiObject {
         sf::Texture ore_texture_;
         sf::Texture grain_texture_;
         sf::Texture lumber_texture_;
+        sf::Texture button_texture_;
+
+        sf::Text button_text_;
 
         int give_balance[5] = {0, 0, 0, 0, 0};
         int take_balance[5] = {0, 0, 0, 0, 0};
@@ -91,6 +94,11 @@ class ResourceCell : public UiObject {
         int given_, taken_;
 
         sf::Sprite sprite_;
+        sf::RectangleShape underlying_shape_;
+
+        /**
+         * Deprecated stuff
+         */
         sf::RectangleShape shape_;
         const sf::Color brick_color = sf::Color(191, 89, 0, 255);
         const sf::Color wool_color = sf::Color(232, 232, 232, 255);

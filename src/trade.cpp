@@ -56,6 +56,8 @@ TradeWindow* TradeWindow::CreateInstance(int seller) {
     instance -> lumber_texture_.loadFromFile("lumber_small.png");
     instance -> lumber_texture_.setRepeated(true);
 
+    instance -> button_texture_.loadFromFile("trade_button.png");
+
     sf::Texture* pts[] = { &(instance -> brick_texture_),
         &(instance -> wool_texture_),
         &(instance -> ore_texture_),
@@ -76,30 +78,44 @@ TradeWindow* TradeWindow::CreateInstance(int seller) {
     }
 
     sf::Vector2f go_btn_size = sf::Vector2f(200, 40);
-    instance -> AddChild(
-            (new TradeButton())
-                         -> set_position(instance -> pos_ + sf::Vector2f(
-                                 .5f * (TRADE_WINDOW_WIDTH - go_btn_size.x),
-                                 TRADE_WINDOW_HEIGHT))
-                         -> set_color(sf::Color::Red)
-                         -> set_size(go_btn_size)
-                         -> set_callback([instance] () {
-                                instance -> on_propose_();
-                             }));
+    sf::Vector2f go_btn_pos = instance -> pos_ + sf::Vector2f(
+            .5f * (TRADE_WINDOW_WIDTH - go_btn_size.x),
+            TRADE_WINDOW_HEIGHT);
+
+    instance -> AddChild((new TradeButton())
+            -> set_position(go_btn_pos)
+            -> set_texture(instance -> button_texture_)
+//            -> set_color(sf::Color::Red)
+            -> set_size(go_btn_size)
+            -> set_callback([instance] () {
+                   instance -> on_propose_();
+                }));
 
     if (!instance -> font_.loadFromFile("cb.ttf"))
         return NULL;
+    instance -> button_text_.setFont(instance -> font_);
+    instance -> button_text_.setColor(
+            sf::Color(220, 230, 230, 255));
+    instance -> button_text_.setCharacterSize(18);
+    instance -> button_text_.setString("next");
+    sf::FloatRect brect = instance -> button_text_.getLocalBounds();
+    instance -> button_text_.setPosition(go_btn_pos +
+            (go_btn_size - sf::Vector2f(brect.width,
+                                        1.5 * brect.height)) * .5f);
+
     return instance;
 }
 
 TradeWindow::TradeWindow()
     : UiObject((sf::Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT) -
                 sf::Vector2f(TRADE_WINDOW_WIDTH, TRADE_WINDOW_HEIGHT)) * .5f),
+      button_text_(),
       shape_(TRADE_WIN_SIZE) {}
 
 void TradeWindow::Draw(sf::RenderWindow* window) {
     window -> draw(shape_);
     UiObject::Draw(window);
+    window -> draw(button_text_);
 }
 
 bool TradeWindow::OnMouse(sf::Vector2i cursor) const {
@@ -213,6 +229,8 @@ ResourceCell* ResourceCell::CreateInstance(int res_id,
             sf::Vector2f((RESOURCE_CELL_SIZE.x -
                     instance -> text_take_
                     .getLocalBounds().width) / 2, RESOURCE_CELL_SIZE.y - 30));
+    instance -> underlying_shape_.setFillColor(
+            sf::Color(255, 255, 255, 100));
 
     sf::Vector2f ul = instance -> pos_ +
             sf::Vector2f(5, 5);
@@ -226,30 +244,30 @@ ResourceCell* ResourceCell::CreateInstance(int res_id,
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(ul)
-                         -> set_color(sf::Color::Black)
-                         -> set_size(bsz)
+//                         -> set_color(sf::Color::Black)
                          -> set_texture(instance -> plus_texture_)
+                         -> set_size(bsz)
                          -> set_callback(pg));
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(sf::Vector2f(dr.x, ul.y))
-                         -> set_color(sf::Color::White)
-                         -> set_size(bsz)
+//                         -> set_color(sf::Color::White)
                          -> set_texture(instance -> minus_texture_)
+                         -> set_size(bsz)
                          -> set_callback(mg));
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(sf::Vector2f(ul.x, dr.y))
-                         -> set_color(sf::Color::Black)
-                         -> set_size(bsz)
+//                         -> set_color(sf::Color::Black)
                          -> set_texture(instance -> plus_texture_)
+                         -> set_size(bsz)
                          -> set_callback(pt));
     instance -> AddChild(
             (new TradeButton())
                          -> set_position(dr)
-                         -> set_color(sf::Color::White)
-                         -> set_size(bsz)
+//                         -> set_color(sf::Color::White)
                          -> set_texture(instance -> minus_texture_)
+                         -> set_size(bsz)
                          -> set_callback(mt));
     return instance;
 }
@@ -261,11 +279,20 @@ ResourceCell::ResourceCell(int res_id)
       plus_texture_(),
       minus_texture_(),
       sprite_(),
+      underlying_shape_(sf::Vector2f(RESOURCE_CELL_SIZE.x - 6, 34)),
       shape_(RESOURCE_CELL_SIZE) {}
 
 void ResourceCell::Draw(sf::RenderWindow* window) {
 //    window -> draw(shape_);
     window -> draw(sprite_);
+
+    underlying_shape_.setPosition(pos_ + sf::Vector2f(3, 3));
+    window -> draw(underlying_shape_);
+
+    underlying_shape_.setPosition(pos_ +
+            sf::Vector2f(3, RESOURCE_CELL_SIZE.y - 38));
+    window -> draw(underlying_shape_);
+
     window -> draw(text_give_);
     window -> draw(text_take_);
     UiObject::Draw(window);
@@ -329,6 +356,12 @@ TradeButton* TradeButton::set_color(sf::Color color) {
 
 TradeButton* TradeButton::set_size(sf::Vector2f sz) {
     shape_.setSize(sz);
+
+    sf::Vector2u isz = sprite_.getTexture() -> getSize();
+    sf::Vector2f usz = sf::Vector2f(
+            isz.x / sz.x,
+            isz.y / sz.y);
+    sprite_.setScale(usz);
     return this;
 }
 
