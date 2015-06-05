@@ -61,4 +61,10 @@ static const sf::Vector2f PLAYER_PANEL_SIZE =
 static const sf::Vector2f PLAYER_PANEL_POS =
         sf::Vector2f(10, .5 * (SCREEN_HEIGHT - PLAYER_PANEL_SIZE.y));
 
+static std::vector<std::string> PLAYER_NAMES = {
+            "Candamir",
+            "Hildegard",
+            "Jean",
+            "Louis"
+        };
 #endif

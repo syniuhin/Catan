@@ -100,7 +100,7 @@ void Game::SetUp() {
                     int _id = game_map_ -> get_lpc();
                     if (-1 != _id) {
                         game_map_ -> ShowNotification("Trading with " +
-                                std::to_string(_id));
+                                PLAYER_NAMES[_id]);
                         on_enter_ = [&, _id] () {
                             int** balance = new int*[2];
                             for (int i = 0; i < 2; ++i)
@@ -206,11 +206,10 @@ void Game::ManualSetUp() {
         sf::Event event;
         while (window_ -> isOpen() && (!village_added ||
                     !road_added)){
-            game_map_ -> ShowNotification((village_added)
-                    ? std::to_string(curr -> get_id() + 1)
-                            .append(" player, add a road")
-                    : std::to_string(curr -> get_id() + 1)
-                            .append(" player, add a village"));
+            game_map_ -> ShowNotification(PLAYER_NAMES[curr -> get_id()].append(
+                        (village_added)
+                            ? ", add a road"
+                            : ", add a village"));
             while (window_ -> pollEvent(event)) {
                 switch (event.type){
                     case sf::Event::Closed:
@@ -292,8 +291,8 @@ void Game::Update() {
 void Game::PerformTurn(Player* curr) {
     //TODO: Complete when added all logic
     const int num = ThrowDice();
-    game_map_ -> ShowNotification(std::to_string(curr -> get_id()) +
-                " make a turn, dice " +
+    game_map_ -> ShowNotification(PLAYER_NAMES[curr -> get_id()] +
+                ", make a turn, dice " +
                 std::to_string(num));
     if (num != 7) {
         std::vector<Triple<int, int, int> > generated_resources =

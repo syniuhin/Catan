@@ -993,7 +993,6 @@ void Map::GenerateLines() {
 //}
 
 void Map::DrawPoints() const {
-//    TODO : remove stub
     for (size_t i = 0; i < points_.size(); ++i) {
         Point* curr = points_[i];
 //        point_circle_.setPosition(curr -> get_pos());
@@ -1063,8 +1062,8 @@ void Map::DrawLines() const {
 //        window_ -> draw(line_array_);
 
         auto road_dim = sf::Vector2i {
-            std::max(abs(pos0.y - pos1.y),
-                    abs(pos0.x - pos1.x)), 10
+            std::max(abs(pos0.y - pos1.y) + 7,
+                    abs(pos0.x - pos1.x) + 7), 10
         };
         int dx = pos0.x - pos1.x;
         int dy = pos0.y - pos1.y;
@@ -1086,7 +1085,7 @@ void Map::DrawLines() const {
                 rotation = 30;
         }
         road_sprite_.setRotation(rotation);
-        road_sprite_.setPosition(pos0 + to_center);
+        road_sprite_.setPosition(pos0 + sf::Vector2f(13, 8));
         road_sprite_.setTextureRect({ 0, 0,
                 road_dim.x, road_dim.y });
         road_sprite_.setColor(fill_color);
