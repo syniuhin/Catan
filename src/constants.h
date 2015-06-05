@@ -67,4 +67,6 @@ static std::vector<std::string> PLAYER_NAMES = {
             "Jean",
             "Louis"
         };
+
+static const sf::Vector2f ROBBERS_OFFSET = {30, 0};
 #endif

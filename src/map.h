@@ -350,6 +350,12 @@ class PlayerPanel : public MapObject {
         PlayerPanel();
 };
 
+class KnightCard : public Button {
+    public:
+        static KnightCard* CreateInstance();
+        KnightCard();
+};
+
 class Map {
     public:
         explicit Map(sf::RenderWindow*);
@@ -360,6 +366,8 @@ class Map {
         void Generate();
         void Draw() const;
         void Click(Player* requester);
+
+        int GetOnMouseId() const;
 
         void ShowNotification(std::string);
         void ShowNotification(std::string, int duration);
@@ -378,6 +386,8 @@ class Map {
         Line* AddRoad(Player*);
 
         void AddButton(Button*);
+
+        void AddKnightCard(KnightCard*);
        /**
          * Generates triples by dice sum:
          * <player_id, terrain_type, quantity>
@@ -391,6 +401,8 @@ class Map {
         void SetActivePlayer(int _id);
 
         int get_lpc() const;
+
+        void MoveRobbers(const int id);
     private:
         std::vector<MapObject*> map_objects_;
 
@@ -400,6 +412,7 @@ class Map {
         NotificationArea* notifications_;
         ActionPanel* action_panel_;
         PlayerPanel* player_panel_;
+        KnightCard* knight_card_;
 
         std::vector<Hex*> hexes_by_num_[13];
 
@@ -422,6 +435,8 @@ class Map {
 
         sf::Texture village_texture_;
         sf::Texture road_texture_;
+
+        sf::Texture robbers_texture_;
         std::vector<sf::Texture> textures_;
 
         mutable sf::Sprite sea_sprite_;
@@ -434,6 +449,10 @@ class Map {
 
         mutable sf::Sprite village_sprite_;
         mutable sf::Sprite road_sprite_;
+
+        mutable sf::Sprite robbers_sprite_;
+        mutable sf::Vector2f robbers_global_pos_;
+        mutable int robbers_local_pos_;
 
         mutable sf::CircleShape point_circle_;
         mutable sf::VertexArray line_array_;
@@ -461,6 +480,8 @@ class Map {
         Line* AddLine(Line*);
 
         bool TryAddPoint(Point*);
+
+        void MoveRobbers(const Hex&);
 };
 
 #endif /* defined(__MAP_H__) */

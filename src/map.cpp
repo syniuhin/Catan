@@ -649,6 +649,17 @@ void PlayerPanel::SetActive(int index) {
         GainFocus();
 }
 
+KnightCard* KnightCard::CreateInstance() {
+    KnightCard* instance = (KnightCard*)
+        Button::CreateInstance(sf::Vector2f(100, 100),
+                sf::Vector2f(150, 150));
+    instance -> sprite_.setColor(sf::Color(255, 255, 255, 255));
+    return instance;
+}
+
+KnightCard::KnightCard()
+    : Button(sf::Vector2f(150, 150)) {}
+
 Map::Map(sf::RenderWindow* window)
     : Map(new Hex, window) {}
 
@@ -659,6 +670,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
               CreateInstance("/Library/Fonts/Arial Black.ttf")),
       action_panel_(ActionPanel::CreateInstance()),
       player_panel_(PlayerPanel::CreateInstance(&last_player_clicked_)),
+      knight_card_(),
       hexagon_(sf::CircleShape(HEX_SIZE - HEX_OUTLINE_SIZE,
               HEX_PRECISION)),
       hex_text_(),
@@ -671,6 +683,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       fields_texture_(),
       village_texture_(),
       road_texture_(),
+      robbers_texture_(),
       sea_sprite_(),
       desert_sprite_(),
       hills_sprite_(),
@@ -679,6 +692,7 @@ Map::Map(Hex* root, sf::RenderWindow* window)
       fields_sprite_(),
       village_sprite_(),
       road_sprite_(),
+      robbers_sprite_(),
       point_circle_(sf::CircleShape(POINT_SIZE - POINT_OUTLINE_SIZE,
               POINT_PRECISION)),
       line_array_(sf::VertexArray(sf::Lines, 2)) {
@@ -753,6 +767,13 @@ void Map::Init() {
     } else {
         road_texture_.setRepeated(true);
         road_sprite_.setTexture(road_texture_);
+    }
+
+    if (!robbers_texture_.loadFromFile("robbers.png")) {
+        LOG(ERROR) << "Can't load robbers texture";
+    } else {
+        robbers_sprite_.setTexture(robbers_texture_);
+        robbers_sprite_.setColor(sf::Color(255, 255, 255, 240));
     }
 
     point_circle_.setFillColor(sf::Color::Red);
@@ -836,6 +857,9 @@ void Map::Generate() {
                     (j > 0 && j < dims_[i] - 1)) {
                 if (1 == i && 1 == j) {
                     type = TYPE_DESERT;
+                    MoveRobbers(*curr);
+//                    robbers_global_pos_ = curr -> get_pos();
+//                    robbers_local_pos_ = hexes_.size();
                 } else {
                     int type_ind = rand() % k;
                     type = types[type_ind];
@@ -1175,6 +1199,7 @@ void Map::Draw() const {
     DrawMap();
     DrawLines();
     DrawPoints();
+    window_ -> draw(robbers_sprite_);
     notifications_ -> Draw(window_);
     notifications_ -> Update();
 
@@ -1188,6 +1213,17 @@ void Map::Click(Player* requester) {
     for (size_t i = 0; i < map_objects_.size(); ++i)
         if (map_objects_[i] -> OnMouse(point))
             map_objects_[i] -> Click();
+}
+
+int Map::GetOnMouseId() const {
+    sf::Vector2i cursor = sf::Mouse::getPosition(*window_);
+
+    for (int i = 0; i < hexes_.size(); ++i) {
+        if (hexes_[i] -> OnMouse(cursor))
+            return i;
+    }
+
+    return -1;
 }
 
 void Map::ShowNotification(std::string text) {
@@ -1237,6 +1273,11 @@ Line* Map::AddRoad(Player* player) {
 void Map::AddButton(Button* b) {
     action_panel_ -> AddComponent(b);
     map_objects_.push_back(b);
+}
+
+void Map::AddKnightCard(KnightCard* card) {
+    knight_card_ = card;
+    map_objects_.push_back(card);
 }
 
 std::vector<Triple<int, int, int> >
@@ -1320,4 +1361,13 @@ bool Map::TryAddPoint(Point* point) {
             point_hexes[i] -> AddPoint(point);
     }
     return res;
+}
+
+void Map::MoveRobbers(const int id) {
+    MoveRobbers(*(hexes_[id]));
+}
+
+void Map::MoveRobbers(const Hex& hex) {
+    robbers_global_pos_ = hex.get_pos();
+    robbers_sprite_.setPosition(robbers_global_pos_ + ROBBERS_OFFSET);
 }

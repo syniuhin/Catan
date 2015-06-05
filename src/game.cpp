@@ -181,6 +181,45 @@ void Game::SetUp() {
                         });
     game_map_ -> AddButton(p_trade_button);
 
+    Button* p_knight_card =
+        Button::CreateInstance(
+                sf::Vector2f(SCREEN_WIDTH - 160,
+                    .5f * (SCREEN_HEIGHT - 150)),
+                sf::Vector2f(150, 150))
+                -> SetColors(sf::Color(255, 255, 255, 196),
+                             sf::Color(255, 255, 255, 255))
+                -> LoadTextureFrom("knight.png")
+                -> AddCallback(
+                        [this] () {
+                            Player* curr_player = players_[curr_player_ind_];
+                            if (!curr_player -> HasArmy()) {
+                                game_map_ -> ShowNotification("You don't "
+                                    "have an army");
+                                return;
+                            }
+                            game_map_ -> ShowNotification("Move robbers");
+                            on_click_ = [&] () {
+                                Player* curr_player = players_[curr_player_ind_];
+                                int curr_id = game_map_ -> GetOnMouseId();
+                                if (curr_id != -1) {
+                                    curr_player -> UseArmy();
+                                    game_map_ -> MoveRobbers(curr_id);
+                                    game_map_ -> ShowNotification("Robbers were moved");
+                                    on_click_ = [] () {};
+                                    on_escape_ = [] () {};
+                                    on_enter_ = [] () {};
+                                }
+                            };
+                            on_enter_ = [&] () {};
+                            on_escape_ = [&] () {
+                                on_click_ = [] () {};
+                                on_escape_ = [] () {};
+                                on_enter_ = [] () {};
+                                game_map_ -> ShowNotification("", 0);
+                            };
+                        });
+    game_map_ -> AddButton(p_knight_card);
+
     game_map_ -> DisplayPlayersInfo(players_);
     mouse_circle_.setFillColor(sf::Color(200, 200, 200, 250));
     mouse_circle_.setOrigin(.5 * sqrt(2.0) * MOUSE_POINTER_SIZE,
@@ -339,7 +378,10 @@ City::City(Point* loc, Player* ownr){
 }
 
 Player::Player(int p_id)
-    : player_id_(p_id) {}
+    : knight_cards_(0),
+      vic_cards_(0),
+      progress_cards_(0),
+      player_id_(p_id) {}
 
 int Player::get_id() {
     return player_id_;
@@ -395,6 +437,14 @@ bool Player::HasResources(int res[5]) {
     for (int i = 0; i < 5 && has; ++i)
         has = resources_[i] >= res[i];
     return has;
+}
+
+bool Player::HasArmy() {
+    return knight_cards_ > 0;
+}
+
+void Player::UseArmy() {
+    --knight_cards_;
 }
 
 void Player::subtract_resources(int* r) {

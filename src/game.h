@@ -27,6 +27,8 @@ class Player {
         void ExchangeWith(Player*, int give[5], int take[5]);
         bool HasResources(int res[5]);
 
+        bool HasArmy();
+        void UseArmy();
         void subtract_resources(int*);
         void add_resources(int*);
 
@@ -96,6 +98,8 @@ class Game {
         mutable sf::CircleShape mouse_circle_;
         std::vector<Player*> players_;
         int curr_player_ind_;
+
+        sf::Texture knight_card_texture_;
 
         std::vector<Village*> villages_;
 
